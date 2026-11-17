@@ -10,8 +10,8 @@ STMicroelectronics.
 
 ## 1. Outcome and decisions still required
 
-The recommended starting release is **Yocto-based OpenSTLinux ecosystem v6.2.1**, pending
-Nunzio's confirmation. It is the current release on the official wiki and explicitly supports
+The selected starting release is **Yocto-based OpenSTLinux ecosystem v6.2.1**, confirmed by
+Nunzio on 2026-11-17. It is the current release on the official wiki and explicitly supports
 STM32MP135F-DK. No published v7 ecosystem release was found during this reconnaissance.
 
 The host test shows that MicroPython v1.29.0 unix already provides the normal REPL, raw REPL,
@@ -155,6 +155,10 @@ STM32_Programmer_CLI -c port=usb1 \
 
 Windows uses the same arguments with `STM32_Programmer_CLI.exe`. The USB index must be taken
 from the actual `-l usb` output rather than assumed if more than one DFU device is present.
+
+Phase 1 host check on 2026-11-17: `STM32_Programmer_CLI.exe --version` ran successfully and
+reported **2.22.0**. The tool must be updated to the release-validated **2.23.0** before flashing;
+the older installed version was not used.
 
 After flashing, power/reset as directed by ST, set SW1 to microSD (`1 0 1`) and boot. The
 expected startup sequence is U-Boot splash, Linux splash, Weston and the GTK demo launcher.
@@ -410,4 +414,4 @@ stability, `mpremote mount`, Windows hardware behavior or any display/touch func
 - [x] MicroPython v1.29.0 built for x86-64 without source modifications.
 - [x] Default and `resume` mpremote behavior tested through fresh PTYs; raw-paste explicitly checked.
 - [x] Soft-reset and absolute-path integration risks recorded.
-- [ ] Nunzio confirms OpenSTLinux ecosystem v6.2.1 for Phase 1.
+- [x] Nunzio confirms OpenSTLinux ecosystem v6.2.1 for Phase 1.
