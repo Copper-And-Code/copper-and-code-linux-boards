@@ -298,6 +298,25 @@ The interactive example is `examples/stm32mp135f-dk/project.json`, using Studio 
 `stm32mp135f_dk_480x272`. Installation, launch and recovery commands are in
 `docs/stm32mp135f-dk-install.md`.
 
+## `shell-linux` application
+
+`examples/shell-linux` extends the board with a separate Linux-capable shell without modifying the
+portable `examples/shell` application. It provides the MicroPython file and text commands, the `edit`
+and `vi` editors, and Linux executable lookup. Built-ins take precedence over Python programs in
+`/usr/local/mpy/fs/bin`, which in turn take precedence over executables in the Linux `PATH`; the
+`linux` command forces Linux execution.
+
+The board-specific `linuxproc` user C module starts each program with `fork`/`execvp` on a controlling
+PTY. It forwards serial keyboard input and terminal output, sets the 60x17 panel dimensions, handles
+non-blocking backpressure while continuing to drain output, and kills the whole process group if a
+MicroPython callback raises. `MICROPY_PY_OS_DUPTERM` is enabled for the shared panel/serial ANSI
+terminal. The terminal alternate screen saves character cells and redraws them on exit rather than
+duplicating the 255 KiB framebuffer, allowing both editors to run within the MicroPython heap.
+
+Installation, usage, limitations and HIL commands are documented in `examples/shell-linux/README.md`
+and linked from `docs/stm32mp135f-dk-install.md`. Autostart is optional and is not installed by
+default.
+
 ## Portable `machine` API decision
 
 The project will expose one MicroPython-compatible public `machine` API across Linux-only MPU boards

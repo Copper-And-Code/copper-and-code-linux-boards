@@ -172,6 +172,32 @@ it on Ethernet, Wi-Fi or an untrusted network without a separate security design
 to run an application: serial and accepted TCP connections are separate processes, and concurrent
 access to LVGL/display/touch peripherals is not supported.
 
+## Install the `shell-linux` application
+
+The optional `examples/shell-linux` application adds the ANSI shell, `edit`, `vi` and Linux program
+execution on a PTY. Install its runtime modules in `/usr/local/mpy/fs` and the two Python editors in
+`/usr/local/mpy/fs/bin`:
+
+```sh
+ssh root@$BOARD 'install -d /usr/local/mpy/fs/bin'
+scp examples/shell-linux/shell_linux.py examples/shell-linux/ansiterm.py \
+    examples/shell-linux/ansifont.py examples/shell-linux/OFL.txt \
+    root@$BOARD:/usr/local/mpy/fs/
+scp examples/shell-linux/edit.py examples/shell-linux/vi.py \
+    root@$BOARD:/usr/local/mpy/fs/bin/
+```
+
+Start it from the MicroPython REPL with:
+
+```py
+import shell_linux
+shell_linux.main()
+```
+
+The application is not added to `main.py` by default. See `examples/shell-linux/README.md` for command
+lookup, the `linux` override, Ctrl-C behavior, tests and current pipeline/exit-status limitations.
+Linux commands inherit the REPL service's root privileges.
+
 ## Recovery
 
 If the board does not boot or the USB gadget fails, use the ST-LINK Linux console. Restore the
