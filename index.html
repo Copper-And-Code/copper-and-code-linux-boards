@@ -293,6 +293,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#why-the-gui-and-the-operating-system-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why: the GUI and the operating system, together
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get-started" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -319,17 +330,6 @@
     <span class="md-ellipsis">
       
         How it is verified
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#why" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why
       
     </span>
   </a>
@@ -631,6 +631,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#why-the-gui-and-the-operating-system-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why: the GUI and the operating system, together
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get-started" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -657,17 +668,6 @@
     <span class="md-ellipsis">
       
         How it is verified
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#why" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why
       
     </span>
   </a>
@@ -736,9 +736,10 @@
 
 
 <h1 id="lvgl-mpy-linux">lvgl-mpy-linux<a class="headerlink" href="#lvgl-mpy-linux" title="Permanent link">&para;</a></h1>
-<p><strong>Turn a Linux board into a MicroPython board with a touch screen.</strong> Write the GUI in Python with
-LVGL, use <code>mpremote</code> as on any MicroPython board, and have all of Linux behind it: files, network,
-audio, and every program the board can run.</p>
+<p><strong>Turn a Linux board into a MicroPython board with a touch screen, where the GUI and the operating
+system work as one.</strong> Write the GUI in Python with LVGL, use <code>mpremote</code> as on any MicroPython board,
+and let every button reach what Linux can do: files, network, audio, GPIO, and every program the
+board can run.</p>
 <div class="shot-grid">
 <figure>
 <p><img alt="Weather" src="images/weather.png" /></p>
@@ -766,6 +767,62 @@ One board tested, the STM32MP135F-DK. A personal, experimental project for maker
 with, sponsored or endorsed by any of the manufacturers of the boards and chips it uses; their
 names only identify the hardware.</p>
 </blockquote>
+<h2 id="why-the-gui-and-the-operating-system-together">Why: the GUI and the operating system, together<a class="headerlink" href="#why-the-gui-and-the-operating-system-together" title="Permanent link">&para;</a></h2>
+<p>On a Linux board the graphical app and the system usually live apart. On one side a GUI toolkit
+(Qt, GTK, a web page), on the other the programs and services of the system; between them, glue in
+C++, D-Bus or shell scripts. That glue is where most makers stop.</p>
+<p>lvgl-mpy-linux puts the GUI <strong>inside</strong> the system. The screen is LVGL, written in Python, and the
+same Python code reaches everything Linux can do:</p>
+<table>
+<thead>
+<tr>
+<th>A touch on the screen...</th>
+<th>...uses the operating system</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>plays a song or an internet radio</td>
+<td><code>gst-play-1.0</code> (GStreamer), driven while it plays</td>
+</tr>
+<tr>
+<td>shows the weather of the next days</td>
+<td><code>curl</code> in the background, the system clock</td>
+</tr>
+<tr>
+<td>connects to a Wi-Fi network</td>
+<td><code>wpa_supplicant</code> and <code>systemd-networkd</code>, configured the standard way</td>
+</tr>
+<tr>
+<td>runs a command, edits a file</td>
+<td>a shell with real Linux programs on a pseudo-terminal</td>
+</tr>
+<tr>
+<td>switches a LED, reads a button</td>
+<td>the kernel's GPIO lines (<code>machine.Pin</code>)</td>
+</tr>
+<tr>
+<td>powers the board off</td>
+<td><code>systemctl poweroff</code></td>
+</tr>
+</tbody>
+</table>
+<p>And it works the other way round: the programs answer, and the GUI follows them live (the position
+of a song, the state of the network, the output of a command) without ever freezing, because the
+slow work runs in the background.</p>
+<p>It is made for makers, so it keeps what makes microcontrollers easy:</p>
+<ul>
+<li><strong>The workflow of a MicroPython board.</strong> A REPL on USB serial and TCP that <code>mpremote</code> and LVGL
+  MPY Studio use as on any board (raw REPL, <code>cp</code>, <code>run</code>, <code>mount</code>), Ctrl-C, a soft reset in 0.2 s,
+  safe mode on a button. No compositor, no cross-compiled C++, no image to rebuild for an app.</li>
+<li><strong>The same app on MCU and Linux.</strong> The <code>display_driver</code> interface is the one of the MCU boards of
+  <a href="https://github.com/Copper-And-Code/mpy-lvgl-boards">mpy-lvgl-boards</a>: an app for an RP2350 or an
+  ESP32 runs unchanged on a Linux board with a bigger screen, and can then grow into Linux.</li>
+<li><strong>An appliance, not a desktop.</strong> At power-on a shell on the display; a tap opens a menu of apps
+  (weather, radio) and power off. The board becomes a device you build.</li>
+<li><strong>Apps written with an assistant, and checked.</strong> LVGL MPY Studio's MCP tools let an AI assistant
+  write the glue between the GUI and the system; the simulator and the tests on the board check it.</li>
+</ul>
 <div class="home-grid">
 <div class="home-card">
 <h2 id="get-started">Get started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h2>
@@ -783,25 +840,6 @@ names only identify the hardware.</p>
 <p><a class="md-button" href="stm32mp135f-dk/">The STM32MP135F-DK</a></p>
 </div>
 </div>
-<h2 id="why">Why<a class="headerlink" href="#why" title="Permanent link">&para;</a></h2>
-<p>A microcontroller running MicroPython is wonderful for a quick touch GUI: plug in USB, copy a file,
-it runs. A Linux board can do much more (play music, stream radio, talk to the internet, run any
-program) but usually means Yocto, a desktop compositor and C++ toolkits. lvgl-mpy-linux gives the
-Linux board the microcontroller workflow:</p>
-<ul>
-<li><strong>The same app on MCU and Linux.</strong> The <a href="display-driver/"><code>display_driver</code></a> interface is the one
-  of the MicroPython MCU boards of <a href="https://github.com/Copper-And-Code/mpy-lvgl-boards">mpy-lvgl-boards</a>:
-  an app made for an RP2350 or an ESP32 runs unchanged on a Linux board with a bigger screen.</li>
-<li><strong>It behaves like a MicroPython board.</strong> A REPL on USB serial and on TCP that works with
-  <code>mpremote</code> (raw REPL, raw-paste, <code>cp</code>, <code>run</code>, <code>mount</code>), Ctrl-C, Ctrl-D soft reset in 0.2 s, safe
-  mode on a button.</li>
-<li><strong>A home screen.</strong> At power-on a shell on the display (built-in commands, <code>vi</code> and <code>edit</code>, Python
-  and Linux programs); a tap opens a menu of apps, such as the weather and the radio, and a power
-  off.</li>
-<li><strong>Linux in reach of Python.</strong> <code>linuxproc</code> runs Linux programs in the background and lets the GUI
-  drive them; <code>machine.Pin</code> drives the GPIO lines of the kernel; <code>mpy_wifi</code> and <code>mpy_settings</code> give
-  every app the network and the settings.</li>
-</ul>
 <h2 id="lvgl-mpy-studio-and-its-mcp-tools">LVGL MPY Studio and its MCP tools<a class="headerlink" href="#lvgl-mpy-studio-and-its-mcp-tools" title="Permanent link">&para;</a></h2>
 <p><a href="https://copper-and-code.github.io/lvgl-mpy-studio/">LVGL MPY Studio</a> designs LVGL screens by drag
 and drop, runs them in a simulator and uploads them to the board. Import the board definition
