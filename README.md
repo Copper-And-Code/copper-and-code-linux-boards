@@ -44,7 +44,14 @@ scripts/build_mp135.sh lvgl
 scripts/build_mp135_usb.sh
 ```
 
-Installation on the board: `docs/stm32mp135f-dk-install.md`. Status and measurements:
+Install on the board over SSH (`linux/install.sh`, idempotent) and remove again with
+`/usr/local/mpy/bin/mpy-uninstall`:
+
+```sh
+scripts/deploy_mp135.sh
+```
+
+Details: `docs/stm32mp135f-dk-install.md`. Status and measurements:
 `docs/stm32mp135f-dk.md`.
 
 ## License
