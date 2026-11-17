@@ -18,3 +18,11 @@ mpremote fs cp of 200 KiB of random data:
   serial /dev/ttyACM2: 12.68 s (11.78 s before the hub, with another 200 KiB file)
   TCP socket://192.168.7.1:8266: 0.94 s
 Soft reset (Ctrl-D to the next ">>> ", 10 samples on serial): 0.100 s each (0.068 s mean before)
+
+After a full reboot (systemctl reboot over SSH):
+  uptime 0 min; mpy-usb-composite and mpy-repl active; no failed units
+  Startup finished in 12.357s (kernel) + 24.314s (userspace) = 36.672s
+  [32.765465] mpy-repl-hub: started /usr/local/mpy/bin/micropython; serial attached
+  host: /dev/serial/by-id/usb-Copper-And-Code_MicroPython_LVGL_MP135_...-if02 -> ttyACM2
+  gadget strings: Copper-And-Code / MicroPython LVGL MP135
+  mpremote connect socket://192.168.7.1:8266 exec -> TCP linux (listener bound with IP_FREEBIND)
