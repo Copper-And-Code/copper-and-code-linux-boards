@@ -108,10 +108,17 @@ def _wpa_config(ssid, password):
     return "\n".join(lines) + "\n"
 
 
-def _write(path, text):
+def _write(path, text, private=False):
+    folder = path.rsplit("/", 1)[0]
+    try:
+        os.stat(folder)
+    except OSError:
+        os.mkdir(folder)  # /etc/wpa_supplicant is missing on some images
     temporary = path + ".tmp"
     with open(temporary, "w") as target:
         target.write(text)
+    if private:  # the hashed key: readable by root only
+        _run(["chmod", "600", temporary])
     os.rename(temporary, path)
 
 
@@ -120,7 +127,7 @@ def start_connect(ssid, password):
     name = interface()
     if name is None:
         raise OSError("no Wi-Fi interface")
-    _write("/etc/wpa_supplicant/wpa_supplicant-%s.conf" % name, _wpa_config(ssid, password))
+    _write("/etc/wpa_supplicant/wpa_supplicant-%s.conf" % name, _wpa_config(ssid, password), True)
     _write(NETWORK_FILE, "%s\n[Match]\nName=%s\n\n[Network]\nDHCP=ipv4\n" % (MARKER, name))
     return Job(["/bin/sh", "-c",
                 "systemctl enable wpa_supplicant@{0} >/dev/null 2>&1; "
