@@ -42,6 +42,11 @@ import serial
 
 port = serial.Serial(os.environ["P"], 115200, timeout=0.1)
 
+# Output left by the previous mpremote session (a trailing ">>> ") would satisfy the waits below
+# before the board answers: let it arrive, then discard it.
+time.sleep(0.3)
+port.reset_input_buffer()
+
 def read_until(marker, timeout=10):
     data = bytearray()
     deadline = time.monotonic() + timeout
@@ -102,6 +107,11 @@ import time
 import serial
 
 port = serial.Serial(os.environ["P"], 115200, timeout=0.1)
+
+# Output left by the previous mpremote session (a trailing ">>> ") would satisfy the waits below
+# before the board answers: let it arrive, then discard it.
+time.sleep(0.3)
+port.reset_input_buffer()
 data = bytearray()
 deadline = time.monotonic() + 15
 try:
