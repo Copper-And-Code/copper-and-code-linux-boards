@@ -1,0 +1,17 @@
+machine.Pin on STM32MP135F-DK, 2026-11-17
+
+Source for the LEDs: UM2993 Rev 2, table 11. Blue LD3 on PA14 and red LD4 on PA13, active low
+(the same lines as B1 and B2, table 12); green LD7 on MCP23017 IO14 and orange LD6 on IO15,
+active high. On the board the MCP23017 is gpiochip9 (label "mcp23017"), lines 14 and 15 unused.
+
+tests/hil/t17_mp135_pin.py (inputs only): MP135_PIN_TEST_PASS
+  Pin('PA4', mode=IN, pull=PULL_UP); pull-up -> 1, pull-down -> 0 (floating)
+  PA14 (gpio-keys) -> OSError EBUSY; same line twice -> EBUSY; value() after deinit() -> EBADF
+  Pin(('mcp23017', 14)) -> Pin('gpiochip9:14', mode=IN, pull=None)
+  Pin(('nochip', 1)) -> ValueError unknown GPIO chip nochip
+
+tests/hil/t19_mp135_led.py (outputs, by eye):
+  Pin('gpiochip9:14', mode=OUT) Pin('gpiochip9:15', mode=OUT)
+  Nunzio confirmed: green LD7 blinked 5 times, then orange LD6 blinked 5 times, then both off.
+
+tests/hil/t18_mp135_pin_loopback.py (jumper between two CN8 pins, open drain): not run yet.
