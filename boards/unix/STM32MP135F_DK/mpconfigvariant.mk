@@ -6,4 +6,5 @@ MICROPY_PY_THREAD_GIL := 1
 USER_C_MODULES += $(VARIANT_DIR)/../../../modules/mpyrepl
 USER_C_MODULES += $(VARIANT_DIR)/../../../modules/linuxfb
 USER_C_MODULES += $(VARIANT_DIR)/../../../modules/linuxproc
+USER_C_MODULES += $(VARIANT_DIR)/../../../modules/linuxmachine
 LDFLAGS += -Wl,--wrap=mp_hal_set_interrupt_char
