@@ -5,9 +5,13 @@ import select
 import struct
 
 EV_SYN = 0x00
+EV_KEY = 0x01
+SYN_REPORT = 0x00
+SYN_DROPPED = 0x03
 EV_ABS = 0x03
 ABS_X = 0x00
 ABS_Y = 0x01
+ABS_MT_SLOT = 0x2F
 ABS_MT_POSITION_X = 0x35
 ABS_MT_POSITION_Y = 0x36
 ABS_MT_TRACKING_ID = 0x39
@@ -43,6 +47,12 @@ class TouchEvdev:
         self.y = 0
         self.pressed = False
         self._pending = b""
+        # The kernel's single-pointer emulation (ABS_X/ABS_Y/BTN_TOUCH) follows the oldest contact;
+        # once seen, the per-slot multitouch events are ignored, so a second finger cannot move
+        # or release the pointer.
+        self._pointer = False
+        # After SYN_DROPPED the kernel's buffer overflowed: drop events up to the next SYN_REPORT.
+        self._dropping = False
 
     def _coordinate(self, value, limit):
         return max(0, min(value, limit - 1))
@@ -66,20 +76,43 @@ class TouchEvdev:
             self._pending += events
             end = self._report_end()
         packet, self._pending = self._pending[:end], self._pending[end:]
+        events = [struct.unpack_from(EVENT_FORMAT, packet, offset)[2:] for offset in range(0, end, EVENT_SIZE)]
+        event_type, code, _value = events[-1]
+        if code == SYN_DROPPED:
+            self._dropping = True
+            return False
+        if self._dropping:
+            self._dropping = False
+            return False
+        if not self._pointer:
+            self._pointer = any(
+                (event_type == EV_ABS and code in (ABS_X, ABS_Y)) or (event_type == EV_KEY and code == BTN_TOUCH)
+                for event_type, code, _value in events
+            )
+        slot = 0
         changed = False
-        for offset in range(0, end, EVENT_SIZE):
-            _sec, _usec, event_type, code, value = struct.unpack_from(EVENT_FORMAT, packet, offset)
+        for event_type, code, value in events:
             if event_type == EV_ABS:
-                if code in (ABS_X, ABS_MT_POSITION_X):
+                if code == ABS_MT_SLOT:
+                    slot = value
+                elif code in (ABS_X, ABS_Y):
+                    if code == ABS_X:
+                        self.x = self._coordinate(value, self.width)
+                    else:
+                        self.y = self._coordinate(value, self.height)
+                    changed = True
+                elif self._pointer or slot != 0:
+                    continue
+                elif code == ABS_MT_POSITION_X:
                     self.x = self._coordinate(value, self.width)
                     changed = True
-                elif code in (ABS_Y, ABS_MT_POSITION_Y):
+                elif code == ABS_MT_POSITION_Y:
                     self.y = self._coordinate(value, self.height)
                     changed = True
                 elif code == ABS_MT_TRACKING_ID:
                     self.pressed = value >= 0
                     changed = True
-            elif event_type == 0x01 and code == BTN_TOUCH:
+            elif event_type == EV_KEY and code == BTN_TOUCH:
                 self.pressed = bool(value)
                 changed = True
             elif event_type == EV_SYN:

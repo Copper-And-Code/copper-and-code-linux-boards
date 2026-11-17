@@ -77,4 +77,64 @@ assert coordinates.pending
 assert coordinates.state() == (200, 210, True)
 assert not coordinates.pending
 
+
+
+def pointer_frame(*events):
+    return b"".join(events) + event(evdev.EV_SYN, evdev.SYN_REPORT, 0)
+
+
+# Goodix with the kernel's pointer emulation: a second finger touches and lifts while the first
+# stays down. Only ABS_X/ABS_Y/BTN_TOUCH decide; slot 1 must not release or move the pointer.
+two_fingers = touch_with(
+    [
+        pointer_frame(
+            event(evdev.EV_ABS, evdev.ABS_MT_SLOT, 0),
+            event(evdev.EV_ABS, evdev.ABS_MT_TRACKING_ID, 7),
+            event(evdev.EV_ABS, evdev.ABS_MT_POSITION_X, 50),
+            event(evdev.EV_ABS, evdev.ABS_MT_POSITION_Y, 60),
+            event(evdev.EV_KEY, evdev.BTN_TOUCH, 1),
+            event(evdev.EV_ABS, evdev.ABS_X, 50),
+            event(evdev.EV_ABS, evdev.ABS_Y, 60),
+        )
+        + pointer_frame(
+            event(evdev.EV_ABS, evdev.ABS_MT_SLOT, 1),
+            event(evdev.EV_ABS, evdev.ABS_MT_TRACKING_ID, 8),
+            event(evdev.EV_ABS, evdev.ABS_MT_POSITION_X, 400),
+            event(evdev.EV_ABS, evdev.ABS_MT_POSITION_Y, 200),
+        )
+        + pointer_frame(event(evdev.EV_ABS, evdev.ABS_MT_SLOT, 1), event(evdev.EV_ABS, evdev.ABS_MT_TRACKING_ID, -1))
+        + pointer_frame(
+            event(evdev.EV_ABS, evdev.ABS_MT_SLOT, 0),
+            event(evdev.EV_ABS, evdev.ABS_MT_TRACKING_ID, -1),
+            event(evdev.EV_KEY, evdev.BTN_TOUCH, 0),
+        )
+    ]
+)
+assert two_fingers.state() == (50, 60, True)
+assert two_fingers.state() == (50, 60, True), "a second finger must not move the pointer"
+assert two_fingers.state() == (50, 60, True), "lifting the second finger must not release the pointer"
+assert two_fingers.state() == (50, 60, False)
+
+# Without pointer emulation, only slot 0 is followed.
+slots = touch_with(
+    [
+        pointer_frame(event(evdev.EV_ABS, evdev.ABS_MT_TRACKING_ID, 1), event(evdev.EV_ABS, evdev.ABS_MT_POSITION_X, 10))
+        + pointer_frame(event(evdev.EV_ABS, evdev.ABS_MT_SLOT, 1), event(evdev.EV_ABS, evdev.ABS_MT_TRACKING_ID, -1))
+    ]
+)
+assert slots.state() == (10, 0, True)
+assert slots.state() == (10, 0, True), "slot 1 must not release the slot 0 contact"
+
+# SYN_DROPPED: the frame that follows is incomplete and must be discarded.
+dropped = touch_with(
+    [
+        event(evdev.EV_SYN, evdev.SYN_DROPPED, 0)
+        + pointer_frame(event(evdev.EV_ABS, evdev.ABS_X, 300))
+        + pointer_frame(event(evdev.EV_KEY, evdev.BTN_TOUCH, 1), event(evdev.EV_ABS, evdev.ABS_X, 30))
+    ]
+)
+assert dropped.state() == (0, 0, False)
+assert dropped.state() == (0, 0, False), "the events after SYN_DROPPED must be discarded"
+assert dropped.state() == (30, 0, True)
+
 print("TOUCH_EVDEV_TEST_PASS")
