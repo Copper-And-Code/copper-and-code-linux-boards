@@ -1,0 +1,16 @@
+STM32MP135F-DK phase 8: packaging, 2026-11-17
+
+scripts/deploy_mp135.sh on the installed board, twice:
+  install: done; nothing changed       (both runs: the script reproduces the manual installation)
+
+Full cycle:
+  /usr/local/mpy/bin/mpy-uninstall: services removed, original DTB restored, Weston, psplash and
+  st-hostname enabled; reboot -> weston-graphical-session and psplash-drm-start active, mpy-repl
+  inactive, DTB sha256 bf08a8e8aa6e0e2a..., original ST gadget (ncm.0 only), st-hostname's
+  hostname back
+  scripts/deploy_mp135.sh: 4 files installed, Weston, psplash and st-hostname disabled, hostname
+  mp135-mpy, services enabled, "reboot to use the new device tree and USB gadget"; reboot ->
+  mpy-usb-composite and mpy-repl active, Weston and psplash inactive, no failed units, ready screen
+  at 32.82 s, CDC-ACM gadget Copper-And-Code present
+
+Regression after the cycle: test_repl.sh PASS, test_tcp_hub.py PASS, t11, t12, t13, t14, t16, t17 PASS

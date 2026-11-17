@@ -20,6 +20,8 @@ the MicroPython REPL.
 - Phase 6 LVGL MPY Studio: the Studio imports the board definition in `studio-board/` from a file.
 - Phase 7 start-up and robustness: ready screen, REPL independent of the display, systemd watchdog
   on the REPL hub; the 10 power cycles by hand and the microSD protection remain.
+- Phase 8 packaging: `scripts/deploy_mp135.sh`, `linux/install.sh` and `linux/uninstall.sh`, checked
+  with a full uninstall, reboot, install and reboot cycle.
 - Later phases: not started.
 
 ## Phase 1 verified configuration
@@ -409,3 +411,36 @@ is not detected, as on the MCU ports, where that is the job of `machine.WDT` (no
 After a reboot the ready screen is drawn at about 32.7 s of kernel uptime, right after the hub
 starts. Most of that time passes before `sysinit.target` (udev, microSD partitions); shortening it
 means changing the image (phase 9). Results: `docs/log/stm32mp135f-dk-phase7.txt`.
+
+## Differences from the MCU boards
+
+What LVGL MPY Studio, `mpremote` and an application see, compared with the MicroPython MCU boards
+of `mpy-lvgl-boards`:
+
+| Topic | MCU boards | STM32MP135F-DK |
+|---|---|---|
+| `sys.platform` | `rp2`, `esp32`, `stm32` | `linux` (unix port) |
+| Filesystem `:` | flash or SD (`/`, `/flash`) | `/usr/local/mpy/fs` on the microSD |
+| Soft reset (Ctrl-D) | reinitialises the VM | re-executes the process (`execve`), 0.1–0.2 s; the raw/friendly mode survives |
+| Hard reset | `machine.reset()` | not provided; `systemctl restart mpy-repl` or a reboot |
+| REPL channels | USB CDC or UART, WebREPL on some | CDC-ACM gadget and TCP `192.168.7.1:8266`, one process for both |
+| Ctrl-C | the port's keyboard interrupt | SIGINT from the pseudo-terminal of the REPL hub |
+| LVGL service | timer callback, scheduled on the main thread | thread with the GIL; LVGL event handlers run in it |
+| Display | SPI/RGB/LTDC panel driver | DRM dumb buffer, one 480×272 RGB565 buffer, DIRECT mode, no vsync |
+| `machine` | full port API | `Pin` only (GPIO character device); no `irq()`, `I2C`, `PWM`, `WDT` yet |
+| Safe mode | board-specific | B1 held while the service starts |
+| Start-up | under a second | about 33 s of kernel uptime to the ready screen (OpenSTLinux image) |
+
+## Known issues
+
+- Start-up is slow (about 33 s to the ready screen) because of the image: udev and the microSD
+  partitions take about 16 s before `sysinit.target`. A smaller image is phase 9.
+- No vsync or page flip: fast full-screen animations can tear.
+- A MicroPython program that hangs is not detected by the systemd watchdog (it watches the hub);
+  `machine.WDT` is not implemented.
+- The TCP REPL has no authentication; it listens only on the USB network.
+- `mpremote fs cp` over the CDC-ACM port is slow (about 17 KiB/s); over TCP it is about 13 times
+  faster.
+- B2 was not tested: its switch on the validation board is damaged.
+- The microSD is not protected against power loss (no read-only root, normal journal): decision
+  pending.
