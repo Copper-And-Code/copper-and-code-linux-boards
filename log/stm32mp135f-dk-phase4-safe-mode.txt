@@ -1,0 +1,61 @@
+STM32MP135F-DK Phase 4 safe-mode physical validation
+
+Intended input:
+  Button: B1 / USER1
+  GPIO: PA13, active-low with pull-up
+  Device: /dev/input/by-path/platform-gpio-keys-event
+  Device-tree label: User-PA13
+  Device-tree linux,code: 0x101 (BTN_1)
+
+Input capabilities reported by evtest:
+  Input device name: "gpio-keys"
+  Event code 143 (KEY_WAKEUP)
+  Event code 257 (BTN_1)
+
+The initial implementation used BTN_EXTRA and a path missing the by-path component. Both were
+corrected from the device tree and evtest capabilities. The final binary reports
+mpyrepl.user_button_pressed() == False while B1 was reported held.
+
+A direct EVIOCGKEY query returned no pressed bits:
+  []
+
+A 15-second evtest capture showed no key events. A separate 12-second poll of
+/sys/kernel/debug/gpio showed the same state on every sample:
+  gpio-525 (PA13 |User-PA13) in hi IRQ ACTIVE LOW
+
+No hi -> lo -> hi transition was observed. Since PA13 is active-low, the kernel did not detect the
+physical press. A safe-mode restart therefore executed the hello fixture in main.py and did not print
+"Safe mode: main.py skipped". After B1 was released, the normal-startup control check passed:
+main.py executed and the raw REPL became available.
+
+Status: OPEN. Safe mode is implemented with the documented BTN_1 input, but physical validation is
+not passing and must not be claimed. Check the physical button/signal path and repeat the GPIO,
+evtest and service-restart checks.
+
+Follow-up root cause and passing validation:
+
+UM2993 Table 12 maps B1/USER1 to PA14 and B2/USER2 to PA13. The earlier test monitored B2 while
+the physical presses were applied to B1. PA14 was also owned by the blue heartbeat LED.
+
+The DTB overlay now disables /leds/led-blue, maps B1/PA14 to BTN_1 (0x101), and preserves
+B2/PA13 separately as BTN_2 (0x102). After reboot, the kernel reported:
+  gpio-525 (PA13 |User2-PA13) in hi IRQ ACTIVE LOW
+  gpio-526 (PA14 |User1-PA14) in hi IRQ ACTIVE LOW
+
+evtest observed three complete B1 cycles:
+  BTN_1 value 1 -> 0
+  BTN_1 value 1 -> 0
+  BTN_1 value 1 -> 0 (held approximately 2.4 seconds)
+
+A normal mpy-repl.service restart executed a temporary main.py and printed:
+  MP135_SAFE_MODE_MAIN_RAN
+Holding B1 during the next service restart printed:
+  Safe mode: main.py skipped
+The main.py marker was absent. After release, mpyrepl.user_button_pressed() returned False and a
+normal restart showed no safe-mode message. The temporary main.py was removed, the display test
+passed, and both MicroPython USB services remained active with no failed systemd units.
+
+B2 is physically broken on this validation board and was not tested.
+
+Status: PASS for B1 safe mode. The original PA13 diagnosis was a button-mapping error, not a B1
+hardware fault.

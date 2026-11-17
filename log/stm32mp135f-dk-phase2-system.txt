@@ -1,0 +1,423 @@
+Host capture time: 2026-11-17T08:59:23+01:00
+
+== Identity and boot state ==
+mp135-mpy-xx-xx-xx
+Linux mp135-mpy-xx-xx-xx 6.6.129 #1 SMP PREEMPT Thu Mar  5 15:03:43 UTC 2026 armv7l GNU/Linux
+ 19:20:26 up 1 min,  1 user,  load average: 2.18, 0.70, 0.25
+running
+
+== Disabled graphical units ==
+weston-graphical-session.service enabled=disabled
+weston-graphical-session.service active=inactive
+weston-checkgpu.service enabled=disabled
+weston-checkgpu.service active=inactive
+seatd-weston.service enabled=disabled
+seatd-weston.service active=inactive
+
+== Failed units ==
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+
+== Boot timing ==
+Startup finished in 12.430s (kernel) + 25.015s (userspace) = 37.445s
+multi-user.target reached after 23.047s in userspace.
+10.715s dev-mmcblk0p8.device
+ 9.263s dev-mmcblk0p9.device
+ 9.171s dev-disk-by\x2dpartuuid-e91c4e10\x2d16e6\x2d4c0e\x2dbd0e\x2d77becf4a3582.device
+ 8.210s dev-mmcblk0p11.device
+ 6.743s alsa-state-stm32mp.service
+ 6.214s systemd-udev-trigger.service
+ 4.273s user@0.service
+ 4.042s mount-partitions.service
+ 2.013s systemd-hostnamed.service
+ 1.934s avahi-daemon.service
+ 1.864s systemd-journald.service
+ 1.732s st-hostname.service
+ 1.585s bluetooth.service
+ 1.501s modprobe@fuse.service
+ 1.472s systemd-logind.service
+ 1.470s dev-mqueue.mount
+ 1.465s sys-kernel-debug.mount
+ 1.456s modprobe@drm.service
+ 1.441s sys-kernel-tracing.mount
+ 1.421s modprobe@configfs.service
+ 1.396s tmp.mount
+ 1.380s kmod-static-nodes.service
+ 1.265s systemd-networkd.service
+ 1.180s systemd-udev-settle.service
+ 1.169s systemd-network-generator.service
+ 1.101s systemd-remount-fs.service
+ 1.099s systemd-resolved.service
+ 1.068s systemd-sysctl.service
+ 1.012s netdata.service
+  927ms systemd-timesyncd.service
+  861ms tee-supplicant.service
+  853ms ip6tables.service
+  849ms iptables.service
+  788ms dbus.service
+  763ms systemd-vconsole-setup.service
+  725ms rpcbind.service
+  720ms tcf-agent.service
+  677ms sysstat.service
+  655ms systemd-udevd.service
+  605ms systemd-user-sessions.service
+  551ms systemd-tmpfiles-setup-dev-early.service
+  462ms systemd-rfkill.service
+  430ms systemd-backlight@backlight:panel-backlight.service
+  405ms sys-fs-fuse-connections.mount
+  370ms systemd-tmpfiles-setup-dev.service
+  340ms sys-kernel-config.mount
+  329ms systemd-update-utmp-runlevel.service
+  309ms bluetooth-brcmfmac-reboot.service
+  299ms systemd-journal-flush.service
+  294ms systemd-random-seed.service
+  279ms systemd-tmpfiles-setup.service
+  279ms systemd-update-utmp.service
+  199ms user-runtime-dir@0.service
+  193ms var-volatile.mount
+
+== Display devices ==
+ls: cannot access '/dev/fb0': No such file or directory
+crw-rw---- 1 root video 226, 0 May 29 19:19 /dev/dri/card0
+
+== DRM resources ==
+Connectors:
+id	encoder	status		name		size (mm)	modes	encoders
+32	31	connected	DPI-1          	105x67		1	31
+  modes:
+	index name refresh (Hz) hdisp hss hse htot vdisp vss vse vtot
+  #0 480x272 59.99 480 490 542 552 272 282 292 302 10000 flags: nhsync, nvsync; type: preferred, driver
+  props:
+	1 EDID:
+		flags: immutable blob
+		blobs:
+
+		value:
+	2 DPMS:
+		flags: enum
+		enums: On=0 Standby=1 Suspend=2 Off=3
+		value: 0
+	5 link-status:
+		flags: enum
+		enums: Good=0 Bad=1
+		value: 0
+	6 non-desktop:
+		flags: immutable range
+		values: 0 1
+		value: 0
+	4 TILE:
+		flags: immutable blob
+		blobs:
+
+		value:
+	33 dithering:
+		flags: enum
+		enums: Off=0 On=1
+		value: 0
+
+CRTCs:
+id	fb	pos	size
+41	49	(0,0)	(480x272)
+  #0 480x272 59.99 480 490 542 552 272 282 292 302 10000 flags: nhsync, nvsync; type: preferred, driver
+  props:
+	24 VRR_ENABLED:
+		flags: range
+		values: 0 1
+		value: 0
+	28 GAMMA_LUT:
+		flags: blob
+		blobs:
+
+		value:
+	29 GAMMA_LUT_SIZE:
+		flags: immutable range
+		values: 0 4294967295
+		value: 256
+
+Planes:
+id	crtc	fb	CRTC x,y	x,y	gamma size	possible crtcs
+34	41	49	0,0		0,0	0       	0x00000001
+  formats: AR24 XR24 AB24 XB24 RA24 RX24 BA24 BX24 RG16 BG16 RG24 BG24 AR15 XR15 AR12 XR12 C8 YUYV YVYU UYVY VYUY NV12 NV21 YU12 YV12
+  props:
+	8 type:
+		flags: immutable enum
+		enums: Overlay=0 Primary=1 Cursor=2
+		value: 1
+	30 IN_FORMATS:
+		flags: immutable blob
+		blobs:
+
+		value:
+			01000000000000001900000018000000
+			01000000800000004152323458523234
+			41423234584232345241323452583234
+			42413234425832345247313642473136
+			52473234424732344152313558523135
+			41523132585231324338202059555956
+			5956595555595659565955594e563132
+			4e563231595531325956313200000000
+			ffffff01000000000000000000000000
+			0000000000000000
+		in_formats blob decoded:
+			 AR24:  LINEAR(0x0)
+			 XR24:  LINEAR(0x0)
+			 AB24:  LINEAR(0x0)
+			 XB24:  LINEAR(0x0)
+			 RA24:  LINEAR(0x0)
+			 RX24:  LINEAR(0x0)
+			 BA24:  LINEAR(0x0)
+			 BX24:  LINEAR(0x0)
+			 RG16:  LINEAR(0x0)
+			 BG16:  LINEAR(0x0)
+			 RG24:  LINEAR(0x0)
+			 BG24:  LINEAR(0x0)
+			 AR15:  LINEAR(0x0)
+			 XR15:  LINEAR(0x0)
+			 AR12:  LINEAR(0x0)
+			 XR12:  LINEAR(0x0)
+			 C8:  LINEAR(0x0)
+			 YUYV:  LINEAR(0x0)
+			 YVYU:  LINEAR(0x0)
+			 UYVY:  LINEAR(0x0)
+			 VYUY:  LINEAR(0x0)
+			 NV12:  LINEAR(0x0)
+			 NV21:  LINEAR(0x0)
+			 YU12:  LINEAR(0x0)
+			 YV12:  LINEAR(0x0)
+	36 COLOR_ENCODING:
+		flags: enum
+		enums: ITU-R BT.601 YCbCr=0 ITU-R BT.709 YCbCr=1
+		value: 0
+	37 COLOR_RANGE:
+		flags: enum
+		enums: YCbCr limited range=0 YCbCr full range=1
+		value: 0
+	38 alpha:
+		flags: range
+		values: 0 65535
+		value: 65535
+	39 zpos:
+		flags: range
+		values: 0 1
+		value: 0
+	40 rotation:
+		flags: bitmask
+		values: rotate-0=0x1 reflect-x=0x10 reflect-y=0x20
+		value: 1
+42	0	0	0,0		0,0	0       	0x00000001
+  formats: AR24 XR24 AB24 XB24 RA24 RX24 BA24 BX24 RG16 BG16 RG24 BG24 AR15 XR15 AR12 XR12 C8 YUYV YVYU UYVY VYUY
+  props:
+	8 type:
+		flags: immutable enum
+		enums: Overlay=0 Primary=1 Cursor=2
+		value: 0
+	30 IN_FORMATS:
+		flags: immutable blob
+		blobs:
+
+		value:
+			01000000000000001500000018000000
+			01000000700000004152323458523234
+			41423234584232345241323452583234
+			42413234425832345247313642473136
+			52473234424732344152313558523135
+			41523132585231324338202059555956
+			59565955555956595659555900000000
+			ffff1f00000000000000000000000000
+			0000000000000000
+		in_formats blob decoded:
+			 AR24:  LINEAR(0x0)
+			 XR24:  LINEAR(0x0)
+			 AB24:  LINEAR(0x0)
+			 XB24:  LINEAR(0x0)
+			 RA24:  LINEAR(0x0)
+			 RX24:  LINEAR(0x0)
+			 BA24:  LINEAR(0x0)
+			 BX24:  LINEAR(0x0)
+			 RG16:  LINEAR(0x0)
+			 BG16:  LINEAR(0x0)
+			 RG24:  LINEAR(0x0)
+			 BG24:  LINEAR(0x0)
+			 AR15:  LINEAR(0x0)
+			 XR15:  LINEAR(0x0)
+			 AR12:  LINEAR(0x0)
+			 XR12:  LINEAR(0x0)
+			 C8:  LINEAR(0x0)
+			 YUYV:  LINEAR(0x0)
+			 YVYU:  LINEAR(0x0)
+			 UYVY:  LINEAR(0x0)
+			 VYUY:  LINEAR(0x0)
+	44 COLOR_ENCODING:
+		flags: enum
+		enums: ITU-R BT.601 YCbCr=0 ITU-R BT.709 YCbCr=1
+		value: 0
+	45 COLOR_RANGE:
+		flags: enum
+		enums: YCbCr limited range=0 YCbCr full range=1
+		value: 0
+	46 alpha:
+		flags: range
+		values: 0 65535
+		value: 65535
+	47 zpos:
+		flags: range
+		values: 0 1
+		value: 1
+	48 rotation:
+		flags: bitmask
+		values: rotate-0=0x1 reflect-x=0x10 reflect-y=0x20
+		value: 1
+
+
+== Input devices ==
+I: Bus=0019 Vendor=0001 Product=0001 Version=0100
+N: Name="gpio-keys"
+P: Phys=gpio-keys/input0
+S: Sysfs=/devices/platform/gpio-keys/input/input0
+U: Uniq=
+H: Handlers=kbd event0
+B: PROP=0
+B: EV=3
+B: KEY=2 0 0 0 8000 0 0 0 0
+
+I: Bus=0018 Vendor=0416 Product=038f Version=1060
+N: Name="Goodix Capacitive TouchScreen"
+P: Phys=input/ts
+S: Sysfs=/devices/platform/soc/5c007000.bus/4c006000.i2c/i2c-1/1-005d/input/input1
+U: Uniq=
+H: Handlers=kbd event1
+B: PROP=2
+B: EV=b
+B: KEY=400 0 0 0 0 0 0 20000000 1 f8000000 0
+B: ABS=2658000 3
+
+
+== Goodix capabilities ==
+Input driver version is 1.0.1
+Input device ID: bus 0x18 vendor 0x416 product 0x38f version 0x1060
+Input device name: "Goodix Capacitive TouchScreen"
+Supported events:
+  Event type 0 (EV_SYN)
+  Event type 1 (EV_KEY)
+    Event code 59 (KEY_F1)
+    Event code 60 (KEY_F2)
+    Event code 61 (KEY_F3)
+    Event code 62 (KEY_F4)
+    Event code 63 (KEY_F5)
+    Event code 64 (KEY_F6)
+    Event code 125 (KEY_LEFTMETA)
+    Event code 330 (BTN_TOUCH)
+  Event type 3 (EV_ABS)
+    Event code 0 (ABS_X)
+      Value      0
+      Min        0
+      Max      479
+    Event code 1 (ABS_Y)
+      Value      0
+      Min        0
+      Max      271
+    Event code 47 (ABS_MT_SLOT)
+      Value      0
+      Min        0
+      Max        4
+    Event code 48 (ABS_MT_TOUCH_MAJOR)
+      Value      0
+      Min        0
+      Max      255
+    Event code 50 (ABS_MT_WIDTH_MAJOR)
+      Value      0
+      Min        0
+      Max      255
+    Event code 53 (ABS_MT_POSITION_X)
+      Value      0
+      Min        0
+      Max      479
+    Event code 54 (ABS_MT_POSITION_Y)
+      Value      0
+      Min        0
+      Max      271
+    Event code 57 (ABS_MT_TRACKING_ID)
+      Value      0
+      Min        0
+      Max    65535
+Properties:
+  Property type 1 (INPUT_PROP_DIRECT)
+Testing ... (interrupt to exit)
+
+== Backlight ==
+/sys/class/backlight/panel-backlight/actual_brightness=10
+/sys/class/backlight/panel-backlight/brightness=10
+/sys/class/backlight/panel-backlight/max_brightness=10
+/sys/class/backlight/panel-backlight/type=raw
+
+== USB network ==
+* 5: usb0
+                   Link File: /usr/lib/systemd/network/99-default.link
+                Network File: /usr/lib/systemd/network/53-usb-otg.network
+                       State: routable (configured)
+                Online state: online
+                        Type: gadget
+                        Path: platform-49000000.usb
+                      Driver: g_ether
+            Hardware Address: xx:xx:xx:xx:xx:04
+                         MTU: 1500 (min: 14, max: 15412)
+                       QDisc: fq_codel
+IPv6 Address Generation Mode: eui64
+    Number of Queues (Tx/Rx): 1/1
+                     Address: 192.168.7.1
+                              fe80::xxxx (redacted)
+           Activation Policy: up
+         Required For Online: yes
+           DHCP6 Client DUID: DUID-EN/Vendor:(redacted)
+         Offered DHCP leases: 192.168.7.58 (to host MAC redacted)
+
+May 29 19:19:55 mp135-mpy systemd-networkd[772]: usb0: Link UP
+May 29 19:19:55 mp135-mpy systemd-networkd[772]: usb0: Gained carrier
+May 29 19:19:55 mp135-mpy systemd-networkd[772]: usb0: Gained IPv6LL
+May 29 19:19:55 mp135-mpy systemd-networkd[772]: usb0: Link DOWN
+May 29 19:19:55 mp135-mpy systemd-networkd[772]: usb0: Lost carrier
+May 29 19:19:55 mp135-mpy systemd-networkd[772]: usb0: Link UP
+May 29 19:19:55 mp135-mpy systemd-networkd[772]: usb0: Gained carrier
+May 29 19:19:56 mp135-mpy systemd-networkd[772]: usb0: found matching network '/usr/lib/systemd/network/53-usb-otg.network', based on potentially unpredictable interface name.
+May 29 19:19:56 mp135-mpy systemd-networkd[772]: usb0: Configuring with /usr/lib/systemd/network/53-usb-otg.network.
+
+== Memory ==
+               total        used        free      shared  buff/cache   available
+Mem:           437Mi        84Mi       277Mi       8.7Mi        95Mi       352Mi
+Swap:             0B          0B          0B
+
+== Second reboot persistence ==
+Host capture time: 2026-11-17T09:03:42+01:00
+hostname=mp135-mpy
+st-hostname.service enabled=disabled
+st-hostname.service active=inactive
+weston-graphical-session.service enabled=disabled
+weston-graphical-session.service active=inactive
+weston-checkgpu.service enabled=disabled
+weston-checkgpu.service active=inactive
+seatd-weston.service enabled=disabled
+seatd-weston.service active=inactive
+system_state=running
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+Startup finished in 12.367s (kernel) + 24.547s (userspace) = 36.915s
+multi-user.target reached after 22.694s in userspace.
+
+== Dropbear configuration ==
+DROPBEAR_EXTRA_ARGS=" -s"
+drwx------ 2 root root 4096 May 29 19:07 /home/root/.ssh
+-rw------- 1 root root 574 May 29 19:07 /home/root/.ssh/authorized_keys
+
+== Restored backlight ==
+brightness=10
+actual_brightness=10
+
+== Human checkpoints ==
+After the first reboot, Nunzio confirmed: black panel, no ST demo.
+A static OpenSTLinux boot logo was visible after a later reboot, with Weston inactive and no touch handling.
+Backlight 0: visually off, confirmed by Nunzio.
+Backlight 5: visible at intermediate brightness, confirmed by Nunzio.
+Backlight 10: restored to maximum brightness, confirmed by Nunzio.
+Four-corner touch: captured in the separate phase2-touch-corners and phase2-touch-bottom-corners logs.

@@ -1,0 +1,224 @@
+STM32MP135F-DK Phase 1 inventory, 2026-11-17
+Console: /dev/ttyACM0, 115200 8N1
+
+$ tty; cat /proc/cmdline
+echo __MP135_BEGIN_0__; tty; cat /proc/cmdline; echo _
+_MP135_END_0__:$?
+__MP135_BEGIN_0__
+/dev/ttySTM0
+root=PARTUUID=e91c4e10-16e6-4c0e-bd0e-77becf4a3582 rootwait rw   console=ttySTM0,115200
+__MP135_END_0__:0
+
+[exit=0]
+
+$ uname -a
+root@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_1__; uname -a; echo __MP135_END_1__
+:$?
+__MP135_BEGIN_1__
+Linux stm32mp1-xx-xx-xx 6.6.129 #1 SMP PREEMPT Thu Mar  5 15:03:43 UTC 2026 armv7l GNU/Linux
+__MP135_END_1__:0
+
+[exit=0]
+
+$ cat /etc/os-release
+oot@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_2__; cat /etc/os-release; echo __MP
+135_END_2__:$?
+__MP135_BEGIN_2__
+ID=openstlinux-weston
+NAME="ST OpenSTLinux - Weston - (A Yocto Project Based Distro)"
+VERSION="5.0.17-openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10 (scarthgap)"
+VERSION_ID=5.0.17-openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10
+VERSION_CODENAME="scarthgap"
+PRETTY_NAME="ST OpenSTLinux - Weston - (A Yocto Project Based Distro) 5.0.17-openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10 (scarthgap)"
+CPE_NAME="cpe:/o:openembedded:openstlinux-weston:5.0.17-openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10"
+__MP135_END_2__:0
+r
+[exit=0]
+
+$ df -h
+oot@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_3__; df -h; echo __MP135_END_3__:$?
+__MP135_BEGIN_3__
+Filesystem       Size  Used Avail Use% Mounted on
+devtmpfs         183M     0  183M   0% /dev
+/dev/mmcblk0p10  3.8G  503M  3.1G  14% /
+tmpfs            219M     0  219M   0% /dev/shm
+tmpfs             88M  8.8M   79M  10% /run
+tmpfs            219M  8.0K  219M   1% /tmp
+/dev/mmcblk0p8    59M   18M   36M  34% /boot
+/dev/mmcblk0p9    14M  6.7M  6.0M  53% /vendor
+tmpfs            219M   20K  219M   1% /var/volatile
+/dev/mmcblk0p11   11G   47M  9.6G   1% /usr/local
+tmpfs             44M  4.0K   44M   1% /run/user/0
+tmpfs             44M  8.0K   44M   1% /run/user/1000
+__MP135_END_3__:0
+
+[exit=0]
+
+$ free -m
+ot@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_4__; free -m; echo __MP135_END_4__:
+$?
+__MP135_BEGIN_4__
+               total        used        free      shared  buff/cache   available
+Mem:             437         116         192          10         149         320
+Swap:              0           0           0
+__MP135_END_4__:0
+
+[exit=0]
+
+$ ls -l /dev/fb* /dev/dri/* /dev/input/*
+root@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_5__; ls -l /dev/fb* /dev/dri/* /dev
+/input/*; echo __MP135_END_5__:$?
+__MP135_BEGIN_5__
+ls: cannot access '/dev/fb*': No such file or directory
+crw-rw---- 1 root video 226,  0 May 29 18:48  /dev/dri/card0
+crw-rw---- 1 root input  13, 64 May 29 18:48  /dev/input/event0
+crw-rw---- 1 root input  13, 65 May 29 18:48  /dev/input/event1
+
+/dev/dri/by-path:
+total 0
+lrwxrwxrwx 1 root root 8 May 29 18:48 platform-5a001000.display-controller-card -> ../card0
+
+/dev/input/by-path:
+total 0
+lrwxrwxrwx 1 root root 9 May 29 18:48 platform-4c006000.i2c-event -> ../event1
+lrwxrwxrwx 1 root root 9 May 29 18:48 platform-gpio-keys-event -> ../event0
+__MP135_END_5__:2
+
+[exit=2]
+
+$ cat /proc/bus/input/devices
+root@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_6__; cat /proc/bus/input/devices; e
+cho __MP135_END_6__:$?
+__MP135_BEGIN_6__
+I: Bus=0019 Vendor=0001 Product=0001 Version=0100
+N: Name="gpio-keys"
+P: Phys=gpio-keys/input0
+S: Sysfs=/devices/platform/gpio-keys/input/input0
+U: Uniq=
+H: Handlers=kbd event0
+B: PROP=0
+B: EV=3
+B: KEY=2 0 0 0 8000 0 0 0 0
+
+I: Bus=0018 Vendor=0416 Product=038f Version=1060
+N: Name="Goodix Capacitive TouchScreen"
+P: Phys=input/ts
+S: Sysfs=/devices/platform/soc/5c007000.bus/4c006000.i2c/i2c-1/1-005d/input/input1
+U: Uniq=
+H: Handlers=kbd event1
+B: PROP=2
+B: EV=b
+B: KEY=400 0 0 0 0 0 0 20000000 1 f8000000 0
+B: ABS=2658000 3
+
+__MP135_END_6__:0
+
+[exit=0]
+
+$ SYSTEMD_PAGER=cat PAGER=cat systemctl list-units --type=service --state=running --no-pager
+root@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_7__; SYSTEMD_PAGER=cat PAGER=cat sy
+stemctl list-units --type=service --state=running --no-pager; echo __MP135_END_7
+__:$?
+__MP135_BEGIN_7__
+[0;4m [0m[0;4m [0m[0;4mUNIT                       [0m[0;4m [0m[0;4mLOAD  [0m[0;4m [0m[0;4mACTIVE[0m[0;4m [0m[0;4mSUB    [0m[0;4m [0m[0;4mDESCRIPTION                 [0m
+  avahi-daemon.service        loaded active running Avahi mDNS/DNS-SD Stack
+  bluetooth.service           loaded active running Bluetooth service
+  busybox-klogd.service       loaded active running Kernel Logging Service
+  busybox-syslog.service      loaded active running System Logging Service
+  dbus.service                loaded active running D-Bus System Message Bus
+  getty@tty1.service          loaded active running Getty on tty1
+  iiod.service                loaded active running IIO Daemon
+  netdata.service             loaded active running Real time performance mon...
+  rng-tools.service           loaded active running Hardware RNG Entropy Gath...
+  rpcbind.service             loaded active running RPC Bind
+  seatd-weston.service        loaded active running Seat for Weston user
+  serial-getty@ttySTM0.ser... loaded active running Serial Getty on ttySTM0
+  systemd-journald.service    loaded active running Journal Service
+  systemd-logind.service      loaded active running User Login Management
+  systemd-networkd.service    loaded active running Network Configuration
+  systemd-resolved.service    loaded active running Network Name Resolution
+  systemd-timesyncd.service   loaded active running Network Time Synchronization
+  systemd-udevd.service       loaded active running Rule-based Manager for De...
+  tcf-agent.service           loaded active running Target Communication Fram...
+  tee-supplicant.service      loaded active running TEE Supplicant
+  user@0.service              loaded active running User Manager for UID 0
+  user@1000.service           loaded active running User Manager for UID 1000
+  weston-graphical-session... loaded active running Weston graphical session
+
+[0;38;5;245mLegend: LOAD   -> Reflects whether the unit definition was properly loaded.[0m
+[0;38;5;245m        ACTIVE -> The high-level unit activation state, i.e. generalization of SUB.[0m
+[0;38;5;245m        SUB    -> The low-level unit activation state, values depend on unit type.[0m
+
+23 loaded units listed.
+__MP135_END_7__:0
+ro
+[exit=0]
+
+$ ip addr
+ot@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_8__; ip addr; echo __MP135_END_8__:
+$?
+__MP135_BEGIN_8__
+
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute
+       valid_lft forever preferred_lft forever
+2: end0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether xx:xx:xx:xx:xx:01 brd ff:ff:ff:ff:ff:ff
+    altname ethernet0
+    altname ethernet0.ethernet
+3: end1: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether xx:xx:xx:xx:xx:02 brd ff:ff:ff:ff:ff:ff
+    altname ethernet1
+    altname ethernet1.ethernet
+4: wlan0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether xx:xx:xx:xx:xx:03 brd ff:ff:ff:ff:ff:ff
+5: usb0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel state DOWN group default qlen 1000
+    link/ether xx:xx:xx:xx:xx:04 brd ff:ff:ff:ff:ff:ff
+__MP135_END_8__:0
+
+[exit=0]
+
+$ ls -l /sys/class/backlight
+oot@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_9__; ls -l /sys/class/backlight; ec
+ho __MP135_END_9__:$?
+__MP135_BEGIN_9__
+total 0
+lrwxrwxrwx 1 root root 0 May 29 18:48 panel-backlight -> ../../devices/platform/panel-backlight/backlight/panel-backlight
+__MP135_END_9__:0
+
+[exit=0]
+
+$ ls -l /sys/class/typec 2>/dev/null
+root@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_10__; ls -l /sys/class/typec 2>/dev
+/null; echo __MP135_END_10__:$?
+__MP135_BEGIN_10__
+total 0
+lrwxrwxrwx 1 root root 0 May 29 18:48 port0 -> ../../devices/platform/soc/40012000.i2c/i2c-0/0-0053/typec/port0
+__MP135_END_10__:0
+r
+[exit=0]
+
+$ ls -l /sys/kernel/config/usb_gadget 2>/dev/null
+oot@stm32mp1-xx-xx-xx:~#
+root@stm32mp1-xx-xx-xx:~# echo __MP135_BEGIN_11__; ls -l /sys/kernel/config/usb_
+gadget 2>/dev/null; echo __MP135_END_11__:$?
+__MP135_BEGIN_11__
+
+total 0
+drwxr-xr-x 7 root root 0 May 29 18:48 g1
+__MP135_END_11__:0
+
+[exit=0]

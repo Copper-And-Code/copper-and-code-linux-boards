@@ -1,0 +1,21 @@
+Wi-Fi and the Settings app on STM32MP135F-DK, 2026-11-17
+
+Board: wlan0 (rfkill unblocked), wpa_supplicant@.service and systemd-networkd present, no
+/etc/wpa_supplicant directory in the image (only /etc/wpa_supplicant.conf).
+
+Scan from the Settings app: 1-2 distinct networks (5 access points with one name); 1.2 s.
+
+First real connection, entered by Nunzio on the panel (network name and password not recorded):
+  "[Errno 2]" twice: mpy_wifi wrote /etc/wpa_supplicant/wpa_supplicant-wlan0.conf into a missing
+  directory. Fixed: the directory is created, the file gets mode 0600.
+  settings.json kept the values (network name present, password 22 characters).
+
+After the fix, mpy_wifi.ensure() from settings.json:
+  job status 0; online True after 3688 ms; state COMPLETED; address assigned
+  /etc/wpa_supplicant/wpa_supplicant-wlan0.conf -rw------- ; /etc/systemd/network/25-mpy-wifi.network
+  wpa_supplicant@wlan0 active; default route; ping 1.1.1.1 OK; name resolution OK
+
+Web radio over Wi-Fi (fake audio sink, no sound card yet):
+  gst-play-1.0 http://stream.radioparadise.com/mp3-128: 10 s received and decoded
+  app: "online: True"; Radio Swiss Jazz "On air 0:00:05"; next -> FIP "On air 0:00:04"; stop ->
+  "Stopped"

@@ -1,0 +1,82 @@
+Input driver version is 1.0.1
+Input device ID: bus 0x18 vendor 0x416 product 0x38f version 0x1060
+Input device name: "Goodix Capacitive TouchScreen"
+Supported events:
+  Event type 0 (EV_SYN)
+  Event type 1 (EV_KEY)
+    Event code 59 (KEY_F1)
+    Event code 60 (KEY_F2)
+    Event code 61 (KEY_F3)
+    Event code 62 (KEY_F4)
+    Event code 63 (KEY_F5)
+    Event code 64 (KEY_F6)
+    Event code 125 (KEY_LEFTMETA)
+    Event code 330 (BTN_TOUCH)
+  Event type 3 (EV_ABS)
+    Event code 0 (ABS_X)
+      Value    428
+      Min        0
+      Max      479
+    Event code 1 (ABS_Y)
+      Value    221
+      Min        0
+      Max      271
+    Event code 47 (ABS_MT_SLOT)
+      Value      0
+      Min        0
+      Max        4
+    Event code 48 (ABS_MT_TOUCH_MAJOR)
+      Value      0
+      Min        0
+      Max      255
+    Event code 50 (ABS_MT_WIDTH_MAJOR)
+      Value      0
+      Min        0
+      Max      255
+    Event code 53 (ABS_MT_POSITION_X)
+      Value      0
+      Min        0
+      Max      479
+    Event code 54 (ABS_MT_POSITION_Y)
+      Value      0
+      Min        0
+      Max      271
+    Event code 57 (ABS_MT_TRACKING_ID)
+      Value      0
+      Min        0
+      Max    65535
+Properties:
+  Property type 1 (INPUT_PROP_DIRECT)
+Testing ... (interrupt to exit)
+Event: time 1748552209.348163, type 3 (EV_ABS), code 57 (ABS_MT_TRACKING_ID), value 14
+Event: time 1748552209.348163, type 3 (EV_ABS), code 53 (ABS_MT_POSITION_X), value 399
+Event: time 1748552209.348163, type 3 (EV_ABS), code 54 (ABS_MT_POSITION_Y), value 172
+Event: time 1748552209.348163, type 3 (EV_ABS), code 48 (ABS_MT_TOUCH_MAJOR), value 42
+Event: time 1748552209.348163, type 3 (EV_ABS), code 50 (ABS_MT_WIDTH_MAJOR), value 42
+Event: time 1748552209.348163, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 1
+Event: time 1748552209.348163, type 3 (EV_ABS), code 0 (ABS_X), value 399
+Event: time 1748552209.348163, type 3 (EV_ABS), code 1 (ABS_Y), value 172
+Event: time 1748552209.348163, -------------- SYN_REPORT ------------
+Event: time 1748552209.653013, type 3 (EV_ABS), code 57 (ABS_MT_TRACKING_ID), value -1
+Event: time 1748552209.653013, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
+Event: time 1748552209.653013, -------------- SYN_REPORT ------------
+Event: time 1748552210.725336, type 3 (EV_ABS), code 57 (ABS_MT_TRACKING_ID), value 15
+Event: time 1748552210.725336, type 3 (EV_ABS), code 53 (ABS_MT_POSITION_X), value 59
+Event: time 1748552210.725336, type 3 (EV_ABS), code 54 (ABS_MT_POSITION_Y), value 221
+Event: time 1748552210.725336, type 3 (EV_ABS), code 48 (ABS_MT_TOUCH_MAJOR), value 16
+Event: time 1748552210.725336, type 3 (EV_ABS), code 50 (ABS_MT_WIDTH_MAJOR), value 16
+Event: time 1748552210.725336, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 1
+Event: time 1748552210.725336, type 3 (EV_ABS), code 0 (ABS_X), value 59
+Event: time 1748552210.725336, type 3 (EV_ABS), code 1 (ABS_Y), value 221
+Event: time 1748552210.725336, -------------- SYN_REPORT ------------
+Event: time 1748552210.840531, type 3 (EV_ABS), code 57 (ABS_MT_TRACKING_ID), value -1
+Event: time 1748552210.840531, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
+Event: time 1748552210.840531, -------------- SYN_REPORT ------------
+Event: time 1748552211.408715, type 3 (EV_ABS), code 57 (ABS_MT_TRACKING_ID), value 16
+Event: time 1748552211.408715, type 3 (EV_ABS), code 48 (ABS_MT_TOUCH_MAJOR), value 38
+Event: time 1748552211.408715, type 3 (EV_ABS), code 50 (ABS_MT_WIDTH_MAJOR), value 38
+Event: time 1748552211.408715, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 1
+Event: time 1748552211.408715, -------------- SYN_REPORT ------------
+Event: time 1748552211.513392, type 3 (EV_ABS), code 57 (ABS_MT_TRACKING_ID), value -1
+Event: time 1748552211.513392, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
+Event: time 1748552211.513392, -------------- SYN_REPORT ------------

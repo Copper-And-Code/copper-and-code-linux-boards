@@ -1,0 +1,16 @@
+STM32MP135F-DK review fixes, 2026-11-17
+
+Binary: clean build (787 C files) of faf3eaf + GIL, mpyrepl termios and service changes,
+installed as /usr/local/mpy/bin/micropython; previous binary kept as micropython.pre-gil.
+
+Service: StartLimitIntervalUSec=0, ExecStartPre stty "raw isig -echo susp undef quit undef".
+
+tests/hil/test_repl.sh (P=/dev/ttyACM2, TCP=socket://192.168.7.1:8266): PASS: REPL HIL tests completed
+tests/hil/t11_mp135_display.py: MP135_DISPLAY_READY 480x272 RGB565 touch=True, MP135_DISPLAY_TEST_PASS
+tests/hil/t12_mp135_performance.py: 571 frames in 10002 ms, 57.09 FPS, 100% full-frame
+  (58.14 FPS before the GIL: about 1.8% slower)
+tests/hil/t13_mp135_linuxproc.py: MP135_LINUXPROC_TEST_PASS
+tests/hil/t14_mp135_shell_linux.py: MP135_SHELL_LINUX_TEST_PASS
+
+Ctrl-Z (0x1A) and Ctrl-\ (0x1C) sent on the CDC-ACM port while a sleep loop ran: the REPL then
+answered print('ALIVE', 6*7) -> ALIVE 42; mpy-repl.service NRestarts=0, SubState=running.

@@ -1,0 +1,17 @@
+active
+active
+active
+5: usb0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    inet 192.168.7.1/24 brd 192.168.7.255 scope global usb0
+       valid_lft forever preferred_lft forever
+1f8a0bdafc669ee05ca19c3fda920df197a1503ca4471b5d4a305bc99884d939  /boot/stm32mp135f-dk.dtb
+bf08a8e8aa6e0e2aacb1e37d76e1045c4702aff2239b8ff32234369b7235c294  /boot/stm32mp135f-dk.dtb.st-original
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+No FIFO errors or kernel Oops in this boot
+mpremote: failed to access /dev/ttyACM2 (it may be in use by another program)
+linux
+ACM attempt 1: mpremote: failed to access /dev/ttyACM2 (it may be in use by another program)
+ACM attempt 2: linux
+PASS: ACM REPL available after reboot

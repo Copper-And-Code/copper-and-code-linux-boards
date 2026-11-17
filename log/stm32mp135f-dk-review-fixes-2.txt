@@ -1,0 +1,35 @@
+STM32MP135F-DK review fixes, second round, 2026-11-17
+
+linuxproc: a background process that ignores SIGHUP kept the pseudo-terminal open after the
+child exited, and run() looped without waiting until that process ended.
+  Before (previous binary), tests/hil/t13 with "(trap '' HUP; exec sleep 5) & ...; exit 3":
+    AssertionError: 5033   (run() returned after 5033 ms)
+  After: MP135_LINUXPROC_TEST_PASS (returns at once with status 3 and the child's output)
+  A plain "sleep 5 &" does not reproduce it: the shell's exit sends SIGHUP to its process group.
+
+linuxfb.blit(): bounds checked against the panel before any product, buffer size in 64 bits.
+  tests/hil/t16_mp135_blit_bounds.py: MP135_BLIT_BOUNDS_TEST_PASS (9 rectangles rejected,
+  including 0x7FFFFFFF sizes and a stride chosen to overflow 32 bits; 2 valid edge cases accepted)
+
+touch_evdev: pointer emulation (ABS_X/ABS_Y/BTN_TOUCH) preferred over the multitouch slots,
+only slot 0 followed without it, frames after SYN_DROPPED discarded.
+  tests/host/test_touch_evdev.py: TOUCH_EVDEV_TEST_PASS (two-finger, slot and SYN_DROPPED cases)
+  Checked by hand with two fingers on the panel: see the end of this file.
+
+display_driver: a missing backlight no longer stops the import; an unexpected DRM mode closes
+linuxfb before raising.
+
+Regression on the board with the new binary:
+  t11 display PASS, t12 57.49 FPS PASS, t14 shell PASS, test_repl.sh PASS
+
+tests/hil/test_repl.sh, run about 1 s after "systemctl restart mpy-repl":
+  before the fix 1 of 3 runs failed (RuntimeError: invalid friendly REPL banner: b'>>> ');
+  the earlier failure "main.py crash did not return to a REPL" has the same pattern.
+  Cause: a trailing ">>> " left by the previous mpremote session satisfied the wait before the
+  board answered. The script now waits 0.3 s and discards stale input. After: 4 of 4 runs PASS.
+
+Two-finger check by hand, 2026-11-17 (tests/hil/t20_mp135_two_fingers.py, guided on the panel):
+  t= 6.9 s DOWN 279,168 -> t=12.1 s UP, click 1 (5.2 s continuous press)
+  t=19.8 s DOWN 262,170 -> t=24.9 s UP 260,153, click 2 (5.1 s continuous press)
+  no MP135_TOUCH_JUMP line. Nunzio: during the first press the second finger touched and lifted
+  once, during the second press twice; the panel showed PRESSED throughout. PASS.
