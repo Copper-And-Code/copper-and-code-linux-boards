@@ -56,6 +56,7 @@ make -C "$MPY/mpy-cross" -j"$JOBS"
 MAKE_ARGS=(
     VARIANT_DIR="$VARIANT_DIR"
     BUILD="build-STM32MP135F_DK-$MODE"
+    MICROPY_MANIFEST_BOARDS_DIR="$REPO"
 )
 if [[ $MODE == minimal ]]; then
     MAKE_ARGS+=(FROZEN_MANIFEST="$MPY/ports/unix/variants/standard/manifest.py")

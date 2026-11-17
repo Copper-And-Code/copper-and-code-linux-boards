@@ -1,5 +1,7 @@
+#define _GNU_SOURCE
 #include <fcntl.h>
 #include <linux/input.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -58,6 +60,7 @@ static void exec_self(void) {
         return;
     }
     char *const argv[] = { "micropython", MPYREPL_LAUNCHER, NULL };
+    close_range(STDERR_FILENO + 1, UINT_MAX, 0);
     execve("/proc/self/exe", argv, environ);
 }
 

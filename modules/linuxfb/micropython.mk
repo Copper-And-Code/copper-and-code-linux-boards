@@ -1,0 +1,5 @@
+LINUXFB_MOD_DIR := $(USERMOD_DIR)
+
+SRC_USERMOD_C += $(LINUXFB_MOD_DIR)/linuxfb.c
+CFLAGS_USERMOD += -I$(SDKTARGETSYSROOT)/usr/include/libdrm
+LDFLAGS += -ldrm

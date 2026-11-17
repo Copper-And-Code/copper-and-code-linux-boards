@@ -36,13 +36,15 @@ excluded from this project configuration:
 
 ```sh
 systemctl disable --now weston-graphical-session.service weston-checkgpu.service seatd-weston.service
+systemctl disable --now psplash-drm-start.service
 systemctl disable st-hostname.service
 hostnamectl set-hostname mp135-mpy
 ```
 
 The original `st-hostname.service` must remain disabled because it otherwise appends a MAC suffix to
-the hostname at every boot. A static OpenSTLinux boot logo can remain on the panel; without Weston it
-is not an interactive application.
+the hostname at every boot. `psplash-drm-start.service` must also remain disabled: it holds DRM
+master and prevents the MicroPython `linuxfb` backend from opening the panel. A static OpenSTLinux
+boot logo can remain on the panel; without Weston it is not an interactive application.
 
 For key-only SSH access, install the selected public key in `/home/root/.ssh/authorized_keys` (root's
 home is `/home/root`, not `/root`):
@@ -70,7 +72,7 @@ the build:
 ```sh
 BOARD=192.168.7.1
 ssh root@$BOARD 'install -d /usr/local/mpy/bin /usr/local/mpy/lib /usr/local/mpy/fs/lib'
-scp dist/micropython-STM32MP135F_DK-lvgl-$REV root@$BOARD:/usr/local/mpy/bin/micropython
+scp dist/micropython-STM32MP135F_DK-lvgl-$REV root@$BOARD:/usr/local/mpy/bin/micropython.new
 scp linux/mpy_launcher.py root@$BOARD:/usr/local/mpy/lib/mpy_launcher.py
 scp linux/mpy-usb-composite.sh root@$BOARD:/usr/local/mpy/bin/mpy-usb-composite
 scp linux/mpy-repl.service linux/mpy-repl-tcp.socket linux/mpy-repl-tcp@.service \
@@ -91,6 +93,7 @@ ssh root@$BOARD '
         cp /boot/stm32mp135f-dk.dtb /boot/stm32mp135f-dk.dtb.st-original
     fi
     mv /boot/stm32mp135f-dk.dtb.new /boot/stm32mp135f-dk.dtb
+    mv /usr/local/mpy/bin/micropython.new /usr/local/mpy/bin/micropython
     chmod 0755 /usr/local/mpy/bin/micropython /usr/local/mpy/bin/mpy-usb-composite
     systemctl daemon-reload
     systemctl enable mpy-usb-composite.service mpy-repl.service mpy-repl-tcp.socket
@@ -113,6 +116,14 @@ systemctl is-active mpy-usb-composite.service mpy-repl.service mpy-repl-tcp.sock
 systemctl --failed
 ```
 
+The REPL units intentionally use
+`MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib`. The `.frozen` entry is required for
+`display_driver` and `touch_evdev`, which are compiled into the LVGL binary.
+
+When upgrading an already running installation, copy the binary to `micropython.new`, rename it over
+`micropython`, and then run `systemctl restart mpy-repl.service`. A soft reset uses `/proc/self/exe`;
+without the service restart it can re-execute the old inode after an atomic binary replacement.
+
 ## Connect and test
 
 Install `mpremote` and `pyserial` on the host. On Linux, identify the new gadget port rather than
@@ -131,6 +142,25 @@ replaces it and removes it during cleanup:
 ```sh
 P=$P TCP=socket://192.168.7.1:8266 tests/hil/test_repl.sh
 ```
+
+Run the physical display checks and the 10-second full-screen benchmark from this repository root:
+
+```sh
+mpremote connect $P run tests/hil/t11_mp135_display.py
+mpremote connect $P run tests/hil/t12_mp135_performance.py
+```
+
+To upload and run the interactive Studio example, use the matching Studio executable and board
+profile `stm32mp135f_dk_480x272`:
+
+```sh
+/opt/devel/lvgl/lvgl-mpy-studio/.venv/bin/lvgl-mpy-studio --language en device run \
+    examples/stm32mp135f-dk/project.json --port $P
+```
+
+The panel shows a dark page with a `TOUCH ME` button. A successful press changes the label to
+`Touch works!` and prints `STM32MP135_TOUCH_OK` on the REPL console. The same project can be opened
+in the Studio GUI; connect to the CDC-ACM gadget port, not the ST-LINK Linux console.
 
 On Windows, identify the new CDC-ACM COM port in Device Manager and install the Python packages with
 `py -m pip install mpremote pyserial`. The individual commands accept `P=COM<n>` and the same socket
@@ -155,8 +185,9 @@ reboot
 ```
 
 Removing `/etc/default/usbotg` allows the original ST gadget startup to use its defaults. To restore
-the graphical demo as well, re-enable `weston-graphical-session.service`, `weston-checkgpu.service`,
-`seatd-weston.service` and, if desired, `st-hostname.service`. The files under `/usr/local/mpy` can
+the graphical demo as well, re-enable `psplash-drm-start.service`,
+`weston-graphical-session.service`, `weston-checkgpu.service`, `seatd-weston.service` and, if
+desired, `st-hostname.service`. The files under `/usr/local/mpy` can
 remain installed while the services are disabled.
 
 ## Safe-mode validation status

@@ -14,7 +14,9 @@ the MicroPython REPL.
 - Phase 2 system preparation: complete.
 - Phase 3 Cortex-A7 MicroPython/LVGL cross-build: complete.
 - Phase 4 MCU-style REPL: Linux HIL tests, performance, stress and reboot validation complete.
-  The physical B1 safe-mode check and the Windows HIL checkpoint remain open.
+- Phase 5 DRM display, Goodix touch and LVGL MPY Studio demo: complete, including rendering
+  performance and repeated soft-reset resource checks.
+- The physical B1 safe-mode check and the Windows HIL checkpoint remain open.
 - Later phases: not started.
 
 ## Phase 1 verified configuration
@@ -158,8 +160,9 @@ SDK directory below it. Outputs and SHA-256 files are written to `dist/`.
 | Minimal | 401,870 | 1,144 | 2,060 | 405,074 bytes |
 | LVGL | 1,134,629 | 2,396 | 2,152 | 1,139,177 bytes |
 
-Both are stripped ARM EABI5 32-bit executables using `/lib/ld-linux-armhf.so.3`. Their only dynamic
-`NEEDED` entries are `libm.so.6`, `libffi.so.8` and `libc.so.6`.
+Both are stripped ARM EABI5 32-bit executables using `/lib/ld-linux-armhf.so.3`. The Phase 3 dynamic
+`NEEDED` entries were `libm.so.6`, `libffi.so.8` and `libc.so.6`; Phase 5 adds `libdrm.so.2` to the
+LVGL build for the DRM panel backend.
 
 On the board, the LVGL binary reports MicroPython 1.29.0, `sys.platform=linux`, build
 `STM32MP135F_DK` and LVGL 9.5.0. The existing PyDevices fake-display smoke test,
@@ -249,6 +252,51 @@ Logs are saved as `docs/log/stm32mp135f-dk-phase4-hil.txt`,
 `docs/log/stm32mp135f-dk-phase4-reboot.txt` and
 `docs/log/stm32mp135f-dk-phase4-safe-mode.txt`. See
 `docs/stm32mp135f-dk-install.md` for installation and recovery instructions.
+
+## Phase 5 display, touch and Studio integration
+
+The panel is driven directly through DRM/KMS on `/dev/dri/card0`; this board has no `/dev/fb0`.
+The board-specific `linuxfb` user C module creates and maps a 480×272 RGB565 dumb buffer with a
+1,024-byte stride, sets the DPI-1 CRTC and copies LVGL dirty rectangles into it. Weston and
+`psplash-drm-start.service` must be disabled so that MicroPython can become DRM master. The LVGL
+binary therefore has `libdrm.so.2` as an additional dynamic dependency.
+
+`python/linux/display_driver.py` implements display-driver contract 1 with one 255 KiB full-screen
+buffer in DIRECT mode. Its service thread calls `lv.timer_handler()` every 5 ms, while the LVGL
+refresh timer is limited to 16 ms. `stop()` waits for the service thread to exit, preventing an
+immediate `start()` from creating overlapping service threads. Backlight control uses
+`/sys/class/backlight/panel-backlight` and defaults to 100%.
+
+`python/linux/touch_evdev.py` discovers `Goodix Capacitive TouchScreen` by name in
+`/proc/bus/input/devices`; the event number is not fixed. It polls the numeric file descriptor and
+decodes the verified 16-byte ARM32 `input_event` records with `llHHi`. `ABS_MT_POSITION_X/Y`,
+`ABS_X/Y`, tracking ID and `BTN_TOUCH` are handled. X increases rightward and Y downward, so no axis
+swap or inversion is needed.
+
+Both Python modules are frozen by the board manifest. The serial and TCP REPL services set
+`MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib`; omitting `.frozen` makes
+`display_driver` unavailable to applications. On soft reset, `mpyrepl` closes inherited descriptors
+above stderr before `execve`, preventing DRM and input descriptors from accumulating across process
+restarts.
+
+Validation results on the physical panel:
+
+| Test | Result |
+|---|---|
+| Red, green, blue and white bars, orientation and title | Visually confirmed |
+| LVGL MPY Studio project upload and execution | `LVGL_MPY_STUDIO_APP_READY buffers=1 touch=True` |
+| Button press changes the label and runs its handler | `STM32MP135_TOUCH_OK` observed twice |
+| Full-screen color animation | 582 frames in 10.011 s: **58.14 FPS**, 100% full-frame coverage |
+| Process CPU during steady-state full-screen rendering | Approximately 10–12% of one Cortex-A7 CPU |
+| Process memory | 2.6 MiB RSS, 4.3 MiB virtual size, two threads |
+| Ctrl-C during an application | `KeyboardInterrupt` reached the application; REPL remained available |
+| Three Ctrl-D/display reinitialization cycles | No extra threads or DRM/input descriptors |
+| `tests/hil/t11_mp135_display.py` | `MP135_DISPLAY_TEST_PASS`, including `stop()`/`start()` |
+| `tests/hil/t12_mp135_performance.py` | `MP135_PERF_TEST_PASS` |
+
+The interactive example is `examples/stm32mp135f-dk/project.json`, using Studio board profile
+`stm32mp135f_dk_480x272`. Installation, launch and recovery commands are in
+`docs/stm32mp135f-dk-install.md`.
 
 ## Portable `machine` API decision
 

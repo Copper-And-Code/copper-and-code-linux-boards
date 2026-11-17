@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 2,
+  "projectName": "STM32MP135F-DK Touch Demo",
+  "display": {
+    "width": 480,
+    "height": 272,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "3c09bdd7d09746c99892431d0b84ffd8",
+      "name": "main",
+      "canvasSize": [
+        480,
+        272
+      ],
+      "widgets": [
+        {
+          "id": "5782241c3f8f4108b864441e6db89351",
+          "name": "background",
+          "type": "panel",
+          "props": {
+            "x": 0,
+            "y": 0,
+            "width": 480,
+            "height": 272,
+            "bgColor": "#101828",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 0,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_AUTO"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "83b764291f8d4b94992b167e65752e94",
+          "name": "titleLabel",
+          "type": "label",
+          "props": {
+            "x": 24,
+            "y": 18,
+            "width": 432,
+            "height": 36,
+            "text": "STM32MP135F-DK",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_CENTER",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "5782241c3f8f4108b864441e6db89351",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b9d5a4eed6d541ad9acbc5fd68ee6ff0",
+          "name": "subtitleLabel",
+          "type": "label",
+          "props": {
+            "x": 24,
+            "y": 62,
+            "width": 432,
+            "height": 24,
+            "text": "MicroPython + LVGL 9.5",
+            "textColor": "#94A3B8",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_CENTER",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "5782241c3f8f4108b864441e6db89351",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "701d42d8b0144847983684c73d5f5744",
+          "name": "statusLabel",
+          "type": "label",
+          "props": {
+            "x": 24,
+            "y": 110,
+            "width": 432,
+            "height": 36,
+            "text": "Touch the button",
+            "textColor": "#38BDF8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_CENTER",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "5782241c3f8f4108b864441e6db89351",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "d62e4662a05b487e974b8863413267b0",
+          "name": "touchButton",
+          "type": "button",
+          "props": {
+            "x": 140,
+            "y": 180,
+            "width": 200,
+            "height": 64,
+            "text": "TOUCH ME",
+            "bgColor": "#2563EB",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 5
+          },
+          "events": {
+            "CLICKED": "touchButton_clicked"
+          },
+          "parentId": "5782241c3f8f4108b864441e6db89351",
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "",
+    "handlers": {
+      "touchButton_clicked": {
+        "widget": "touchButton",
+        "event": "CLICKED",
+        "body": "ui.statusLabel.set_text(\"Touch works!\")\nprint(\"STM32MP135_TOUCH_OK\")\n"
+      }
+    }
+  },
+  "currentPageId": "3c09bdd7d09746c99892431d0b84ffd8",
+  "assets": {},
+  "variables": [],
+  "projectId": "6622c0255f5742a6ad1a109d1fcd7e2d",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp135f_dk_480x272",
+    "revision": 1,
+    "name": "STM32MP135F-DK (480×272)",
+    "adapter": "stm32mp135_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 480,
+    "physicalHeight": 272,
+    "logicalWidth": 480,
+    "logicalHeight": 272,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  }
+}

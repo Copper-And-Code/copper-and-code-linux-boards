@@ -7,7 +7,7 @@ ConditionPathExists=/dev/ttyGS0
 [Service]
 Type=simple
 WorkingDirectory=/usr/local/mpy/fs
-Environment=MICROPYPATH=/usr/local/mpy/fs:/usr/local/mpy/fs/lib
+Environment=MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib
 ExecStartPre=/usr/bin/stty -F /dev/ttyGS0 raw isig -echo
 ExecStart=/usr/local/mpy/bin/micropython /usr/local/mpy/lib/mpy_launcher.py
 Restart=always
