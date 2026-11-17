@@ -16,6 +16,7 @@ BACKLIGHT_PATH = "/sys/class/backlight/panel-backlight"
 
 _drm_width, _drm_height, _bpp, _stride = linuxfb.open()
 if (_drm_width, _drm_height, _bpp) != (480, 272, 16):
+    linuxfb.close()
     raise RuntimeError("unexpected DRM mode: %sx%s, %s bpp" % (_drm_width, _drm_height, _bpp))
 WIDTH = _drm_width
 HEIGHT = _drm_height
@@ -110,5 +111,8 @@ def backlight(percent=None):
         target.write(str((value * maximum + 50) // 100))
 
 
-backlight(100)
+try:
+    backlight(100)
+except OSError as error:
+    print("display_driver: no backlight control:", error)
 start()
