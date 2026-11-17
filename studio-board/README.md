@@ -8,14 +8,8 @@ repository while the Linux board is experimental. Nothing here is published.
 
 ## Using it in the Studio
 
-The Studio does not load board definitions from a file yet: the work is described for its agent in
-`lvgl-mpy-studio/prompts/import-board-esterne.md`. Once it is done, this JSON file is imported as it
-is. The earlier built-in version of the profile (Studio commit 7175b3e, reverted) is kept as a patch
-in the history of this repository, commit a382b74.
-
-## Adding it to the Studio later
-
-Give the Studio a way to load board definitions from outside its repository, for example a
-folder of profiles named by a setting or an environment variable, with the adapter's module
-list taken from the profile's `firmware.modules` instead of the fixed `ADAPTERS` table. This
-folder would then be loaded as it is, with no MP135-specific code in the Studio.
+LVGL MPY Studio imports board definitions from a file (Studio commit d3aabe9): in the board profile
+manager choose **Import…** and select `boards/stm32mp135f_dk_480x272.json`; **Delete** removes it
+again. Connect to the CDC-ACM REPL port of the board, not to the ST-LINK console. The earlier
+built-in version of the profile (Studio commit 7175b3e, reverted in 928ccdf) is kept as a patch in
+the history of this repository, commit a382b74.
