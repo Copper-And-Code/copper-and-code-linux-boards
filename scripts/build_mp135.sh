@@ -4,7 +4,7 @@
 #   scripts/build_mp135.sh [minimal|lvgl]
 #
 # Environment:
-#   WORK_DIR  source checkouts and SDK (default: .work/mp135 in this repo)
+#   WORK_DIR  source checkouts and SDK (default: work/ in this repo)
 #   SDK_DIR   installed OpenSTLinux SDK (default: $WORK_DIR/sdk/openstlinux-<release>)
 #   JOBS      parallel jobs (default: nproc)
 set -euo pipefail
@@ -27,7 +27,7 @@ MODE=${1:-lvgl}
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 VARIANT_DIR=$REPO/boards/unix/STM32MP135F_DK
 [[ -f $VARIANT_DIR/mpconfigvariant.mk ]] || die "missing variant $VARIANT_DIR"
-WORK_DIR=$(mkdir -p "${WORK_DIR:-$REPO/.work/mp135}" && cd "${WORK_DIR:-$REPO/.work/mp135}" && pwd)
+WORK_DIR=$(mkdir -p "${WORK_DIR:-$REPO/work}" && cd "${WORK_DIR:-$REPO/work}" && pwd)
 SDK_DIR=${SDK_DIR:-$WORK_DIR/sdk/$SDK_RELEASE}
 JOBS=${JOBS:-$(nproc)}
 [[ $(uname -m) == x86_64 ]] || die "this SDK requires an x86-64 host"

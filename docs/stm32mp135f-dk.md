@@ -145,14 +145,12 @@ the SDK environment and pins MicroPython v1.29.0, lvgl-micropython `58d18ce` and
 `7740c2f` (LVGL 9.5.0). The validated commands in this development workspace are:
 
 ```sh
-cd /opt/devel/lvgl/mpy-lvgl-stm32/mpy-lvgl-boards
-export WORK_DIR=/opt/devel/lvgl/lvgl-mpy-linux/work
-export SDK_DIR=$WORK_DIR/sdk/openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10
+cd /opt/devel/lvgl/lvgl-mpy-linux
 scripts/build_mp135.sh minimal
 scripts/build_mp135.sh lvgl
 ```
 
-The default `WORK_DIR` is `.work/mp135` inside this repository; `SDK_DIR` defaults to the matching
+`WORK_DIR` defaults to `work/` inside this repository and can be set to another workspace; `SDK_DIR` defaults to the matching
 SDK directory below it. Outputs and SHA-256 files are written to `dist/`.
 
 | Build | text | data | bss | Total |

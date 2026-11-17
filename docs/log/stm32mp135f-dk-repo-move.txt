@@ -1,0 +1,19 @@
+Move from mpy-lvgl-boards (branch stm32mp135f-dk) to lvgl-mpy-linux, 2026-11-17
+
+The 54 MP135 files were extracted with their history (16 commits) and compared byte by byte with
+the source branch: no difference. Left in mpy-lvgl-boards: README.md, docs/display-driver.md and
+examples/README.md, shared with the other boards.
+
+Clean build from this repository with the default WORK_DIR=work/ (787 C files, no warnings):
+  dist/micropython-STM32MP135F_DK-lvgl-4a55d10-dirty  1150480 bytes
+  dist/stm32mp135f-dk-usb-composite-4a55d10-dirty.dtb  sha256 0c0e3d98a814a9f3...
+The DTB is identical to /boot/stm32mp135f-dk.dtb on the board. The binary differs from the
+previous one by 4 bytes in size (build paths of different length); it was installed instead
+(previous binary kept as /usr/local/mpy/bin/micropython.pre-move) and tested:
+
+  tests/host/test_touch_evdev.py: TOUCH_EVDEV_TEST_PASS
+  tests/hil/t11_mp135_display.py: MP135_DISPLAY_TEST_PASS
+  tests/hil/t13_mp135_linuxproc.py: MP135_LINUXPROC_TEST_PASS
+  tests/hil/test_repl.sh: 2 of 3 runs PASS. The first run, started about 1 s after
+    "systemctl restart mpy-repl", failed with "main.py crash did not return to a REPL"; the next
+    two consecutive runs passed. Intermittent, not investigated yet.

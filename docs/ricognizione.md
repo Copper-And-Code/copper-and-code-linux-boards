@@ -382,7 +382,7 @@ visible in `ports/unix/main.c` and `shared/runtime/pyexec.c`: Ctrl-D returns a f
 |---|---:|---|
 | `... connect /tmp/upy resume exec "import sys; print(1+1); print(sys.platform)"` | 0 | `2` and `linux` |
 | `... connect /tmp/upy resume fs ls` | 0 | Listing of the process working directory |
-| `... connect /tmp/upy resume fs cp work/phase0-hello.py :phase0-hello.py` | 0 | Copy completed |
+| `... connect /tmp/upy resume fs cp tests/hil/phase0-hello.py :phase0-hello.py` | 0 | Copy completed |
 | `... connect /tmp/upy resume fs cat :phase0-hello.py` | 0 | Exact test source printed |
 
 A direct `SerialTransport` check entered raw mode with `soft_reset=False` and executed

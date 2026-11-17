@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO=$(cd "$(dirname "$0")/.." && pwd)
-WORK_DIR=${WORK_DIR:-$REPO/.work/mp135}
+WORK_DIR=${WORK_DIR:-$REPO/work}
 SDK_RELEASE=openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10
 SDK_DIR=${SDK_DIR:-$WORK_DIR/sdk/$SDK_RELEASE}
 TOOLS=$SDK_DIR/sysroots/x86_64-ostl_sdk-linux/usr/bin

@@ -1,0 +1,6 @@
+# Sources, SDK, Starter Package, host tools and logs of the development workspace
+work/
+dist/
+build-*/
+__pycache__/
+*.pyc

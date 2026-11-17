@@ -13,9 +13,7 @@ gadget CDC-ACM port or TCP over USB networking.
 Install the matching OpenSTLinux Developer Package SDK, then run:
 
 ```sh
-cd /opt/devel/lvgl/mpy-lvgl-stm32/mpy-lvgl-boards
-export WORK_DIR=/opt/devel/lvgl/lvgl-mpy-linux/work
-export SDK_DIR=$WORK_DIR/sdk/openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10
+cd /opt/devel/lvgl/lvgl-mpy-linux
 scripts/build_mp135.sh lvgl
 scripts/build_mp135_usb.sh
 REV=$(git describe --always --dirty)
