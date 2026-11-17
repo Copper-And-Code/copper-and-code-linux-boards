@@ -363,7 +363,13 @@ changes.
   provides the corresponding peripheral.
 
 STM32MP135F-DK has no programmable real-time MCU. Its initial implementation will therefore use the
-Linux kernel backend. This section records an architectural decision; it does not imply that all of
+Linux kernel backend. The first class is `machine.Pin` (`modules/linuxmachine/`), on the GPIO
+character device (uAPI v2): lines by kernel name (`Pin("PA4")`) or `(chip, offset)`, modes `IN`,
+`OUT`, `OPEN_DRAIN`, pulls `PULL_UP`, `PULL_DOWN`, `value()`, `on()`, `off()`, `toggle()`, `init()`,
+`deinit()`. A line used by the kernel raises `OSError(EBUSY)`; `irq()` is not provided.
+`tests/hil/t17_mp135_pin.py` checks names, errors, inputs with pulls and release without driving any
+line; outputs need two free connector pins joined by a jumper (`tests/hil/t18_mp135_pin_loopback.py`,
+not run yet). This section records an architectural decision; it does not imply that all of
 these classes are already implemented.
 
 ## Flash references

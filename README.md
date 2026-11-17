@@ -19,9 +19,12 @@ history; nothing of it is published.
 | Path | Content |
 |---|---|
 | `boards/unix/STM32MP135F_DK/` | Out-of-tree unix variant: `mpconfigvariant.h/.mk`, frozen manifest |
+| `boards/unix/STM32MP157C_DK2/`, `mcu/` | Second board, with a Cortex-M4: placeholders, see `docs/stm32mp157c-dk2.md` |
 | `modules/mpyrepl/` | MCU-style REPL (`pyexec`), soft reset by `execve`, safe mode on B1 |
 | `modules/linuxfb/` | DRM dumb-buffer RGB565 scan-out |
 | `modules/linuxproc/` | Linux programs on a pseudo-terminal, for the shell example |
+| `modules/linuxmachine/` | `machine.Pin` on the Linux GPIO character device |
+| `tools/mpy-repl-hub/` | One REPL process shared by the USB serial port and TCP |
 | `python/linux/` | `display_driver.py` and `touch_evdev.py`, frozen |
 | `linux/` | systemd units, USB composite gadget, DTB overlay, launcher |
 | `scripts/` | `build_mp135.sh` (MicroPython), `build_mp135_usb.sh` (DTB) |
