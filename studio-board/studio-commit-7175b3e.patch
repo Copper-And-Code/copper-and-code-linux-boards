@@ -1,0 +1,105 @@
+commit 7175b3ea2be1a738cb6ddfcccef9503200515980
+Author: Nunzio Raciti <nuraci@users.noreply.github.com>
+Date:   Tue Nov 17 15:17:45 2026 +0100
+
+    Add STM32MP135F-DK REPL board profile
+
+diff --git a/README.md b/README.md
+index dea2064..a03f45e 100644
+--- a/README.md
++++ b/README.md
+@@ -32,7 +32,7 @@ A scripted replay of the real IDE, sped up: [more videos](https://copper-and-cod
+ - **Design.** A drag and drop designer that shows the page as LVGL draws it, at the resolution of the board, with undo, alignment, and a resolution change that adapts the layout.
+ - **Code.** Handlers and modules in Python, with completion, plain-language actions that insert the exact LVGL call, and errors that lead to the handler and line, also when they happen on the board.
+ - **Run.** A simulator with touch, keyboard and sound; upload to a board as bytecode; changes to the design shown on the running board shortly after an edit.
+-- **Boards.** ESP32-S3, RP2350 and STM32H743 boards with RGB panels, through firmware built in [a repository of its own](https://github.com/Copper-And-Code/mpy-lvgl-boards).
++- **Boards.** ESP32-S3, RP2350, STM32H743 and STM32MP135F boards, through firmware built in [a repository of its own](https://github.com/Copper-And-Code/mpy-lvgl-boards).
+ - **Hardware blocks.** Components such as Digital Output and Digital Input, described by a folder of data and MicroPython code that [anyone can write](docs/blocks.md).
+ - **Assets.** Pictures and TrueType fonts stored in the project and converted for LVGL by the IDE, kerning included, with no external tool.
+ - **Distribute.** Single-file executables for Linux and Windows, a version that runs in the browser as WebAssembly, and portable C sources.
+diff --git a/docs/boards.md b/docs/boards.md
+index cb5806c..cac8a54 100644
+--- a/docs/boards.md
++++ b/docs/boards.md
+@@ -30,6 +30,12 @@ The connection uses UART1 through a CH340 adapter at **115200 8N1**, normally `/
+ 
+ The **ESP32-4848S040 (480×480)** profile uses native 480×480 RGB565 resolution, GT911 touch and 1× scaling. It requires MicroPython 1.29 or later, LVGL 9.5 or later, and the `display_driver` and `gt911` modules. Panel support is integrated into the display driver: a separate `rgbpanel` module is not required. The USB serial connection uses `mpremote`, normally on `/dev/ttyUSB0`; applications are installed under `/lms_apps/` without modifying `boot.py` or `main.py`.
+ 
++### STM32MP135F-DK
++
++The **STM32MP135F-DK (480×272)** profile uses the Linux MicroPython firmware from `mpy-lvgl-boards` and the standard `mpremote` transport. Select the USB CDC-ACM REPL port exposed by the board, normally `/dev/ttyACM2` on Linux; do not select the ST-LINK console. The same connection supports device information, file transfer and the interactive **Device Console**. The board also provides a TCP REPL at `socket://192.168.7.1:8266` for `mpremote`, but the Studio console currently requires the serial connection.
++
++MicroPython, LVGL and the REPL are available. The display driver is not yet installed, so **Device Information** reports `display_driver` and resolution as incompatible and project upload/run is not available yet. This is expected until the display integration is completed; it does not prevent use of the REPL or board files.
++
+ ### Live editing
+ 
+ While an application started from the IDE is running, **Device → Live Editing** sends design changes to the board about half a second after the last edit, with no restart. It rebuilds all pages off screen, shows the page open in the designer, and then deletes the old ones. Python module state survives, but widget state such as a typed text or a slider position returns to the design values. Code, Buzzer or Timer changes are not sent: the status bar asks you to press F5.
+diff --git a/lvgl_mpy_studio/boards/stm32mp135f_dk_480x272.json b/lvgl_mpy_studio/boards/stm32mp135f_dk_480x272.json
+new file mode 100644
+index 0000000..b9aaa57
+--- /dev/null
++++ b/lvgl_mpy_studio/boards/stm32mp135f_dk_480x272.json
+@@ -0,0 +1,27 @@
++{
++  "schemaVersion": 1,
++  "id": "stm32mp135f_dk_480x272",
++  "revision": 1,
++  "name": "STM32MP135F-DK (480×272)",
++  "adapter": "stm32mp135_linux",
++  "firmware": {
++    "microPython": "1.29.0",
++    "lvgl": "9.5.0",
++    "modules": ["lvgl", "display_driver"]
++  },
++  "physicalWidth": 480,
++  "physicalHeight": 272,
++  "logicalWidth": 480,
++  "logicalHeight": 272,
++  "scale": 1,
++  "colorFormat": "RGB565",
++  "fonts": [14, 16, 24, 32, 40],
++  "orientations": [0],
++  "config": {
++    "driver": "display_driver",
++    "buffers": "driver",
++    "eventLoop": "driver",
++    "appRoot": "/lms_apps",
++    "mainPath": "/main.py"
++  }
++}
+diff --git a/lvgl_mpy_studio/core/boards.py b/lvgl_mpy_studio/core/boards.py
+index 2d85562..bb40447 100644
+--- a/lvgl_mpy_studio/core/boards.py
++++ b/lvgl_mpy_studio/core/boards.py
+@@ -24,6 +24,11 @@ ADAPTERS = {
+         "modules": ["lvgl", "display_driver", "gt911"],
+         "eventLoop": "driver",
+     },
++    "stm32mp135_linux": {
++        "colorFormats": {"RGB565"},
++        "modules": ["lvgl", "display_driver"],
++        "eventLoop": "driver",
++    },
+ }
+ 
+ 
+diff --git a/tests/test_board_support.py b/tests/test_board_support.py
+index add78fe..dafbff5 100644
+--- a/tests/test_board_support.py
++++ b/tests/test_board_support.py
+@@ -98,6 +98,15 @@ def test_profile_manager_cancel_and_apply(qtbot, tmp_path, monkeypatch):
+     assert dialog.result() != QDialog.Accepted
+ 
+ 
++def test_stm32mp135_profile_is_available_with_linux_usb_repl():
++    profile = ProfileStore().get("stm32mp135f_dk_480x272")
++    assert profile["origin"] == "builtin"
++    assert profile["adapter"] == "stm32mp135_linux"
++    assert (profile["logicalWidth"], profile["logicalHeight"], profile["scale"]) == (480, 272, 1)
++    assert profile["firmware"] == {"microPython": "1.29.0", "lvgl": "9.5.0", "modules": ["lvgl", "display_driver"]}
++    assert profile["config"]["appRoot"] == "/lms_apps"
++
++
+ def test_board_generation_uses_firmware_driver_only(tmp_path):
+     project = Project("board")
+     project.set_display_size(240, 240)
