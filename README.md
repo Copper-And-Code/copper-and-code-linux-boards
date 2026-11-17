@@ -4,6 +4,8 @@
 LVGL, use `mpremote` as on any MicroPython board, and have all of Linux behind it: files, network,
 audio, and every program the board can run.
 
+Website: **https://copper-and-code.github.io/lvgl-mpy-linux/**
+
 | | |
 |---|---|
 | ![Weather](docs/images/weather.png) | ![Web radio](docs/images/web-radio.png) |
@@ -144,6 +146,16 @@ Honestly, today:
 [MicroPython](https://micropython.org), [LVGL](https://lvgl.io) and the LVGL binding of
 [PyDevices](https://github.com/PyDevices/lvgl-micropython) do the hard work; GStreamer plays the
 audio of the examples.
+
+## Website
+
+The site is built from `docs/` with MkDocs Material, like the LVGL MPY Studio site:
+
+```sh
+pip install -r requirements-site.txt
+mkdocs serve          # preview
+mkdocs gh-deploy      # publish on the gh-pages branch
+```
 
 ## License
 

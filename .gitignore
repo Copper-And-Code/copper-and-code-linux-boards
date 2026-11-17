@@ -7,3 +7,4 @@ __pycache__/
 
 # Working notes and plans for the agents, local only
 prompts/
+build/
