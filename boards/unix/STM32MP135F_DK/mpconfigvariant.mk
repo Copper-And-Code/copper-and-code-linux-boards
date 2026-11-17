@@ -1,0 +1,2 @@
+FROZEN_MANIFEST ?= $(VARIANT_DIR)/manifest.py
+MICROPY_PY_FFI := 1

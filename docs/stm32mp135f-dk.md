@@ -12,6 +12,7 @@ the MicroPython REPL.
 - Phase 0 reconnaissance: complete; see `docs/ricognizione.md`.
 - Phase 1 flash and initial inventory: complete.
 - Phase 2 system preparation: complete.
+- Phase 3 Cortex-A7 MicroPython/LVGL cross-build: complete.
 - Later phases: not started.
 
 ## Phase 1 verified configuration
@@ -122,6 +123,56 @@ order after the lower contacts in the first sequence were reversed.
 `ABS_X/Y` matched the corresponding multitouch coordinates. X increases to the right and Y increases
 downward: no axis swap or inversion is required. These are observed finger-contact positions, not
 new calibration limits; the driver retains its full 0–479 by 0–271 range.
+
+## Phase 3 cross-build and on-board validation
+
+The x86-64 Developer Package SDK archive
+`SDK-x86_64-stm32mp1-openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10.tar.gz` was extracted and its
+installer completed successfully. The installed environment reports GCC 13.4.0, `ARCH=arm`,
+`CROSS_COMPILE=arm-ostl-linux-gnueabi-` and the expected `OECORE_SDK_VERSION`.
+
+The SDK and board both provide libffi 3.4.6, so `MICROPY_PY_FFI=1` is retained. They also provide
+libdrm 2.4.120 and SDL2 2.30.1, but the final MicroPython binaries do not link SDL. The SDK
+environment does not export `SIZE`; the build script therefore sets `SIZE`, `STRIP` and `READELF`
+explicitly with the cross-tool prefix.
+
+Reproducible builds use `scripts/build_mp135.sh`. It builds `mpy-cross` for the host before loading
+the SDK environment and pins MicroPython v1.29.0, lvgl-micropython `58d18ce` and lvgl-bindings
+`7740c2f` (LVGL 9.5.0). The validated commands in this development workspace are:
+
+```sh
+cd /opt/devel/lvgl/mpy-lvgl-stm32/mpy-lvgl-boards
+export WORK_DIR=/opt/devel/lvgl/lvgl-mpy-mpu/work
+export SDK_DIR=$WORK_DIR/sdk/openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10
+scripts/build_mp135.sh minimal
+scripts/build_mp135.sh lvgl
+```
+
+The default `WORK_DIR` is `.work/mp135` inside this repository; `SDK_DIR` defaults to the matching
+SDK directory below it. Outputs and SHA-256 files are written to `dist/`.
+
+| Build | text | data | bss | Total |
+|---|---:|---:|---:|---:|
+| Minimal | 400,806 | 1,136 | 2,052 | 403,994 bytes |
+| LVGL | 1,133,565 | 2,388 | 2,144 | 1,138,097 bytes |
+
+Both are stripped ARM EABI5 32-bit executables using `/lib/ld-linux-armhf.so.3`. Their only dynamic
+`NEEDED` entries are `libm.so.6`, `libffi.so.8` and `libc.so.6`.
+
+On the board, the LVGL binary reports MicroPython 1.29.0, `sys.platform=linux`, build
+`STM32MP135F_DK` and LVGL 9.5.0. The existing PyDevices fake-display smoke test,
+`tests/hil/t02_lvgl_smoke.py`, passes twice including after `lv.deinit()`; the second scene renders
+successfully and the MicroPython heap returns to its initial value. Output is in
+`docs/log/stm32mp135f-dk-phase3-smoke.txt`.
+
+The fast official `basics` suite ran on the board: 545 tests performed, 544 passed and 28 skipped.
+Three tests requiring the optional, non-frozen `unittest` package were explicitly excluded. The only
+failure, `int_64_basics.py`, is a 32-bit reference mismatch: the board's 32-bit CPython raises
+`OverflowError` while creating the expected output, whereas MicroPython completes the test. The full
+output and diff are in `docs/log/stm32mp135f-dk-phase3-tests-basics.txt`.
+
+PyDevices reports that this build does not include the optional `jpegio` module: JPEG images will not
+draw, while PNG and LVGL BIN remain available. JPEG support was not required for this phase.
 
 ## Portable `machine` API decision
 

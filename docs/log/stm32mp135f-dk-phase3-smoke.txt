@@ -1,0 +1,11 @@
+(name='micropython', version=(1, 29, 0, ''), _machine='linux [GCC 13.4.0] version', _mpy=8966, _build='STM32MP135F_DK', _thread='unsafe')
+linux
+LVGL 9 5 0
+mem_free before: 1023088
+clicked
+Hello from LVGL - drew 240 px wide refr_now 769 us
+mem_free after scene: 957520
+mem_free after deinit: 1023088
+clicked
+Hello from LVGL - drew 240 px wide refr_now 736 us
+OK
