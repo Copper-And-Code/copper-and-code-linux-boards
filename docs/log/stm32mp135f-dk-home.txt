@@ -25,3 +25,8 @@ t17, t21 PASS.
 
 By hand on the panel (Nunzio): a tap on the shell opens "Apps" with Radio, Weather and Shell;
 Weather starts; the home tab goes back to the shell; the same with Radio. All as expected.
+
+Power off in the app menu: a red "Power off" tile asks "Power off the board?" (Cancel / Power off);
+Power off shows "Shutting down..." and runs systemctl poweroff in the background.
+On the board: the menu has the dialog after the tile (children 2 -> 3), Cancel removes it (-> 2),
+system still "running". The real power-off is not tried yet: it needs a hand to power on again.

@@ -82,10 +82,49 @@ def menu():
     for app in apps():
         _tile(grid, app["name"], TILE, lambda p=app["path"]: launch(p))
     _tile(grid, lv.SYMBOL.KEYBOARD + "  Shell", ACCENT, lambda: ansiterm.term.show())
+    _tile(grid, lv.SYMBOL.POWER + "  Power off", 0xB3261E, lambda: confirm_power_off(screen))
     if not apps():
         note = _label(screen, "Add apps to settings.json, section \"home\"", 14, 0x9AA6B8)
         note.align(lv.ALIGN.BOTTOM_LEFT, 4, 0)
     lv.screen_load(screen)
+
+
+def confirm_power_off(screen):
+    # A tap too many must not switch the board off: ask first.
+    box = lv.obj(screen)
+    box.set_size(300, 130)
+    box.center()
+    box.set_style_bg_color(lv.color_hex(TILE), 0)
+    box.set_style_border_width(0, 0)
+    box.set_style_radius(14, 0)
+    question = _label(box, "Power off the board?", 16, 0xFFFFFF)
+    question.align(lv.ALIGN.TOP_MID, 0, 6)
+    cancel = lv.button(box)
+    cancel.set_size(120, 44)
+    cancel.align(lv.ALIGN.BOTTOM_LEFT, 0, 0)
+    cancel.set_style_bg_color(lv.color_hex(0x2A3444), 0)
+    _label(cancel, "Cancel", 16, 0xFFFFFF).center()
+    cancel.add_event_cb(lambda e: box.delete(), lv.EVENT.CLICKED, None)
+    off = lv.button(box)
+    off.set_size(120, 44)
+    off.align(lv.ALIGN.BOTTOM_RIGHT, 0, 0)
+    off.set_style_bg_color(lv.color_hex(0xB3261E), 0)
+    _label(off, "Power off", 16, 0xFFFFFF).center()
+    off.add_event_cb(lambda e: power_off(), lv.EVENT.CLICKED, None)
+
+
+def power_off():
+    import linuxproc
+
+    screen = lv.obj()
+    screen.set_style_bg_color(lv.color_hex(0), 0)
+    note = _label(screen, "Shutting down...\nUnplug the power when the screen goes dark.", 16, 0xFFFFFF)
+    note.set_style_text_align(lv.TEXT_ALIGN.CENTER, 0)
+    note.center()
+    lv.screen_load(screen)
+    lv.refr_now(None)
+    # In the background: the shutdown stops this process too.
+    linuxproc.Process(["systemctl", "poweroff"])
 
 
 def _on_terminal(screen):

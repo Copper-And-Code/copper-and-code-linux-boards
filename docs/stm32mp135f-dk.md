@@ -455,7 +455,8 @@ of `mpy-lvgl-boards`:
 editors in `fs/bin`, Python programs (`name.py` in `fs/bin`, or `python file.py`) and Linux programs.
 
 A tap on the terminal opens the app menu: the LVGL MPY Studio apps listed in `settings.json`,
-section `home` (`{"apps": [{"name": ..., "path": ".../app_main.py"}]}`), and Shell. An app starts in
+section `home` (`{"apps": [{"name": ..., "path": ".../app_main.py"}]}`), Shell, and Power off,
+which asks first and then runs `systemctl poweroff`. An app starts in
 a fresh process (`mpyrepl.restart()`, a soft reset), so apps never share modules; a small home tab
 at the top centre brings the shell back the same way. Every soft reset stops the Linux programs the
 application started with `linuxproc.Process` (a radio stream does not go on playing).
