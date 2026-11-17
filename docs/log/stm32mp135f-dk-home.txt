@@ -22,3 +22,6 @@ weather app with run: LVGL_MPY_STUDIO_APP_READY.
 
 Regression: test_repl.sh PASS (main.py saved and put back), test_tcp_hub.py PASS, t11, t13, t14,
 t17, t21 PASS.
+
+By hand on the panel (Nunzio): a tap on the shell opens "Apps" with Radio, Weather and Shell;
+Weather starts; the home tab goes back to the shell; the same with Radio. All as expected.
