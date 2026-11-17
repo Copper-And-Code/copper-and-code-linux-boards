@@ -175,13 +175,18 @@ static mp_obj_t linuxfb_blit(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
     mp_int_t y = args[ARG_y].u_int;
     mp_int_t width = args[ARG_width].u_int;
     mp_int_t height = args[ARG_height].u_int;
+    // Each bound is checked against the panel before any product, so nothing below can overflow.
+    if (x < 0 || y < 0 || width <= 0 || height <= 0 || width > (mp_int_t)fb.width || height > (mp_int_t)fb.height
+        || x > (mp_int_t)fb.width - width || y > (mp_int_t)fb.height - height) {
+        mp_raise_ValueError(MP_ERROR_TEXT("linuxfb: invalid rectangle or stride"));
+    }
     mp_int_t stride = args[ARG_stride].u_int ? args[ARG_stride].u_int : width * 2;
-    if (x < 0 || y < 0 || width <= 0 || height <= 0 || x + width > (mp_int_t)fb.width || y + height > (mp_int_t)fb.height || stride < width * 2) {
+    if (stride < width * 2) {
         mp_raise_ValueError(MP_ERROR_TEXT("linuxfb: invalid rectangle or stride"));
     }
     mp_buffer_info_t buffer;
     mp_get_buffer_raise(args[ARG_buffer].u_obj, &buffer, MP_BUFFER_READ);
-    if (buffer.len < (size_t)((height - 1) * stride + width * 2)) {
+    if ((uint64_t)buffer.len < (uint64_t)(height - 1) * (uint64_t)stride + (uint64_t)width * 2) {
         mp_raise_ValueError(MP_ERROR_TEXT("linuxfb: buffer too small"));
     }
     const uint8_t *source = buffer.buf;
