@@ -11,7 +11,7 @@ the MicroPython REPL.
 
 - Phase 0 reconnaissance: complete; see `docs/ricognizione.md`.
 - Phase 1 flash and initial inventory: complete.
-- Phase 2 system preparation: in progress.
+- Phase 2 system preparation: complete.
 - Later phases: not started.
 
 ## Phase 1 verified configuration
@@ -89,25 +89,39 @@ script itself was not modified. All other services, including networking, Dropbe
 gadget, remain enabled.
 
 After the first reboot, all three Weston units were disabled and inactive, no systemd units were
-failed, and Nunzio confirmed a black panel with no ST demo. SSH remained available.
+failed, and Nunzio confirmed a black panel with no ST demo. SSH remained available. A static
+OpenSTLinux boot logo can remain visible on later boots; without Weston it has no touch handling and
+is not an interactive application.
 
-### Measurements and remaining physical checks
+### Measurements and physical validation
 
 | Item | Verified value |
 |---|---|
 | Original boot time | 2 min 10.670 s: kernel 1 min 17.307 s, userspace 53.363 s |
 | Boot without Weston | 37.445 s: kernel 12.430 s, userspace 25.015 s |
+| Second boot without Weston | 36.915 s: kernel 12.367 s, userspace 24.547 s |
 | Memory without Weston | 437 MiB total, 352 MiB available at measurement time |
 | DRM connector | DPI-1, connected, 480×272 at 59.99 Hz |
 | Primary plane formats | Includes `RG16` (RGB565) and `XR24` (XRGB8888) |
 | Goodix X ranges | `ABS_X` and `ABS_MT_POSITION_X`: 0–479 |
 | Goodix Y ranges | `ABS_Y` and `ABS_MT_POSITION_Y`: 0–271 |
 | Goodix multitouch | Five slots (`ABS_MT_SLOT` 0–4), `INPUT_PROP_DIRECT` |
-| Backlight range | 0–10; restored to 10 after the initial check |
+| Backlight | Range 0–10; 0 visually off, 5 intermediate, 10 maximum |
 
-The four-corner touch capture and visual backlight checks at 0, 5 and 10 are still pending. A
-sysfs write of 0 was accepted (`actual_brightness=0`), but visual extinction has not been confirmed
-and must not be treated as verified.
+The raw corner events are saved in `docs/log/stm32mp135f-dk-phase2-touch-corners.txt` and
+`docs/log/stm32mp135f-dk-phase2-touch-bottom-corners.txt`. The bottom pair was repeated in strict
+order after the lower contacts in the first sequence were reversed.
+
+| Physical contact | Observed X,Y |
+|---|---|
+| Top-left | 52,45 |
+| Top-right | 417,50 |
+| Bottom-right, repeated check | 399,172 |
+| Bottom-left, repeated check | 59,221 |
+
+`ABS_X/Y` matched the corresponding multitouch coordinates. X increases to the right and Y increases
+downward: no axis swap or inversion is required. These are observed finger-contact positions, not
+new calibration limits; the driver retains its full 0–479 by 0–271 range.
 
 ## Portable `machine` API decision
 

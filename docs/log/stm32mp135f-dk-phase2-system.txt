@@ -416,4 +416,8 @@ actual_brightness=10
 
 == Human checkpoints ==
 After the first reboot, Nunzio confirmed: black panel, no ST demo.
-Visual backlight checks and four-corner touch capture: pending.
+A static OpenSTLinux boot logo was visible after a later reboot, with Weston inactive and no touch handling.
+Backlight 0: visually off, confirmed by Nunzio.
+Backlight 5: visible at intermediate brightness, confirmed by Nunzio.
+Backlight 10: restored to maximum brightness, confirmed by Nunzio.
+Four-corner touch: captured in the separate phase2-touch-corners and phase2-touch-bottom-corners logs.
