@@ -1,7 +1,7 @@
-# STM32MP135F-DK board definition for LVGL MPY Studio (local, experimental)
+# STM32MP135F-DK board definition for LVGL MPY Studio
 
-This folder keeps the LVGL MPY Studio board definition of the STM32MP135F-DK outside the Studio
-repository while the Linux board is experimental. Nothing here is published.
+This folder keeps the LVGL MPY Studio board definition of the STM32MP135F-DK next to the firmware it
+describes, outside the Studio repository: the Studio imports it from the file.
 
 - `boards/stm32mp135f_dk_480x272.json`: the board profile (480×272, RGB565, `display_driver`,
   `mpremote` over the USB CDC-ACM REPL).
