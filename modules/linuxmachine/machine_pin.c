@@ -3,8 +3,8 @@
 //
 //   Pin(id, mode=-1, pull=-1, *, value=None)
 //
-// id is a line name as the kernel reports it ("PA4"), or (chip, offset) with chip a number or a
-// name ("gpiochip0"). The line is requested when the Pin is made and released by deinit(), by the
+// id is a line name as the kernel reports it ("PA4"), or (chip, offset) with chip a number, a
+// device name ("gpiochip9") or a chip label ("mcp23017"). The line is requested when the Pin is made and released by deinit(), by the
 // garbage collector or when the process ends. A line already used by the kernel or another process
 // raises OSError(EBUSY). Without a mode the line is requested as an input.
 
@@ -82,10 +82,26 @@ static void pin_find(machine_pin_obj_t *self, mp_obj_t id) {
     }
     if (mp_obj_is_str(items[0])) {
         const char *chip = mp_obj_str_get_str(items[0]);
-        if (strncmp(chip, "gpiochip", 8) != 0) {
-            mp_raise_ValueError(MP_ERROR_TEXT("chip must be gpiochipN"));
+        if (strncmp(chip, "gpiochip", 8) == 0) {
+            self->chip = atoi(chip + 8);
+        } else {
+            // A chip label, such as "GPIOA" or "mcp23017": it does not depend on probe order.
+            self->chip = -1;
+            for (int number = 0; number < MAX_CHIPS && self->chip < 0; ++number) {
+                int fd = chip_open(number);
+                if (fd < 0) {
+                    continue;
+                }
+                struct gpiochip_info info;
+                if (ioctl(fd, GPIO_GET_CHIPINFO_IOCTL, &info) == 0 && strcmp(info.label, chip) == 0) {
+                    self->chip = number;
+                }
+                close(fd);
+            }
+            if (self->chip < 0) {
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("unknown GPIO chip %s"), chip);
+            }
         }
-        self->chip = atoi(chip + 8);
     } else {
         self->chip = mp_obj_get_int(items[0]);
     }
