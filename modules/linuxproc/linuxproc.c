@@ -16,6 +16,7 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "py/mperrno.h"
 #include "py/mphal.h"
 #include "py/runtime.h"
 
@@ -193,9 +194,242 @@ static mp_obj_t linuxproc_run(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(linuxproc_run_obj, 2, linuxproc_run);
 
+// Process(argv, rows=24, cols=80): a Linux program running in the background on its own
+// pseudo-terminal, for applications that keep their GUI live while it runs (a player, a download).
+// Nothing blocks: read() returns what is there, write() what fits, poll() the exit status or None.
+// The program and its process group are stopped by kill(), close(), or when the object is collected.
+
+typedef struct _linuxproc_process_obj_t {
+    mp_obj_base_t base;
+    pid_t pid;
+    int fd;
+    bool exited;
+    int status;
+} linuxproc_process_obj_t;
+
+static mp_obj_t process_status(linuxproc_process_obj_t *self) {
+    if (WIFEXITED(self->status)) {
+        return MP_OBJ_NEW_SMALL_INT(WEXITSTATUS(self->status));
+    }
+    if (WIFSIGNALED(self->status)) {
+        return MP_OBJ_NEW_SMALL_INT(-WTERMSIG(self->status));
+    }
+    return MP_OBJ_NEW_SMALL_INT(-1);
+}
+
+static bool process_reap(linuxproc_process_obj_t *self, int options) {
+    if (!self->exited && self->pid > 0) {
+        pid_t result;
+        do {
+            result = waitpid(self->pid, &self->status, options);
+        } while (result < 0 && errno == EINTR);
+        if (result == self->pid || (result < 0 && errno == ECHILD)) {
+            self->exited = true;
+        }
+    }
+    return self->exited;
+}
+
+static mp_obj_t linuxproc_process_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    enum { ARG_argv, ARG_rows, ARG_cols };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_argv, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_rows, MP_ARG_INT, {.u_int = 24} },
+        { MP_QSTR_cols, MP_ARG_INT, {.u_int = 80} },
+    };
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    size_t count;
+    mp_obj_t *items;
+    mp_obj_get_array(args[ARG_argv].u_obj, &count, &items);
+    if (!count) {
+        mp_raise_ValueError(MP_ERROR_TEXT("linuxproc: empty argv"));
+    }
+    char **argv = m_new(char *, count + 1);
+    for (size_t i = 0; i < count; ++i) {
+        argv[i] = (char *)mp_obj_str_get_str(items[i]);
+    }
+    argv[count] = NULL;
+
+    linuxproc_process_obj_t *self = mp_obj_malloc_with_finaliser(linuxproc_process_obj_t, type);
+    self->pid = -1;
+    self->fd = -1;
+    self->exited = false;
+    self->status = 0;
+
+    int master = posix_openpt(O_RDWR | O_NOCTTY | O_NONBLOCK | O_CLOEXEC);
+    if (master < 0 || grantpt(master) || unlockpt(master)) {
+        int error = errno;
+        if (master >= 0) {
+            close(master);
+        }
+        mp_raise_OSError(error);
+    }
+    int slave = open(ptsname(master), O_RDWR | O_NOCTTY);
+    if (slave < 0) {
+        int error = errno;
+        close(master);
+        mp_raise_OSError(error);
+    }
+    struct termios termios;
+    if (tcgetattr(slave, &termios) == 0) {
+        termios.c_lflag &= ~ECHO; // what the application writes is input, not output to show
+        tcsetattr(slave, TCSANOW, &termios);
+    }
+    struct winsize size = {.ws_row = args[ARG_rows].u_int, .ws_col = args[ARG_cols].u_int};
+    ioctl(slave, TIOCSWINSZ, &size);
+
+    pid_t child = fork();
+    if (child < 0) {
+        int error = errno;
+        close(slave);
+        close(master);
+        mp_raise_OSError(error);
+    }
+    if (child == 0) {
+        sigset_t none;
+        sigemptyset(&none);
+        sigprocmask(SIG_SETMASK, &none, NULL);
+        setsid();
+        ioctl(slave, TIOCSCTTY, 0);
+        dup2(slave, STDIN_FILENO);
+        dup2(slave, STDOUT_FILENO);
+        dup2(slave, STDERR_FILENO);
+        close_range(STDERR_FILENO + 1, UINT_MAX, 0);
+        execvp(argv[0], argv);
+        const char *message = "linuxproc: exec failed\n";
+        write(STDERR_FILENO, message, strlen(message));
+        _exit(127);
+    }
+    close(slave);
+    self->pid = child;
+    self->fd = master;
+    return MP_OBJ_FROM_PTR(self);
+}
+
+static linuxproc_process_obj_t *process_open(mp_obj_t self_in) {
+    linuxproc_process_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (self->fd < 0) {
+        mp_raise_OSError(MP_EBADF);
+    }
+    return self;
+}
+
+static mp_obj_t linuxproc_process_read(size_t n_args, const mp_obj_t *args) {
+    linuxproc_process_obj_t *self = process_open(args[0]);
+    mp_int_t wanted = n_args > 1 ? mp_obj_get_int(args[1]) : 4096;
+    if (wanted <= 0) {
+        return mp_const_empty_bytes;
+    }
+    vstr_t buffer;
+    vstr_init_len(&buffer, wanted);
+    ssize_t got = read(self->fd, buffer.buf, wanted);
+    if (got < 0) {
+        int error = errno;
+        vstr_clear(&buffer);
+        // EAGAIN: nothing yet. EIO: every program on the terminal has closed it.
+        if (error == EAGAIN || error == EINTR || error == EIO) {
+            return mp_const_empty_bytes;
+        }
+        mp_raise_OSError(error);
+    }
+    buffer.len = got;
+    return mp_obj_new_bytes_from_vstr(&buffer);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linuxproc_process_read_obj, 1, 2, linuxproc_process_read);
+
+static mp_obj_t linuxproc_process_write(mp_obj_t self_in, mp_obj_t data_in) {
+    linuxproc_process_obj_t *self = process_open(self_in);
+    mp_buffer_info_t data;
+    mp_get_buffer_raise(data_in, &data, MP_BUFFER_READ);
+    ssize_t written = write(self->fd, data.buf, data.len);
+    if (written < 0) {
+        if (errno == EAGAIN || errno == EINTR) {
+            return MP_OBJ_NEW_SMALL_INT(0);
+        }
+        mp_raise_OSError(errno);
+    }
+    return MP_OBJ_NEW_SMALL_INT(written);
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(linuxproc_process_write_obj, linuxproc_process_write);
+
+static mp_obj_t linuxproc_process_poll(mp_obj_t self_in) {
+    linuxproc_process_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    return process_reap(self, WNOHANG) ? process_status(self) : mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(linuxproc_process_poll_obj, linuxproc_process_poll);
+
+static mp_obj_t linuxproc_process_kill(size_t n_args, const mp_obj_t *args) {
+    linuxproc_process_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    int signal_number = n_args > 1 ? mp_obj_get_int(args[1]) : SIGTERM;
+    if (!process_reap(self, WNOHANG)) {
+        if (kill(-self->pid, signal_number) < 0 && errno == ESRCH) {
+            kill(self->pid, signal_number);
+        }
+    }
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linuxproc_process_kill_obj, 1, 2, linuxproc_process_kill);
+
+static mp_obj_t linuxproc_process_close(mp_obj_t self_in) {
+    linuxproc_process_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (self->pid > 0 && !process_reap(self, WNOHANG)) {
+        kill(-self->pid, SIGTERM);
+        for (int tries = 0; tries < 50 && !process_reap(self, WNOHANG); ++tries) {
+            usleep(20000); // up to 1 s to exit cleanly
+        }
+        if (!process_reap(self, WNOHANG)) {
+            kill(-self->pid, SIGKILL);
+            process_reap(self, 0);
+        }
+    }
+    if (self->fd >= 0) {
+        close(self->fd);
+        self->fd = -1;
+    }
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(linuxproc_process_close_obj, linuxproc_process_close);
+
+static mp_obj_t linuxproc_process_fileno(mp_obj_t self_in) {
+    return MP_OBJ_NEW_SMALL_INT(process_open(self_in)->fd);
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(linuxproc_process_fileno_obj, linuxproc_process_fileno);
+
+static void linuxproc_process_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    linuxproc_process_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (dest[0] == MP_OBJ_NULL && attr == MP_QSTR_pid) {
+        dest[0] = MP_OBJ_NEW_SMALL_INT(self->pid);
+    } else {
+        dest[1] = MP_OBJ_SENTINEL; // continue in the locals dict
+    }
+}
+
+static const mp_rom_map_elem_t linuxproc_process_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&linuxproc_process_read_obj) },
+    { MP_ROM_QSTR(MP_QSTR_write), MP_ROM_PTR(&linuxproc_process_write_obj) },
+    { MP_ROM_QSTR(MP_QSTR_poll), MP_ROM_PTR(&linuxproc_process_poll_obj) },
+    { MP_ROM_QSTR(MP_QSTR_kill), MP_ROM_PTR(&linuxproc_process_kill_obj) },
+    { MP_ROM_QSTR(MP_QSTR_close), MP_ROM_PTR(&linuxproc_process_close_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fileno), MP_ROM_PTR(&linuxproc_process_fileno_obj) },
+    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&linuxproc_process_close_obj) },
+};
+static MP_DEFINE_CONST_DICT(linuxproc_process_locals_dict, linuxproc_process_locals_dict_table);
+
+static MP_DEFINE_CONST_OBJ_TYPE(
+    linuxproc_process_type,
+    MP_QSTR_Process,
+    MP_TYPE_FLAG_NONE,
+    make_new, linuxproc_process_make_new,
+    attr, linuxproc_process_attr,
+    locals_dict, &linuxproc_process_locals_dict
+    );
+
 static const mp_rom_map_elem_t linuxproc_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_linuxproc) },
     { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&linuxproc_run_obj) },
+    { MP_ROM_QSTR(MP_QSTR_Process), MP_ROM_PTR(&linuxproc_process_type) },
 };
 static MP_DEFINE_CONST_DICT(linuxproc_module_globals, linuxproc_module_globals_table);
 
