@@ -19,6 +19,11 @@ rm -f "$UNITS/mpy-repl.service" "$UNITS/mpy-usb-composite.service" \
     "$UNITS/mpy-repl-tcp.socket" "$UNITS/mpy-repl-tcp@.service"
 say "removed the MicroPython services"
 
+if [ -e /etc/systemd/journald.conf.d/mpy-volatile.conf ]; then
+    rm -f /etc/systemd/journald.conf.d/mpy-volatile.conf
+    systemctl restart systemd-journald
+    say "journal on the microSD again"
+fi
 # The original gadget startup uses its defaults again.
 rm -f /etc/default/usbotg
 

@@ -24,3 +24,10 @@ Soft reset with the ready screen (no main.py): 0.150, 0.201, 0.201, 0.201, 0.201
 Regression: test_repl.sh PASS, test_tcp_hub.py PASS, t11 PASS, t12 PASS, t13 PASS, t17 PASS
 
 Not done yet: 10 power cycles by hand; microSD protection (decision pending).
+
+microSD and power loss (option a, chosen by Nunzio):
+  already in the image: /var/log -> volatile/log, /var/tmp -> volatile/tmp (tmpfs /var/volatile),
+  /tmp tmpfs, journal in /run/log/journal (no /var/log/journal)
+  install.sh adds /etc/systemd/journald.conf.d/mpy-volatile.conf (Storage=volatile,
+  RuntimeMaxUse=16M): "journal kept in RAM only"; second run "nothing changed"
+  / is mmcblk0p10 ext4 rw, /usr/local (fs/) is mmcblk0p11 ext4 rw

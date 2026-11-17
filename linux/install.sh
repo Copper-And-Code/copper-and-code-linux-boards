@@ -4,7 +4,7 @@
 #
 #   micropython  mpy-repl-hub  stm32mp135f-dk.dtb  (each with an optional .sha256)
 #   mpy_launcher.py  mpy-usb-composite.sh  mpy-usb-composite.service  mpy-repl.service
-#   usbotg.default
+#   usbotg.default  journald-volatile.conf
 #
 # It can be run again: unchanged files are left alone. SSH settings are not touched. Environment:
 #   MPY_HOSTNAME  hostname to set (default mp135-mpy; empty leaves it unchanged)
@@ -23,7 +23,7 @@ die() { printf 'install: error: %s\n' "$*" >&2; exit 1; }
 [ "$(id -u)" = 0 ] || die "run as root"
 grep -q "st,stm32mp135f-dk" /proc/device-tree/compatible 2>/dev/null || die "not an STM32MP135F-DK"
 for file in micropython mpy-repl-hub stm32mp135f-dk.dtb mpy_launcher.py mpy-usb-composite.sh \
-    mpy-usb-composite.service mpy-repl.service usbotg.default; do
+    mpy-usb-composite.service mpy-repl.service usbotg.default journald-volatile.conf; do
     [ -f "$SOURCE/$file" ] || die "missing $SOURCE/$file"
     if [ -f "$SOURCE/$file.sha256" ]; then
         expected=$(cut -d' ' -f1 "$SOURCE/$file.sha256")
@@ -53,6 +53,15 @@ put "$SOURCE/mpy_launcher.py" "$PREFIX/lib/mpy_launcher.py" 0644
 put "$SOURCE/mpy-usb-composite.service" "$UNITS/mpy-usb-composite.service" 0644
 put "$SOURCE/mpy-repl.service" "$UNITS/mpy-repl.service" 0644
 put "$SOURCE/usbotg.default" /etc/default/usbotg 0644
+install -d /etc/systemd/journald.conf.d
+journal_before=$changed
+put "$SOURCE/journald-volatile.conf" /etc/systemd/journald.conf.d/mpy-volatile.conf 0644
+if [ "$changed" != "$journal_before" ]; then
+    # The journal moves to /run now; the logs already on the microSD are removed.
+    systemctl restart systemd-journald
+    rm -rf /var/log/journal/*
+    say "journal kept in RAM only"
+fi
 
 # The original DTB is kept once, for uninstall.sh and for recovery from the ST-LINK console.
 if [ ! -e "$DTB.st-original" ]; then

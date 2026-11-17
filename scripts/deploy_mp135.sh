@@ -29,7 +29,7 @@ stage "$MICROPYTHON" micropython
 stage "$HUB" mpy-repl-hub
 stage "$DTB" stm32mp135f-dk.dtb
 for file in mpy_launcher.py mpy-usb-composite.sh mpy-usb-composite.service mpy-repl.service \
-    usbotg.default install.sh uninstall.sh; do
+    usbotg.default journald-volatile.conf install.sh uninstall.sh; do
     cp "$REPO/linux/$file" "$STAGE/$file"
 done
 

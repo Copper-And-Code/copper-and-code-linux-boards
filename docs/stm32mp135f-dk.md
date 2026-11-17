@@ -19,7 +19,7 @@ the MicroPython REPL.
 - The physical B1 safe-mode check passes; the Windows HIL checkpoint remains open.
 - Phase 6 LVGL MPY Studio: the Studio imports the board definition in `studio-board/` from a file.
 - Phase 7 start-up and robustness: ready screen, REPL independent of the display, systemd watchdog
-  on the REPL hub; the 10 power cycles by hand and the microSD protection remain.
+  on the REPL hub, journal in RAM; the 10 power cycles by hand remain.
 - Phase 8 packaging: `scripts/deploy_mp135.sh`, `linux/install.sh` and `linux/uninstall.sh`, checked
   with a full uninstall, reboot, install and reboot cycle.
 - Later phases: not started.
@@ -442,5 +442,7 @@ of `mpy-lvgl-boards`:
 - `mpremote fs cp` over the CDC-ACM port is slow (about 17 KiB/s); over TCP it is about 13 times
   faster.
 - B2 was not tested: its switch on the validation board is damaged.
-- The microSD is not protected against power loss (no read-only root, normal journal): decision
-  pending.
+- Power loss: `/var/log`, `/var/tmp` and `/tmp` are already in RAM in this image, and
+  `install.sh` keeps the systemd journal in RAM explicitly (`linux/journald-volatile.conf`). The
+  root filesystem and `/usr/local` (its own partition, which holds `fs/`) are writable ext4: a power
+  cut while the Studio copies an application can still damage it. A read-only root is for phase 9.
