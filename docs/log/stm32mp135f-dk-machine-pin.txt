@@ -14,4 +14,8 @@ tests/hil/t19_mp135_led.py (outputs, by eye):
   Pin('gpiochip9:14', mode=OUT) Pin('gpiochip9:15', mode=OUT)
   Nunzio confirmed: green LD7 blinked 5 times, then orange LD6 blinked 5 times, then both off.
 
-tests/hil/t18_mp135_pin_loopback.py (jumper between two CN8 pins, open drain): not run yet.
+tests/hil/t18_mp135_pin_loopback.py, jumper across CN8 pins 38 (PA5, output) and 40 (PA0, input),
+UM2993 Rev 2 table 18: MP135_PIN_LOOPBACK_TEST_PASS
+  push-pull 1/0/1/0, toggle, off; open drain: low driven, high released (follows the input's pull)
+  After deinit(), gpioinfo shows PA0 input and PA5 output: the kernel keeps a released line's last
+  configuration (here open drain, high, so not driven).

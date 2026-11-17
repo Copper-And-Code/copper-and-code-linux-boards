@@ -369,8 +369,10 @@ character device (uAPI v2): lines by kernel name (`Pin("PA4")`) or `(chip, offse
 `deinit()`. A line used by the kernel raises `OSError(EBUSY)`; `irq()` is not provided.
 `tests/hil/t17_mp135_pin.py` checks names, errors, inputs with pulls and release without driving any
 line; `tests/hil/t19_mp135_led.py` drives the green LD7 and orange LD6 LEDs on the MCP23017 expander
-(`Pin(("mcp23017", 14))`), confirmed by eye. Open drain needs two free connector pins joined by a
-jumper (`tests/hil/t18_mp135_pin_loopback.py`, not run yet). Results:
+(`Pin(("mcp23017", 14))`), confirmed by eye. `tests/hil/t18_mp135_pin_loopback.py` checks push-pull and
+open drain with a jumper across CN8 pins 38 (PA5) and 40 (PA0). A released line keeps its last
+configuration, as a pin does on the MCU ports when its `Pin` object is deleted: an output stays an
+output. Results:
 `docs/log/stm32mp135f-dk-machine-pin.txt`. This section records an architectural decision; it does not imply that all of
 these classes are already implemented.
 
