@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # A friendly editor for the ANSI terminal of ansiterm.py, or for any terminal on the
 # serial port: no modes, you type and the text changes, the keys are on the screen. Runs
 # from shell_linux.py once copied to /usr/local/mpy/fs/bin/edit.py:

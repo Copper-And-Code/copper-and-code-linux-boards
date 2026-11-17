@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 import mpyrepl
 import os
 import sys

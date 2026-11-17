@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # The 8x16 font of ansiterm.py: ASCII 32-126, 16 bytes a glyph, top row first, high bit left.
 #
 # Copyright (C) 2020 Dimitar Toshkov Zhekov,

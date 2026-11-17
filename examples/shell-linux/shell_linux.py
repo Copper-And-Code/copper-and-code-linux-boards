@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # A Linux-capable shell for STM32MP135F-DK, derived from examples/shell without changing it.
 # The panel and serial port share an ANSI terminal. Python programs run in MicroPython;
 # Linux executables run on a pseudo-terminal through the board's linuxproc module.

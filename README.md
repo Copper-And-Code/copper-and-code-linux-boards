@@ -1,59 +1,144 @@
 # lvgl-mpy-linux
 
-This is a personal, experimental project. It is not affiliated with, sponsored or endorsed by any
-of the manufacturers of the boards and chips it uses; their names are used only to identify the
-hardware.
+**Turn a Linux board into a MicroPython board with a touch screen.** Write the GUI in Python with
+LVGL, use `mpremote` as on any MicroPython board, and have all of Linux behind it: files, network,
+audio, and every program the board can run.
 
-MicroPython (unix port, v1.29.0) with LVGL 9.5 on the STM32MP135F-DK under OpenSTLinux, made to
-behave like a MicroPython MCU board: the application runs on the board's display with touch, and
-the PC sees a REPL that works with `mpremote` (raw REPL, raw-paste, soft reset) over USB CDC-ACM
-or TCP. LVGL MPY Studio can then load and run its generated applications through the same
-`display_driver` interface as on the MCU boards.
-
-The project is local for now. It started as the `stm32mp135f-dk` branch of
-[mpy-lvgl-boards](https://github.com/Copper-And-Code/mpy-lvgl-boards) and was moved here with its
-history; nothing of it is published.
-
-## Layout
-
-| Path | Content |
+| | |
 |---|---|
-| `boards/unix/STM32MP135F_DK/` | Out-of-tree unix variant: `mpconfigvariant.h/.mk`, frozen manifest |
-| `boards/unix/STM32MP157C_DK2/`, `mcu/` | Second board, with a Cortex-M4: placeholders, see `docs/stm32mp157c-dk2.md` |
-| `modules/mpyrepl/` | MCU-style REPL (`pyexec`), soft reset by `execve`, safe mode on B1 |
-| `modules/linuxfb/` | DRM dumb-buffer RGB565 scan-out |
-| `modules/linuxproc/` | Linux programs on a pseudo-terminal, for the shell example |
-| `modules/linuxmachine/` | `machine.Pin` on the Linux GPIO character device |
-| `tools/mpy-repl-hub/` | One REPL process shared by the USB serial port and TCP |
-| `python/linux/` | `display_driver.py` and `touch_evdev.py`, frozen |
-| `linux/` | systemd units, USB composite gadget, DTB overlay, launcher |
-| `scripts/` | `build_mp135.sh` (MicroPython), `build_mp135_usb.sh` (DTB) |
-| `tests/hil/`, `tests/host/` | Tests on the board from the PC, and on the host |
-| `examples/` | Linux shell example, LVGL MPY Studio demo project |
-| `studio-board/` | The LVGL MPY Studio board definition, kept out of the Studio for now |
-| `docs/` | Reconnaissance, build, installation, validation logs |
-| `prompts/` | Not versioned: working notes and plans for the agents |
-| `work/` | Not versioned: MicroPython and LVGL sources, SDK, Starter Package, host tools |
+| ![MP3 player](docs/images/mp3-player.png) | ![Web radio](docs/images/web-radio.png) |
+| [MP3 player](examples/mp3-player): songs from the SD card | [Web radio](examples/web-radio): internet stations |
 
-## Build
+Both examples were built with [LVGL MPY Studio](https://github.com/Copper-And-Code/lvgl-mpy-studio)
+through its MCP tools: an AI assistant designed the screens, wrote the code, tried it in the
+Studio's simulator and ran it on the board.
 
-With the OpenSTLinux Developer Package SDK installed under `work/sdk/`:
+> A personal, experimental project for makers. It is not affiliated with, sponsored or endorsed by
+> any of the manufacturers of the boards and chips it uses; their names only identify the hardware.
 
-```sh
-scripts/build_mp135.sh lvgl
-scripts/build_mp135_usb.sh
+## Why
+
+A microcontroller running MicroPython is wonderful for a quick touch GUI: plug in USB, copy a file,
+it runs. A Linux board can do much more (play music, stream radio, talk to the internet, run any
+program) but usually means Yocto, a desktop compositor and C++ toolkits.
+
+lvgl-mpy-linux gives the Linux board the microcontroller workflow:
+
+- **The same app on MCU and Linux.** The `display_driver` interface is the one of the MicroPython
+  MCU boards of [mpy-lvgl-boards](https://github.com/Copper-And-Code/mpy-lvgl-boards): an app made
+  for an RP2350 or an ESP32 runs unchanged on a Linux board with a bigger screen.
+- **It behaves like a MicroPython board.** A REPL on USB serial and on TCP that works with
+  `mpremote` (raw REPL, raw-paste, `cp`, `run`, `mount`), Ctrl-C, Ctrl-D soft reset in 0.2 s, safe
+  mode on a button, a "MicroPython ready" screen at power-on.
+- **Linux in reach of Python.** `linuxproc` runs Linux programs in the background and lets the GUI
+  drive them; `machine.Pin` drives the GPIO lines of the kernel.
+
+## LVGL MPY Studio and its MCP tools
+
+[LVGL MPY Studio](https://github.com/Copper-And-Code/lvgl-mpy-studio) designs LVGL screens by drag
+and drop, runs them in a simulator and uploads them to the board. Import
+`studio-board/boards/stm32mp135f_dk_480x272.json` in its board manager and the Linux board is one
+more target.
+
+The Studio also offers its tools through MCP, so an AI coding assistant can build a whole
+application: add pages and widgets, write handlers and Python modules, render the pages, play
+touch scripts in the simulator, upload to the board and read its console. That is how the MP3
+player and the web radio here were made, and how a maker can go from "I want a radio with these
+stations" to an app running on the board.
+
+## Examples
+
+| Example | What it shows |
+|---|---|
+| [mp3-player](examples/mp3-player) | Track list with ID3 titles, play, pause, next, volume: GStreamer driven from the GUI |
+| [web-radio](examples/web-radio) | Internet radio stations, the same player for `http://` streams |
+| [shell-linux](examples/shell-linux) | A terminal on the screen: shell, `vi`, `edit` and Linux programs on a pseudo-terminal |
+| [stm32mp135f-dk](examples/stm32mp135f-dk) | The smallest Studio project: a button that answers to touch |
+
+The audio examples need a sound card (a USB audio adapter is enough) and, for the radio, internet.
+
+## Boards
+
+| Board | Status |
+|---|---|
+| STM32MP135F-DK (480×272, OpenSTLinux) | Tested: build, installation, REPL, display, touch, GPIO, examples |
+| STM32MP157C-DK2 (with a Cortex-M4) | Planned: `machine` served by the Cortex-M4 over RPMsg ([plan](docs/stm32mp157c-dk2.md)) |
+| Other Linux boards | The Linux parts are generic; a port needs a build for its CPU (see below) |
+
+What a Linux board needs: a panel the kernel drives through DRM (RGB565 dumb buffer), a touchscreen
+through evdev, and a USB device port for the serial REPL (or only the network for the TCP REPL).
+The display driver takes the resolution from DRM and finds the first touchscreen and the first
+backlight by itself; `MPY_TOUCH_NAME`, `MPY_TOUCH_RANGE` and `MPY_BACKLIGHT` override them. A new
+board then needs a unix variant in `boards/unix/` built with its toolchain, and its install script.
+
+## Quick start (STM32MP135F-DK)
+
+1. Flash OpenSTLinux and set up SSH: [installation guide](docs/stm32mp135f-dk-install.md).
+2. Build and install from a Linux PC with the board's SDK in `work/sdk/`:
+
+   ```sh
+   scripts/build_mp135.sh lvgl
+   scripts/build_mp135_usb.sh
+   scripts/deploy_mp135.sh          # over SSH; reboot when it asks
+   ```
+
+3. The screen shows "MicroPython ready". Talk to it:
+
+   ```sh
+   mpremote connect /dev/ttyACM2 exec "import sys; print(sys.platform)"   # or socket://192.168.7.1:8266
+   ```
+
+4. Open an example in LVGL MPY Studio and run it on the board.
+
+`/usr/local/mpy/bin/mpy-uninstall` brings the original system back.
+
+## How it works
+
+```text
+ PC: LVGL MPY Studio / mpremote
+        │ USB serial (CDC-ACM)        │ TCP over USB network
+        └──────────────┬──────────────┘
+                 mpy-repl-hub            one REPL for both, Ctrl-C as a signal, systemd watchdog
+                       │ pseudo-terminal
+     MicroPython unix port + LVGL 9.5    REPL like the MCU ports, soft reset by execve
+       ├── display_driver ── linuxfb ──── DRM panel
+       │                  └─ touch_evdev ─ touchscreen
+       ├── machine.Pin ─────────────────── GPIO character device
+       └── linuxproc ───────────────────── Linux programs (gst-play, shell, ...)
 ```
 
-Install on the board over SSH (`linux/install.sh`, idempotent) and remove again with
-`/usr/local/mpy/bin/mpy-uninstall`:
+| Part | Where |
+|---|---|
+| MicroPython variant, frozen drivers | `boards/unix/`, `python/linux/` |
+| C modules | `modules/mpyrepl`, `linuxfb`, `linuxproc`, `linuxmachine` |
+| REPL hub | `tools/mpy-repl-hub/` |
+| systemd units, USB gadget, install scripts | `linux/` |
+| Build and deploy | `scripts/` |
+| Tests on the board, run from the PC | `tests/hil/` |
+| Measurements and validation logs | `docs/`, `docs/log/` |
 
-```sh
-scripts/deploy_mp135.sh
-```
+MicroPython, LVGL and the LVGL binding are used unchanged: everything here is an out-of-tree
+variant, user C modules and frozen Python.
 
-Details: `docs/stm32mp135f-dk-install.md`. Status and measurements:
-`docs/stm32mp135f-dk.md`.
+## Limits
+
+Honestly, today:
+
+- One board tested. The parts for other Linux boards are written but not tried on one yet.
+- Start-up takes about 33 s on the stock OpenSTLinux image (a smaller image is planned).
+- `machine` has `Pin` only: no `I2C`, `PWM`, `WDT` or pin interrupts yet.
+- No vsync: fast full-screen animations can tear.
+- The TCP REPL has no password: it listens only on the USB network.
+
+[Status, measurements and known issues](docs/stm32mp135f-dk.md).
+
+## Credits
+
+[MicroPython](https://micropython.org), [LVGL](https://lvgl.io) and the LVGL binding of
+[PyDevices](https://github.com/PyDevices/lvgl-micropython) do the hard work; GStreamer plays the
+audio of the examples.
 
 ## License
 
-MIT, see `LICENSE`.
+MIT, see [LICENSE](LICENSE). The font of `examples/shell-linux` is under the SIL Open Font License
+([OFL.txt](examples/shell-linux/OFL.txt)).

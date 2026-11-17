@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Copy the build outputs to the STM32MP135F-DK over SSH and run linux/install.sh there.
 #
 #   scripts/deploy_mp135.sh [BOARD]        (default BOARD=192.168.7.1)

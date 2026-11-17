@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # An ANSI terminal on the display: a character grid drawn on an LVGL canvas, receiving
 # everything MicroPython prints (through os.dupterm), so a program only has to write text
 # and escape sequences, as on a VT100:

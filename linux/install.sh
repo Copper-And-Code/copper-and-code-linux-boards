@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT
 # Install MicroPython, the REPL hub and the services on the STM32MP135F-DK. Run on the board as
 # root from a directory that holds the files (scripts/deploy_mp135.sh copies them):
 #

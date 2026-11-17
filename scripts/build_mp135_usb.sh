@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Build the STM32MP135F-DK DTB for composite USB gadgets and B1 safe mode.
 set -euo pipefail
 

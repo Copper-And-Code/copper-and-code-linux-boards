@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT
 set -eu
 
 CONFIGFS=/sys/kernel/config/usb_gadget

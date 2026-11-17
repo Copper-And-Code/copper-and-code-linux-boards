@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Build MicroPython for STM32MP135F-DK, with or without LVGL.
 #
 #   scripts/build_mp135.sh [minimal|lvgl]

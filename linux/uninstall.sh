@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT
 # Restore the OpenSTLinux configuration on the STM32MP135F-DK: original device tree, original USB
 # gadget, Weston and its demo. Run on the board as root, then reboot.
 #

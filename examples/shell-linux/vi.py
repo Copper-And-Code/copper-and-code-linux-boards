@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # A small vi for the ANSI terminal of ansiterm.py, or for any terminal on the serial port.
 # Runs from shell_linux.py once copied to /usr/local/mpy/fs/bin/vi.py:
 #
