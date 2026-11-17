@@ -1,0 +1,20 @@
+mpy-repl-hub on STM32MP135F-DK, 2026-11-17
+
+One MicroPython process on a pseudo-terminal (pts/0), shared by /dev/ttyGS0 and one TCP client on
+192.168.7.1:8266; mpy-repl-tcp.socket and mpy-repl-tcp@.service removed from the board (copies in
+/usr/local/mpy/units-pre-hub/, previous binary micropython.pre-hub).
+
+Host check (hub built for x86-64, host MicroPython): TCP replace, respawn after sys.exit(3).
+
+tests/hil/test_tcp_hub.py:
+  PASS: Ctrl-C over TCP interrupts running code
+  PASS: a new TCP connection replaces the previous one
+  PASS: serial and TCP share MicroPython process 2285
+  PASS: display_driver imported from TCP and serial in the same process
+tests/hil/test_repl.sh (serial and TCP): PASS
+t11 display, t12 performance, t13 linuxproc, t14 shell, t16 blit bounds: PASS
+
+mpremote fs cp of 200 KiB of random data:
+  serial /dev/ttyACM2: 12.68 s (11.78 s before the hub, with another 200 KiB file)
+  TCP socket://192.168.7.1:8266: 0.94 s
+Soft reset (Ctrl-D to the next ">>> ", 10 samples on serial): 0.100 s each (0.068 s mean before)

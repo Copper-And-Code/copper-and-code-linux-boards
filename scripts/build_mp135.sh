@@ -98,5 +98,12 @@ OUT=micropython-STM32MP135F_DK-$MODE-$REV
 mkdir -p "$REPO/dist"
 cp "$BINARY" "$REPO/dist/$OUT"
 (cd "$REPO/dist" && sha256sum "$OUT" > "$OUT.sha256")
+
+log "REPL hub"
+HUB=mpy-repl-hub-$REV
+# shellcheck disable=SC2086
+$CC $CFLAGS -Wall -Wextra -Werror -o "$REPO/dist/$HUB" "$REPO/tools/mpy-repl-hub/mpy-repl-hub.c" $LDFLAGS
+(cd "$REPO/dist" && sha256sum "$HUB" > "$HUB.sha256")
 log "done"
 echo "$REPO/dist/$OUT"
+echo "$REPO/dist/$HUB"

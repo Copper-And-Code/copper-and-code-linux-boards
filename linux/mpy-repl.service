@@ -1,8 +1,7 @@
 [Unit]
-Description=MicroPython REPL on CDC-ACM
+Description=MicroPython REPL on CDC-ACM and TCP
 Requires=mpy-usb-composite.service
 After=mpy-usb-composite.service
-ConditionPathExists=/dev/ttyGS0
 # Restart=always must never give up, or a crash loop leaves the board without a REPL.
 StartLimitIntervalSec=0
 
@@ -10,15 +9,11 @@ StartLimitIntervalSec=0
 Type=simple
 WorkingDirectory=/usr/local/mpy/fs
 Environment=MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib
-ExecStartPre=/usr/bin/stty -F /dev/ttyGS0 raw isig -echo susp undef quit undef
-ExecStart=/usr/local/mpy/bin/micropython /usr/local/mpy/lib/mpy_launcher.py
+# One MicroPython process on a pseudo-terminal, shared by the USB serial port and one TCP client
+# on the USB network only (no authentication). The hub restarts MicroPython when it exits.
+ExecStart=/usr/local/mpy/bin/mpy-repl-hub --tty /dev/ttyGS0 --listen 192.168.7.1:8266 -- /usr/local/mpy/bin/micropython /usr/local/mpy/lib/mpy_launcher.py
 Restart=always
 RestartSec=0
-StandardInput=tty
-StandardOutput=tty
-StandardError=tty
-TTYPath=/dev/ttyGS0
-TTYReset=no
 
 [Install]
 WantedBy=multi-user.target

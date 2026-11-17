@@ -238,10 +238,14 @@ While code runs the CDC-ACM terminal has `ISIG` on for Ctrl-C only: Ctrl-Z and C
 disabled, both by the service `stty` and by `mpyrepl`, so they cannot stop or kill the REPL process.
 `StartLimitIntervalSec=0` keeps `Restart=always` working through a crash loop.
 
+`mpy-repl.service` runs `mpy-repl-hub` (`tools/mpy-repl-hub/`): one MicroPython process on a
+pseudo-terminal, shared by the CDC-ACM port and one TCP client on `192.168.7.1:8266`. The terminal's
+line discipline turns Ctrl-C into SIGINT for both channels. Output goes to both clients, as with
+MicroPython's dupterm on the MCU ports, and input from both reaches the REPL; a new TCP connection
+replaces the previous one. A client that stops reading for 1 s has its output dropped until it reads
+again, so a closed serial port never blocks the REPL. When MicroPython exits the hub starts it again.
 The TCP listener has no authentication or encryption and is bound only to the USB gadget address.
-`FreeBind=yes` allows it to start before the address is assigned during boot. Serial and accepted TCP
-connections run separate MicroPython processes. Sharing LVGL, display, touch or other peripherals
-across those processes has not been designed or validated; use one REPL channel to run an application.
+Results: `docs/log/stm32mp135f-dk-repl-hub.txt`.
 
 UM2993 maps B1/USER1 to PA14 and B2/USER2 to PA13. The original configuration exposed PA13 as
 `BTN_1` and drove PA14 as the blue heartbeat LED, so B1 presses produced no input events. The DTB

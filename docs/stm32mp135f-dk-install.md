@@ -71,10 +71,10 @@ the build:
 BOARD=192.168.7.1
 ssh root@$BOARD 'install -d /usr/local/mpy/bin /usr/local/mpy/lib /usr/local/mpy/fs/lib'
 scp dist/micropython-STM32MP135F_DK-lvgl-$REV root@$BOARD:/usr/local/mpy/bin/micropython.new
+scp dist/mpy-repl-hub-$REV root@$BOARD:/usr/local/mpy/bin/mpy-repl-hub.new
 scp linux/mpy_launcher.py root@$BOARD:/usr/local/mpy/lib/mpy_launcher.py
 scp linux/mpy-usb-composite.sh root@$BOARD:/usr/local/mpy/bin/mpy-usb-composite
-scp linux/mpy-repl.service linux/mpy-repl-tcp.socket linux/mpy-repl-tcp@.service \
-    root@$BOARD:/etc/systemd/system/
+scp linux/mpy-repl.service linux/mpy-usb-composite.service root@$BOARD:/etc/systemd/system/
 scp linux/usbotg.default root@$BOARD:/etc/default/usbotg
 scp dist/stm32mp135f-dk-usb-composite-$REV.dtb root@$BOARD:/boot/stm32mp135f-dk.dtb.new
 ```
@@ -92,9 +92,13 @@ ssh root@$BOARD '
     fi
     mv /boot/stm32mp135f-dk.dtb.new /boot/stm32mp135f-dk.dtb
     mv /usr/local/mpy/bin/micropython.new /usr/local/mpy/bin/micropython
-    chmod 0755 /usr/local/mpy/bin/micropython /usr/local/mpy/bin/mpy-usb-composite
+    mv /usr/local/mpy/bin/mpy-repl-hub.new /usr/local/mpy/bin/mpy-repl-hub
+    chmod 0755 /usr/local/mpy/bin/micropython /usr/local/mpy/bin/mpy-repl-hub /usr/local/mpy/bin/mpy-usb-composite
+    # Earlier installations had a separate TCP REPL process per connection.
+    systemctl disable --now mpy-repl-tcp.socket 2>/dev/null || true
+    rm -f /etc/systemd/system/mpy-repl-tcp.socket /etc/systemd/system/mpy-repl-tcp@.service
     systemctl daemon-reload
-    systemctl enable mpy-usb-composite.service mpy-repl.service mpy-repl-tcp.socket
+    systemctl enable mpy-usb-composite.service mpy-repl.service
     reboot
 '
 ```
@@ -103,18 +107,18 @@ A reboot is required. The expected DTB SHA-256 values for this exact release are
 
 ```text
 bf08a8e8aa6e0e2aacb1e37d76e1045c4702aff2239b8ff32234369b7235c294  original
-1f8a0bdafc669ee05ca19c3fda920df197a1503ca4471b5d4a305bc99884d939  NCM+ACM
+0c0e3d98a814a9f394056e74c914e00f0ce96b926108d60d55be9e71ee9da2f9  NCM+ACM, B1 on PA14
 ```
 
-After boot, the board has `192.168.7.1/24` on `usb0`; the host address is assigned dynamically. All
-three units should be active:
+After boot, the board has `192.168.7.1/24` on `usb0`; the host address is assigned dynamically. Both
+units should be active:
 
 ```sh
-systemctl is-active mpy-usb-composite.service mpy-repl.service mpy-repl-tcp.socket
+systemctl is-active mpy-usb-composite.service mpy-repl.service
 systemctl --failed
 ```
 
-The REPL units intentionally use
+The REPL service intentionally uses
 `MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib`. The `.frozen` entry is required for
 `display_driver` and `touch_evdev`, which are compiled into the LVGL binary.
 
@@ -203,7 +207,7 @@ original DTB and disable the new services:
 
 ```sh
 cp /boot/stm32mp135f-dk.dtb.st-original /boot/stm32mp135f-dk.dtb
-systemctl disable --now mpy-repl.service mpy-repl-tcp.socket mpy-usb-composite.service
+systemctl disable --now mpy-repl.service mpy-usb-composite.service
 rm -f /etc/default/usbotg
 reboot
 ```
