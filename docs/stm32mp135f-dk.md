@@ -109,6 +109,33 @@ The four-corner touch capture and visual backlight checks at 0, 5 and 10 are sti
 sysfs write of 0 was accepted (`actual_brightness=0`), but visual extinction has not been confirmed
 and must not be treated as verified.
 
+## Portable `machine` API decision
+
+The project will expose one MicroPython-compatible public `machine` API across Linux-only MPU boards
+and boards with a real-time MCU. User code should not change when the underlying hardware backend
+changes.
+
+- On STM32MP135F-DK and similar Linux-only boards, classes such as `Pin`, `I2C`, `SPI`, `PWM`, `ADC`
+  and `Timer` will use kernel interfaces and drivers. Direct peripheral register access from Linux
+  user space is not part of this design.
+- On MPU boards with a programmable MCU, an equivalent backend may communicate with MCU firmware
+  through remoteproc and RPMsg/OpenAMP. Native MicroPython MCU ports should retain their existing
+  `machine` API wherever possible.
+- Public method signatures, units, ranges, return values, exceptions and resource cleanup semantics
+  should be shared across backends. Board-specific names, device discovery and capabilities must be
+  kept out of application code.
+- Unsupported peripherals and operations must be reported explicitly rather than emulated silently.
+  Board capabilities must be discoverable and documented.
+- API compatibility does not imply equivalent timing guarantees. Linux-only backends must not claim
+  hard real-time behavior; future real-time control-loop offload requires a separate, explicitly
+  defined API.
+- The different backends should run the same hardware-in-the-loop contract tests where the board
+  provides the corresponding peripheral.
+
+STM32MP135F-DK has no programmable real-time MCU. Its initial implementation will therefore use the
+Linux kernel backend. This section records an architectural decision; it does not imply that all of
+these classes are already implemented.
+
 ## Flash references
 
 The exact package names, SDK names, switch settings and Linux/Windows commands are recorded in
