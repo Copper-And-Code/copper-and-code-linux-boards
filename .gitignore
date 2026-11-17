@@ -4,3 +4,6 @@ dist/
 build-*/
 __pycache__/
 *.pyc
+
+# Working notes and plans for the agents, local only
+prompts/
