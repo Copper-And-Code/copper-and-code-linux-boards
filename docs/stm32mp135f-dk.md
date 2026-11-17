@@ -236,6 +236,10 @@ Performance and stability measured on the board:
 A standalone `mpremote mount .` mounts the directory and then enters the interactive REPL, so it needs
 a terminal; a non-interactive shell should append a command such as `exec` as shown above.
 
+While code runs the CDC-ACM terminal has `ISIG` on for Ctrl-C only: Ctrl-Z and Ctrl-\ are
+disabled, both by the service `stty` and by `mpyrepl`, so they cannot stop or kill the REPL process.
+`StartLimitIntervalSec=0` keeps `Restart=always` working through a crash loop.
+
 The TCP listener has no authentication or encryption and is bound only to the USB gadget address.
 `FreeBind=yes` allows it to start before the address is assigned during boot. Serial and accepted TCP
 connections run separate MicroPython processes. Sharing LVGL, display, touch or other peripherals
@@ -266,7 +270,12 @@ binary therefore has `libdrm.so.2` as an additional dynamic dependency.
 
 `python/linux/display_driver.py` implements display-driver contract 1 with one 255 KiB full-screen
 buffer in DIRECT mode. Its service thread calls `lv.timer_handler()` every 5 ms, while the LVGL
-refresh timer is limited to 16 ms. `stop()` waits for the service thread to exit, preventing an
+refresh timer is limited to 16 ms. The variant enables the MicroPython GIL
+(`MICROPY_PY_THREAD_GIL := 1`): the unix port has none by default, and without it the service thread
+and `main.py` or the REPL would call LVGL at the same time. With the GIL each LVGL call is atomic, as
+with the scheduled callbacks of the MCU ports; the full-screen animation measured 57.09 FPS (58.14
+without the GIL). LVGL event handlers run in the service thread, so Ctrl-C does not stop a handler
+that never returns. `stop()` waits for the service thread to exit, preventing an
 immediate `start()` from creating overlapping service threads. Backlight control uses
 `/sys/class/backlight/panel-backlight` and defaults to 100%.
 
