@@ -9,8 +9,8 @@
 
 from machine import Pin
 
-OUT_LINE = None  # for example "PXn", from UM2993
-IN_LINE = None
+OUT_LINE = "PA5"  # CN8 pin 38, GPIO20 (UM2993 Rev 2, table 18)
+IN_LINE = "PA0"  # CN8 pin 40, GPIO21: one jumper across pins 38 and 40
 
 if OUT_LINE is None or IN_LINE is None:
     raise SystemExit("set OUT_LINE and IN_LINE to two connector pins joined by a jumper")
