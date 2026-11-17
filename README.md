@@ -6,10 +6,12 @@ audio, and every program the board can run.
 
 | | |
 |---|---|
-| ![MP3 player](docs/images/mp3-player.png) | ![Web radio](docs/images/web-radio.png) |
-| [MP3 player](examples/mp3-player): songs from the SD card | [Web radio](examples/web-radio): internet stations |
+| ![Weather](docs/images/weather.png) | ![Web radio](docs/images/web-radio.png) |
+| [Weather](examples/weather): five days, drawn icons, night dimming | [Web radio](examples/web-radio): internet stations |
+| ![MP3 player](docs/images/mp3-player.png) | ![Settings](docs/images/settings.png) |
+| [MP3 player](examples/mp3-player): songs from the SD card | [Settings](examples/settings): Wi-Fi for every app |
 
-Both examples were built with [LVGL MPY Studio](https://github.com/Copper-And-Code/lvgl-mpy-studio)
+All these examples were built with [LVGL MPY Studio](https://github.com/Copper-And-Code/lvgl-mpy-studio)
 through its MCP tools: an AI assistant designed the screens, wrote the code, tried it in the
 Studio's simulator and ran it on the board.
 
@@ -50,12 +52,15 @@ stations" to an app running on the board.
 
 | Example | What it shows |
 |---|---|
+| [settings](examples/settings) | Wi-Fi scan and connect; saved in `settings.json`, where every app finds it |
+| [weather](examples/weather) | Open-Meteo forecast for five days with drawn icons; settings page with night dimming |
 | [mp3-player](examples/mp3-player) | Track list with ID3 titles, play, pause, next, volume: GStreamer driven from the GUI |
 | [web-radio](examples/web-radio) | Internet radio stations, the same player for `http://` streams |
 | [shell-linux](examples/shell-linux) | A terminal on the screen: shell, `vi`, `edit` and Linux programs on a pseudo-terminal |
 | [stm32mp135f-dk](examples/stm32mp135f-dk) | The smallest Studio project: a button that answers to touch |
 
-The audio examples need a sound card (a USB audio adapter is enough) and, for the radio, internet.
+The audio examples need a sound card (a USB audio adapter is enough); the radio and the weather
+need the internet, set up once with the Settings app.
 
 ## Boards
 
