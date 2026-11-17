@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the STM32MP135F-DK DTB with FIFO space for composite USB gadgets.
+# Build the STM32MP135F-DK DTB for composite USB gadgets and B1 safe mode.
 set -euo pipefail
 
 REPO=$(cd "$(dirname "$0")/.." && pwd)
@@ -28,6 +28,16 @@ mkdir -p "$REPO/dist"
 FIFO=$("$TOOLS/fdtget" -t x "$OUT" "$NODE" g-tx-fifo-size)
 [[ $FIFO == "80 80 40 10 10 10 10 10" ]] || {
     echo "error: unexpected TX FIFO layout: $FIFO" >&2
+    exit 1
+}
+B1_GPIO=$("$TOOLS/fdtget" -t x "$OUT" /gpio-keys/button-user gpios)
+[[ $B1_GPIO == "72 e 11" ]] || {
+    echo "error: unexpected B1 GPIO specifier: $B1_GPIO" >&2
+    exit 1
+}
+BLUE_STATUS=$("$TOOLS/fdtget" -t s "$OUT" /leds/led-blue status)
+[[ $BLUE_STATUS == "disabled" ]] || {
+    echo "error: blue heartbeat LED must be disabled for B1" >&2
     exit 1
 }
 (cd "$REPO/dist" && sha256sum "$(basename "$OUT")" > "$(basename "$OUT").sha256")

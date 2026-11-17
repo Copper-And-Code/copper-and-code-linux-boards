@@ -16,7 +16,7 @@ the MicroPython REPL.
 - Phase 4 MCU-style REPL: Linux HIL tests, performance, stress and reboot validation complete.
 - Phase 5 DRM display, Goodix touch and LVGL MPY Studio demo: complete, including rendering
   performance and repeated soft-reset resource checks.
-- The physical B1 safe-mode check and the Windows HIL checkpoint remain open.
+- The physical B1 safe-mode check passes; the Windows HIL checkpoint remains open.
 - Later phases: not started.
 
 ## Phase 1 verified configuration
@@ -146,7 +146,7 @@ the SDK environment and pins MicroPython v1.29.0, lvgl-micropython `58d18ce` and
 
 ```sh
 cd /opt/devel/lvgl/mpy-lvgl-stm32/mpy-lvgl-boards
-export WORK_DIR=/opt/devel/lvgl/lvgl-mpy-mpu/work
+export WORK_DIR=/opt/devel/lvgl/lvgl-mpy-linux/work
 export SDK_DIR=$WORK_DIR/sdk/openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10
 scripts/build_mp135.sh minimal
 scripts/build_mp135.sh lvgl
@@ -207,7 +207,7 @@ MicroPython source is modified.
 | Ctrl-D soft reset | Pass; raw mode restored and `main.py` executed |
 | Filesystem `:` rooted at `/usr/local/mpy/fs` | Pass; copy, list, import and delete tested |
 | `main.py` exception | Pass; traceback shown and REPL remains available |
-| B1 safe mode skips `main.py` | **Not physically verified**: PA13 remained high during B1 tests |
+| B1 safe mode skips `main.py` | **Pass**: three `BTN_1` cycles; safe-mode marker observed and temporary `main.py` skipped |
 | TCP REPL on `192.168.7.1:8266` | Pass; command, filesystem and soft reset tested |
 
 `tests/hil/test_repl.sh` automates the serial checks, the real `main.py` crash and TCP smoke tests. It
@@ -241,10 +241,13 @@ The TCP listener has no authentication or encryption and is bound only to the US
 connections run separate MicroPython processes. Sharing LVGL, display, touch or other peripherals
 across those processes has not been designed or validated; use one REPL channel to run an application.
 
-The B1 input is `User-PA13`, device-tree code `0x101` (`BTN_1`), exposed through
-`/dev/input/by-path/platform-gpio-keys-event`. The safe-mode path and key code are implemented, but
-both `EVIOCGKEY` and the kernel GPIO debug interface showed no pressed state during physical tests.
-This remains an open hardware validation item, not a passing test.
+UM2993 maps B1/USER1 to PA14 and B2/USER2 to PA13. The original configuration exposed PA13 as
+`BTN_1` and drove PA14 as the blue heartbeat LED, so B1 presses produced no input events. The DTB
+overlay now disables that LED, exposes B1/PA14 as `BTN_1` (`0x101`) and preserves B2/PA13 as
+`BTN_2` (`0x102`) through `/dev/input/by-path/platform-gpio-keys-event`. Three complete physical B1
+press/release cycles were observed. Holding B1 during an `mpy-repl.service` restart printed
+`Safe mode: main.py skipped` and prevented the temporary `main.py` marker from running; the normal
+restart control executed it. B2 is physically broken on the validation board and was not tested.
 
 Logs are saved as `docs/log/stm32mp135f-dk-phase4-hil.txt`,
 `docs/log/stm32mp135f-dk-phase4-performance.txt`,
@@ -271,7 +274,14 @@ immediate `start()` from creating overlapping service threads. Backlight control
 `/proc/bus/input/devices`; the event number is not fixed. It polls the numeric file descriptor and
 decodes the verified 16-byte ARM32 `input_event` records with `llHHi`. `ABS_MT_POSITION_X/Y`,
 `ABS_X/Y`, tracking ID and `BTN_TOUCH` are handled. X increases rightward and Y downward, so no axis
-swap or inversion is needed.
+swap or inversion is needed. The board's `FileIO` does not expose `read1()` and its `os` module does
+not expose `read()`. After polling, each read therefore requests exactly one 16-byte event: the
+kernel supplies a complete event without MicroPython waiting to fill a larger buffer. Input is
+delivered one `SYN_REPORT` frame at a time and the LVGL `continue_reading` flag drains frames queued
+in the driver or kernel. A quick press and release therefore remain two distinct LVGL states instead
+of collapsing into a release with no click. `tests/host/test_touch_evdev.py` covers this quick-tap
+regression, partial frames, queued motion and the restricted `FileIO` method surface;
+`tests/hil/t15_mp135_touch.py` provides a visible click counter and callback timing on the panel.
 
 Both Python modules are frozen by the board manifest. The serial and TCP REPL services set
 `MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib`; omitting `.frozen` makes
@@ -285,7 +295,8 @@ Validation results on the physical panel:
 |---|---|
 | Red, green, blue and white bars, orientation and title | Visually confirmed |
 | LVGL MPY Studio project upload and execution | `LVGL_MPY_STUDIO_APP_READY buffers=1 touch=True` |
-| Button press changes the label and runs its handler | `STM32MP135_TOUCH_OK` observed twice |
+| Studio button press changes the label and runs its handler | 24 `STM32MP135_TOUCH_OK` events after the final evdev correction; no errors |
+| Quick-tap press/release delivery | 11 matched `DOWN`/`UP`/`CLICK` sequences; callback approximately 0.4–2.0 ms |
 | Full-screen color animation | 582 frames in 10.011 s: **58.14 FPS**, 100% full-frame coverage |
 | Process CPU during steady-state full-screen rendering | Approximately 10–12% of one Cortex-A7 CPU |
 | Process memory | 2.6 MiB RSS, 4.3 MiB virtual size, two threads |
@@ -356,5 +367,5 @@ The exact package names, SDK names, switch settings and Linux/Windows commands a
 The Starter Package was extracted below:
 
 ```text
-/opt/devel/lvgl/lvgl-mpy-mpu/work/starter-package/stm32mp1-openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10/
+/opt/devel/lvgl/lvgl-mpy-linux/work/starter-package/stm32mp1-openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10/
 ```

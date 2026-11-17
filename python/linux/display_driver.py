@@ -51,6 +51,7 @@ def _read(_indev, data):
         data.point.x = x
         data.point.y = y
         data.state = lv.INDEV_STATE.PRESSED if pressed else lv.INDEV_STATE.RELEASED
+        data.continue_reading = touch.pending
 
 
 indev = lv.indev_create()

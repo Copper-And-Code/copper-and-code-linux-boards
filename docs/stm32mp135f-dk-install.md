@@ -14,7 +14,7 @@ Install the matching OpenSTLinux Developer Package SDK, then run:
 
 ```sh
 cd /opt/devel/lvgl/mpy-lvgl-stm32/mpy-lvgl-boards
-export WORK_DIR=/opt/devel/lvgl/lvgl-mpy-mpu/work
+export WORK_DIR=/opt/devel/lvgl/lvgl-mpy-linux/work
 export SDK_DIR=$WORK_DIR/sdk/openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10
 scripts/build_mp135.sh lvgl
 scripts/build_mp135_usb.sh
@@ -216,10 +216,18 @@ the graphical demo as well, re-enable `psplash-drm-start.service`,
 desired, `st-hostname.service`. The files under `/usr/local/mpy` can
 remain installed while the services are disabled.
 
-## Safe-mode validation status
+## Safe-mode validation
 
-B1/USER1 is `PA13`, active-low, device-tree key `BTN_1` (`0x101`). The launcher checks it through
-`/dev/input/by-path/platform-gpio-keys-event` and skips `main.py` when pressed. During the Phase 4
-physical checks, PA13 remained high and no key state was reported, so safe mode is implemented but
-not yet physically verified. Do not describe this feature as validated until a `hi -> lo -> hi`
-transition and the `Safe mode: main.py skipped` message have been observed.
+B1/USER1 is `PA14`, active-low with a pull-up, device-tree key `BTN_1` (`0x101`). B2/USER2 is
+`PA13` and is exposed separately as `BTN_2` (`0x102`). The DTB overlay disables the blue heartbeat
+LED because it shares PA14 with B1. The launcher checks B1 through
+`/dev/input/by-path/platform-gpio-keys-event` and skips `main.py` when pressed.
+
+Physical validation observed three complete `BTN_1` press/release cycles. A normal service restart
+executed the temporary `main.py` marker; holding B1 during another service restart printed
+`Safe mode: main.py skipped` and did not execute the marker. Releasing B1 returned
+`mpyrepl.user_button_pressed()` to false. B2 is physically broken on the validation board and was
+not tested.
+
+To enter safe mode, hold B1 while restarting `mpy-repl.service`, then release it after the message.
+Do not hold B1 during a full board reset unless the U-Boot USB programming mode is intended.

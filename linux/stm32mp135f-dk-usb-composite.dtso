@@ -10,4 +10,27 @@
             g-tx-fifo-size = <128 128 64 16 16 16 16 16>;
         };
     };
+
+    fragment@1 {
+        target-path = "/leds/led-blue";
+        __overlay__ {
+            status = "disabled";
+        };
+    };
+
+    fragment@2 {
+        target-path = "/gpio-keys";
+        __overlay__ {
+            button-user {
+                label = "User1-PA14";
+                gpios = <&gpioa 0x0e 0x11>;
+            };
+
+            button-user2 {
+                label = "User2-PA13";
+                linux,code = <0x102>;
+                gpios = <&gpioa 0x0d 0x11>;
+            };
+        };
+    };
 };

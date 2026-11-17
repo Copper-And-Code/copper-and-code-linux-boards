@@ -307,7 +307,7 @@ new board-generated applications.
 Workspace:
 
 ```text
-/opt/devel/lvgl/lvgl-mpy-mpu/work
+/opt/devel/lvgl/lvgl-mpy-linux/work
 ```
 
 The clone was checked out at tag v1.29.0, commit

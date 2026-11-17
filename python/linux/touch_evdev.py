@@ -47,17 +47,27 @@ class TouchEvdev:
     def _coordinate(self, value, limit):
         return max(0, min(value, limit - 1))
 
-    def poll(self):
-        if not self.poller.poll(0):
-            return False
-        events = self.file.read(EVENT_SIZE * 32)
-        if not events:
-            return False
-        self._pending += events
+    def _report_end(self):
         complete = len(self._pending) - len(self._pending) % EVENT_SIZE
-        packet, self._pending = self._pending[:complete], self._pending[complete:]
-        changed = False
         for offset in range(0, complete, EVENT_SIZE):
+            event_type = struct.unpack_from(EVENT_FORMAT, self._pending, offset)[2]
+            if event_type == EV_SYN:
+                return offset + EVENT_SIZE
+        return 0
+
+    def poll(self):
+        end = self._report_end()
+        while not end:
+            if not self.poller.poll(0):
+                return False
+            events = self.file.read(EVENT_SIZE)
+            if not events:
+                return False
+            self._pending += events
+            end = self._report_end()
+        packet, self._pending = self._pending[:end], self._pending[end:]
+        changed = False
+        for offset in range(0, end, EVENT_SIZE):
             _sec, _usec, event_type, code, value = struct.unpack_from(EVENT_FORMAT, packet, offset)
             if event_type == EV_ABS:
                 if code in (ABS_X, ABS_MT_POSITION_X):
@@ -75,6 +85,10 @@ class TouchEvdev:
             elif event_type == EV_SYN:
                 changed = True
         return changed
+
+    @property
+    def pending(self):
+        return self._report_end() != 0 or bool(self.poller.poll(0))
 
     def state(self):
         self.poll()
