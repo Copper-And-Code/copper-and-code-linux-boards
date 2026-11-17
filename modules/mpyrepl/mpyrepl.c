@@ -68,7 +68,10 @@ static void set_keyboard_interrupt(bool enabled) {
     struct termios termios;
     if (tcgetattr(STDIN_FILENO, &termios) == 0) {
         if (enabled) {
+            // Only Ctrl-C becomes a signal: Ctrl-Z would stop the REPL process, Ctrl-\ kill it.
             termios.c_lflag |= ISIG;
+            termios.c_cc[VSUSP] = _POSIX_VDISABLE;
+            termios.c_cc[VQUIT] = _POSIX_VDISABLE;
         } else {
             termios.c_lflag &= ~ISIG;
         }
