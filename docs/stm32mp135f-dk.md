@@ -11,6 +11,7 @@ the MicroPython REPL.
 
 - Phase 0 reconnaissance: complete; see `docs/ricognizione.md`.
 - Phase 1 flash and initial inventory: complete.
+- Phase 2 system preparation: in progress.
 - Later phases: not started.
 
 ## Phase 1 verified configuration
@@ -51,6 +52,62 @@ Consequences for subsequent phases:
   replaced.
 - Weston and its graphical session are still enabled. No service, network setting, password or
   boot configuration was changed during Phase 1.
+
+## Phase 2 configuration and installation notes
+
+These are the approved board changes to preserve when creating the final user installation guide
+and installer. They are not yet a complete installation procedure.
+
+### Network and SSH
+
+- CN7/USB_OTG provides the existing NCM interface `usb0`; no gadget replacement is required.
+- The board has `192.168.7.1/24` and runs a DHCP server on this interface. The development host
+  received `192.168.7.58/24`; this host address is dynamic and must not be hard-coded.
+- SSH is provided by `dropbear.socket`, not OpenSSH. The key-only configuration was verified after
+  a reboot; an attempt without the public key was rejected.
+- Root's actual home is `/home/root`, not `/root`. The authorized key must therefore be installed
+  as `/home/root/.ssh/authorized_keys`, with mode `0600` and parent directory mode `0700`.
+- The selected host public key is `id_rsa.pub`, fingerprint
+  `SHA256:Qak5m6jc+Adn/q9ouKuO/q9Yd2lnJzq4f0c9ocACwrU`.
+- `/etc/default/dropbear` contains `DROPBEAR_EXTRA_ARGS=" -s"` to disable SSH password
+  authentication. The local root password was not changed.
+- `/etc/hosts` maps `127.0.1.1` to `mp135-mpy`.
+
+### Services and hostname
+
+The following units were explicitly approved and disabled:
+
+```sh
+systemctl disable --now weston-graphical-session.service weston-checkgpu.service seatd-weston.service
+systemctl disable st-hostname.service
+hostnamectl set-hostname mp135-mpy
+```
+
+`st-hostname.service` must remain disabled for this configuration: its original
+`/usr/bin/st-hostname.sh` script appends the `end0` MAC suffix to a hostname on every boot. The
+script itself was not modified. All other services, including networking, Dropbear and the USB
+gadget, remain enabled.
+
+After the first reboot, all three Weston units were disabled and inactive, no systemd units were
+failed, and Nunzio confirmed a black panel with no ST demo. SSH remained available.
+
+### Measurements and remaining physical checks
+
+| Item | Verified value |
+|---|---|
+| Original boot time | 2 min 10.670 s: kernel 1 min 17.307 s, userspace 53.363 s |
+| Boot without Weston | 37.445 s: kernel 12.430 s, userspace 25.015 s |
+| Memory without Weston | 437 MiB total, 352 MiB available at measurement time |
+| DRM connector | DPI-1, connected, 480×272 at 59.99 Hz |
+| Primary plane formats | Includes `RG16` (RGB565) and `XR24` (XRGB8888) |
+| Goodix X ranges | `ABS_X` and `ABS_MT_POSITION_X`: 0–479 |
+| Goodix Y ranges | `ABS_Y` and `ABS_MT_POSITION_Y`: 0–271 |
+| Goodix multitouch | Five slots (`ABS_MT_SLOT` 0–4), `INPUT_PROP_DIRECT` |
+| Backlight range | 0–10; restored to 10 after the initial check |
+
+The four-corner touch capture and visual backlight checks at 0, 5 and 10 are still pending. A
+sysfs write of 0 was accepted (`actual_brightness=0`), but visual extinction has not been confirmed
+and must not be treated as verified.
 
 ## Flash references
 
