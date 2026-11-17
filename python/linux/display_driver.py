@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: MIT
-# STM32MP135F-DK: DRM RGB565 panel and Goodix touch, contract 1.
+# Linux boards: the panel through a DRM dumb buffer (RGB565, the connector's preferred mode), the
+# first touchscreen through evdev, the first backlight in sysfs. display_driver contract 1.
+#
+# Environment: MPY_BACKLIGHT (a /sys/class/backlight/... directory), MPY_TOUCH_NAME, MPY_TOUCH_RANGE.
 
 import _thread
+import os
 import time
 
 import lvgl as lv
@@ -12,10 +16,23 @@ CONTRACT = 1
 PERIOD_MS = 5
 REFR_PERIOD_MS = 16
 BUFFERS = 1
-BACKLIGHT_PATH = "/sys/class/backlight/panel-backlight"
+
+
+def _backlight_path():
+    path = os.getenv("MPY_BACKLIGHT")
+    if path:
+        return path
+    try:
+        names = sorted(os.listdir("/sys/class/backlight"))
+    except OSError:
+        return None
+    return "/sys/class/backlight/" + names[0] if names else None
+
+
+BACKLIGHT_PATH = _backlight_path()
 
 _drm_width, _drm_height, _bpp, _stride = linuxfb.open()
-if (_drm_width, _drm_height, _bpp) != (480, 272, 16):
+if _bpp != 16:
     linuxfb.close()
     raise RuntimeError("unexpected DRM mode: %sx%s, %s bpp" % (_drm_width, _drm_height, _bpp))
 WIDTH = _drm_width
@@ -101,6 +118,9 @@ def running():
 
 
 def backlight(percent=None):
+    # Without a backlight in sysfs the panel is always on: 100, and setting does nothing.
+    if BACKLIGHT_PATH is None:
+        return 100 if percent is None else None
     with open(BACKLIGHT_PATH + "/max_brightness") as source:
         maximum = int(source.read())
     if percent is None:

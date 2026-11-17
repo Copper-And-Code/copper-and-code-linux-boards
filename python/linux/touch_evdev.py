@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: MIT
-# Goodix touch input through the Linux event interface on 32-bit ARM.
+# Touchscreen input through the Linux event interface (evdev), on any Linux board.
+#
+# The device is the first touchscreen the kernel lists (INPUT_PROP_DIRECT with ABS_X/ABS_Y), or the
+# one named by MPY_TOUCH_NAME. MPY_TOUCH_RANGE=WxH scales a panel that reports another range, for
+# example 4096x4096; by default the touch range is the display size.
 
+import os
 import select
 import struct
 
@@ -20,24 +25,58 @@ EVENT_FORMAT = "llHHi"
 EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
 
 
-def find_touch(name="Goodix Capacitive TouchScreen"):
+INPUT_PROP_DIRECT = 1
+
+
+def _bits(line):
+    # "B: ABS=2658000 3" -> the bitmap as one integer (the kernel prints the highest word first)
+    value = 0
+    for word in line.split("=", 1)[1].split():
+        value = (value << (8 * struct.calcsize("L"))) | int(word, 16)
+    return value
+
+
+def find_touch(name=None):
+    name = name or os.getenv("MPY_TOUCH_NAME")
     with open("/proc/bus/input/devices") as devices:
         blocks = devices.read().split("\n\n")
     for block in blocks:
-        if 'N: Name="' + name + '"' not in block:
-            continue
-        for line in block.splitlines():
-            if line.startswith("H: Handlers="):
+        lines = block.splitlines()
+        device_name = props = absolute = event = None
+        for line in lines:
+            if line.startswith('N: Name="'):
+                device_name = line[9:-1]
+            elif line.startswith("B: PROP="):
+                props = _bits(line)
+            elif line.startswith("B: ABS="):
+                absolute = _bits(line)
+            elif line.startswith("H: Handlers="):
                 for handler in line.split("=", 1)[1].split():
                     if handler.startswith("event"):
-                        return "/dev/input/" + handler
-    raise OSError("touch input not found: " + name)
+                        event = "/dev/input/" + handler
+        if event is None:
+            continue
+        if name is not None:
+            if device_name == name:
+                return event
+        elif props is not None and props & (1 << INPUT_PROP_DIRECT) and absolute is not None and absolute & 3 == 3:
+            return event
+    raise OSError("touch input not found: " + (name or "no touchscreen"))
+
+
+def _range(width, height):
+    value = os.getenv("MPY_TOUCH_RANGE")
+    if value:
+        x, _, y = value.lower().partition("x")
+        return int(x), int(y)
+    return width, height
 
 
 class TouchEvdev:
     def __init__(self, width=480, height=272, path=None):
         self.width = width
         self.height = height
+        self.range_x, self.range_y = _range(width, height)
         self.path = path or find_touch()
         self.file = open(self.path, "rb", buffering=0)
         self.fd = self.file.fileno()
@@ -54,7 +93,9 @@ class TouchEvdev:
         # After SYN_DROPPED the kernel's buffer overflowed: drop events up to the next SYN_REPORT.
         self._dropping = False
 
-    def _coordinate(self, value, limit):
+    def _coordinate(self, value, limit, touch_range):
+        if touch_range != limit:
+            value = value * limit // touch_range
         return max(0, min(value, limit - 1))
 
     def _report_end(self):
@@ -97,17 +138,17 @@ class TouchEvdev:
                     slot = value
                 elif code in (ABS_X, ABS_Y):
                     if code == ABS_X:
-                        self.x = self._coordinate(value, self.width)
+                        self.x = self._coordinate(value, self.width, self.range_x)
                     else:
-                        self.y = self._coordinate(value, self.height)
+                        self.y = self._coordinate(value, self.height, self.range_y)
                     changed = True
                 elif self._pointer or slot != 0:
                     continue
                 elif code == ABS_MT_POSITION_X:
-                    self.x = self._coordinate(value, self.width)
+                    self.x = self._coordinate(value, self.width, self.range_x)
                     changed = True
                 elif code == ABS_MT_POSITION_Y:
-                    self.y = self._coordinate(value, self.height)
+                    self.y = self._coordinate(value, self.height, self.range_y)
                     changed = True
                 elif code == ABS_MT_TRACKING_ID:
                     self.pressed = value >= 0
