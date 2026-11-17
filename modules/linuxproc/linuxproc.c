@@ -155,6 +155,9 @@ static mp_obj_t linuxproc_run(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
                     master_done = true;
                     break;
                 } else if (got < 0 && errno == EAGAIN) {
+                    // The child has exited and its output is drained. A background process it left
+                    // may still hold the terminal open: do not wait for it, or the loop spins.
+                    master_done = child_done;
                     break;
                 } else if (got < 0 && errno != EINTR) {
                     mp_raise_OSError(errno);

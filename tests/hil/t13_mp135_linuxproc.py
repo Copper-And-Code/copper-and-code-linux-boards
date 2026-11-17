@@ -76,4 +76,15 @@ except StopOutput:
 else:
     raise AssertionError("output exception did not propagate")
 
+# A background process keeps the terminal open after the child exits: run() must return at once
+# with the child's status, not wait (and spin) until the background process ends.
+import time
+
+started = time.ticks_ms()
+status, output = run(["/bin/sh", "-c", "(trap '' HUP; exec sleep 5) & printf parent-done; exit 3"])
+elapsed = time.ticks_diff(time.ticks_ms(), started)
+assert status == 3, status
+assert output == b"parent-done", output
+assert elapsed < 2000, elapsed
+
 print("MP135_LINUXPROC_TEST_PASS")
