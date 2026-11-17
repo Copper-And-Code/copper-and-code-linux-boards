@@ -17,11 +17,13 @@
 #include <poll.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <sys/wait.h>
 #include <termios.h>
 #include <time.h>
@@ -47,6 +49,26 @@ static struct client serial_client = {.name = "serial", .fd = -1};
 static struct client tcp_client = {.name = "tcp", .fd = -1};
 static struct client *const clients[] = {&serial_client, &tcp_client};
 static volatile sig_atomic_t terminating;
+
+// systemd's notification protocol, without libsystemd: one datagram to $NOTIFY_SOCKET.
+static void notify(const char *message) {
+    const char *path = getenv("NOTIFY_SOCKET");
+    if (!path || (path[0] != '/' && path[0] != '@') || strlen(path) >= sizeof(((struct sockaddr_un *)0)->sun_path)) {
+        return;
+    }
+    struct sockaddr_un address = {.sun_family = AF_UNIX};
+    size_t length = strlen(path);
+    memcpy(address.sun_path, path, length);
+    if (address.sun_path[0] == '@') {
+        address.sun_path[0] = 0; // abstract socket
+    }
+    int fd = socket(AF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    if (fd >= 0) {
+        sendto(fd, message, strlen(message), MSG_NOSIGNAL, (struct sockaddr *)&address,
+            offsetof(struct sockaddr_un, sun_path) + length);
+        close(fd);
+    }
+}
 
 static long long now_ms(void) {
     struct timespec ts;
@@ -230,9 +252,18 @@ int main(int argc, char **argv) {
     size_t input_offset = 0, input_length = 0;
     long long serial_retry_ms = 0, started_ms = now_ms(), respawn_ms = 0;
     pid_t child = spawn(slave, program);
+    notify("READY=1");
+    // WatchdogSec= in the unit: the hub's loop pings at a third of the period. It shows that the
+    // hub serves its clients; a MicroPython program that hangs is a matter for machine.WDT.
+    const char *watchdog = getenv("WATCHDOG_USEC");
+    long long watchdog_ms = watchdog ? atoll(watchdog) / 3000 : 0, pinged_ms = 0;
 
     while (!terminating) {
         long long now = now_ms();
+        if (watchdog_ms > 0 && now - pinged_ms >= watchdog_ms) {
+            notify("WATCHDOG=1");
+            pinged_ms = now;
+        }
         if (child > 0) {
             int status;
             if (waitpid(child, &status, WNOHANG) == child) {

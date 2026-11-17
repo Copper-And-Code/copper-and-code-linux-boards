@@ -6,12 +6,17 @@ After=mpy-usb-composite.service
 StartLimitIntervalSec=0
 
 [Service]
-Type=simple
+Type=notify
+NotifyAccess=main
+# The hub pings every few seconds; if it stops, systemd restarts the service.
+WatchdogSec=10
 WorkingDirectory=/usr/local/mpy/fs
 Environment=MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib
+# Also shown on the ready screen.
+Environment=MPY_REPL_TCP=192.168.7.1:8266
 # One MicroPython process on a pseudo-terminal, shared by the USB serial port and one TCP client
 # on the USB network only (no authentication). The hub restarts MicroPython when it exits.
-ExecStart=/usr/local/mpy/bin/mpy-repl-hub --tty /dev/ttyGS0 --listen 192.168.7.1:8266 -- /usr/local/mpy/bin/micropython /usr/local/mpy/lib/mpy_launcher.py
+ExecStart=/usr/local/mpy/bin/mpy-repl-hub --tty /dev/ttyGS0 --listen ${MPY_REPL_TCP} -- /usr/local/mpy/bin/micropython /usr/local/mpy/lib/mpy_launcher.py
 Restart=always
 RestartSec=0
 

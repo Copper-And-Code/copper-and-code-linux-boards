@@ -17,6 +17,9 @@ the MicroPython REPL.
 - Phase 5 DRM display, Goodix touch and LVGL MPY Studio demo: complete, including rendering
   performance and repeated soft-reset resource checks.
 - The physical B1 safe-mode check passes; the Windows HIL checkpoint remains open.
+- Phase 6 LVGL MPY Studio: the Studio imports the board definition in `studio-board/` from a file.
+- Phase 7 start-up and robustness: ready screen, REPL independent of the display, systemd watchdog
+  on the REPL hub; the 10 power cycles by hand and the microSD protection remain.
 - Later phases: not started.
 
 ## Phase 1 verified configuration
@@ -253,7 +256,7 @@ overlay now disables that LED, exposes B1/PA14 as `BTN_1` (`0x101`) and preserve
 `BTN_2` (`0x102`) through `/dev/input/by-path/platform-gpio-keys-event`. Three complete physical B1
 press/release cycles were observed. Holding B1 during an `mpy-repl.service` restart printed
 `Safe mode: main.py skipped` and prevented the temporary `main.py` marker from running; the normal
-restart control executed it. B2 is physically broken on the validation board and was not tested.
+restart control executed it. B2's mechanical switch on the validation board was damaged by a knock and is to be replaced; B2 was not tested.
 
 Logs are saved as `docs/log/stm32mp135f-dk-phase4-hil.txt`,
 `docs/log/stm32mp135f-dk-phase4-performance.txt`,
@@ -390,3 +393,19 @@ The Starter Package was extracted below:
 ```text
 /opt/devel/lvgl/lvgl-mpy-linux/work/starter-package/stm32mp1-openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10/
 ```
+
+## Start-up and robustness
+
+The launcher (`linux/mpy_launcher.py`) checks B1 for safe mode, then, when there is no `main.py` or
+in safe mode, shows the ready screen (`python/linux/mpy_ready.py`): "MicroPython ready", the
+CDC-ACM port and the TCP address from `MPY_REPL_TCP`. Any error of the display, and a Ctrl-C from a
+client connecting at that moment, only costs the ready screen: the REPL starts anyway. The screen
+writes the kernel uptime at which it was drawn to `/run/mpy-ready`.
+
+`mpy-repl.service` is `Type=notify` with `WatchdogSec=10`: the hub pings systemd from its loop, and
+a hub that stops is restarted. This shows that the REPL is served; a MicroPython program that hangs
+is not detected, as on the MCU ports, where that is the job of `machine.WDT` (not implemented yet).
+
+After a reboot the ready screen is drawn at about 32.7 s of kernel uptime, right after the hub
+starts. Most of that time passes before `sysinit.target` (udev, microSD partitions); shortening it
+means changing the image (phase 9). Results: `docs/log/stm32mp135f-dk-phase7.txt`.

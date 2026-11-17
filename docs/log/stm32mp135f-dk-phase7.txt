@@ -1,0 +1,26 @@
+STM32MP135F-DK phase 7: start-up and robustness, 2026-11-17
+
+Ready screen (python/linux/mpy_ready.py, frozen), shown by the launcher when there is no main.py or
+in safe mode, with the TCP address from MPY_REPL_TCP. Serial output after a service restart:
+  MPY_READY_SCREEN uptime 1358.40
+  raw REPL; CTRL-B to exit      (the saved REPL mode of the previous session)
+
+Display unavailable (DRM master held by another MicroPython process during the restart):
+  ready screen: OSError(16,)
+  then the friendly REPL: print('REPL', 6*7) -> REPL 42
+
+Watchdog (Type=notify, WatchdogSec=10, the hub pings at a third of the period):
+  kill -STOP on the hub -> new main pid after 9 s; "Failed with result 'watchdog'", restart
+  counter 1, service active again
+
+After a reboot (kernel uptime, so the firmware boot before the kernel is not included):
+  hub started and serial attached at 32.45 s, ready screen drawn at 32.71 s
+  Startup finished in 12.384s (kernel) + 28.278s (userspace) = 40.663s
+  critical chain: sysinit.target @16.6 s (udev trigger, microSD partitions), basic.target @16.9 s,
+  mpy-usb-composite @17.7 s +1.6 s, mpy-repl +0.4 s: the delay is the image's, not this service's.
+
+Soft reset with the ready screen (no main.py): 0.150, 0.201, 0.201, 0.201, 0.201 s
+
+Regression: test_repl.sh PASS, test_tcp_hub.py PASS, t11 PASS, t12 PASS, t13 PASS, t17 PASS
+
+Not done yet: 10 power cycles by hand; microSD protection (decision pending).
