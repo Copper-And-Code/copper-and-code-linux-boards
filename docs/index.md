@@ -140,13 +140,26 @@ user C modules and frozen Python.
 What a Linux board needs: a panel the kernel drives through DRM, a touchscreen through evdev, and a
 USB device port for the serial REPL (or only the network for the TCP REPL).
 
+## What's next: the `machine` class, above all with an MCU on board
+
+Today `machine` offers `Pin`, on the kernel's GPIO lines. The plan is to port the rest of the
+MicroPython `machine` API (`I2C`, `SPI`, `PWM`, `ADC`, `Timer`, `WDT`) with the same names and
+behaviour as on the MCU ports, so that hardware code moves between boards unchanged.
+
+The most interesting case is a board that pairs Linux with a microcontroller, such as the
+STM32MP157C-DK2 with its Cortex-M4: Python and the GUI on Linux, the real-time work on the MCU.
+There `machine` will talk to firmware on the Cortex-M4 over RPMsg, so a Python app can read sensors
+and drive motors with microcontroller timing, while Linux keeps the screen, the network and the
+programs. On boards without an MCU the same classes will use the kernel's drivers.
+See the [plan for the STM32MP157C-DK2](stm32mp157c-dk2.md).
+
 ## Limits
 
 Honestly, today:
 
 - One board tested. The parts for other Linux boards are written but not tried on one yet.
 - Start-up takes about 33 s on the stock OpenSTLinux image.
-- `machine` has `Pin` only: no `I2C`, `PWM`, `WDT` or pin interrupts yet.
+- `machine` has `Pin` only, for now: see what's next above.
 - No vsync: fast full-screen animations can tear.
 - The TCP REPL has no password: it listens only on the USB network.
 
