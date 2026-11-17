@@ -29,7 +29,7 @@ history; nothing of it is published.
 | `examples/` | Linux shell example, LVGL MPY Studio demo project |
 | `studio-board/` | The LVGL MPY Studio board definition, kept out of the Studio for now |
 | `docs/` | Reconnaissance, build, installation, validation logs |
-| `prompts/` | The working plan |
+| `prompts/` | Not versioned: working notes and plans for the agents |
 | `work/` | Not versioned: MicroPython and LVGL sources, SDK, Starter Package, host tools |
 
 ## Build
