@@ -1,8 +1,9 @@
 # lvgl-mpy-linux
 
-**Turn a Linux board into a MicroPython board with a touch screen.** Write the GUI in Python with
-LVGL, use `mpremote` as on any MicroPython board, and have all of Linux behind it: files, network,
-audio, and every program the board can run.
+**Turn a Linux board into a MicroPython board with a touch screen, where the GUI and the operating
+system work as one.** Write the GUI in Python with LVGL, use `mpremote` as on any MicroPython board,
+and let every button reach what Linux can do: files, network, audio, GPIO, and every program the
+board can run.
 
 Website: **https://copper-and-code.github.io/lvgl-mpy-linux/**
 
@@ -20,24 +21,40 @@ Studio's simulator and ran it on the board.
 > A personal, experimental project for makers. It is not affiliated with, sponsored or endorsed by
 > any of the manufacturers of the boards and chips it uses; their names only identify the hardware.
 
-## Why
+## Why: the GUI and the operating system, together
 
-A microcontroller running MicroPython is wonderful for a quick touch GUI: plug in USB, copy a file,
-it runs. A Linux board can do much more (play music, stream radio, talk to the internet, run any
-program) but usually means Yocto, a desktop compositor and C++ toolkits.
+On a Linux board the graphical app and the system usually live apart. On one side a GUI toolkit
+(Qt, GTK, a web page), on the other the programs and services of the system; between them, glue in
+C++, D-Bus or shell scripts. That glue is where most makers stop.
 
-lvgl-mpy-linux gives the Linux board the microcontroller workflow:
+lvgl-mpy-linux puts the GUI **inside** the system. The screen is LVGL, written in Python, and the
+same Python code reaches everything Linux can do:
 
-- **The same app on MCU and Linux.** The `display_driver` interface is the one of the MicroPython
-  MCU boards of [mpy-lvgl-boards](https://github.com/Copper-And-Code/mpy-lvgl-boards): an app made
-  for an RP2350 or an ESP32 runs unchanged on a Linux board with a bigger screen.
-- **It behaves like a MicroPython board.** A REPL on USB serial and on TCP that works with
-  `mpremote` (raw REPL, raw-paste, `cp`, `run`, `mount`), Ctrl-C, Ctrl-D soft reset in 0.2 s, safe
-  mode on a button, a "MicroPython ready" screen at power-on.
-- **A home screen.** At power-on a shell on the display (built-in commands, `vi` and `edit`, Python
-  and Linux programs); a tap opens a menu of apps such as the weather and the radio.
-- **Linux in reach of Python.** `linuxproc` runs Linux programs in the background and lets the GUI
-  drive them; `machine.Pin` drives the GPIO lines of the kernel.
+| A touch on the screen... | ...uses the operating system |
+|---|---|
+| plays a song or an internet radio | `gst-play-1.0` (GStreamer), driven while it plays |
+| shows the weather of the next days | `curl` in the background, the system clock |
+| connects to a Wi-Fi network | `wpa_supplicant` and `systemd-networkd`, configured the standard way |
+| runs a command, edits a file | a shell with real Linux programs on a pseudo-terminal |
+| switches a LED, reads a button | the kernel's GPIO lines (`machine.Pin`) |
+| powers the board off | `systemctl poweroff` |
+
+And it works the other way round: the programs answer, and the GUI follows them live (the position
+of a song, the state of the network, the output of a command) without ever freezing, because the
+slow work runs in the background.
+
+It is made for makers, so it keeps what makes microcontrollers easy:
+
+- **The workflow of a MicroPython board.** A REPL on USB serial and TCP that `mpremote` and LVGL
+  MPY Studio use as on any board (raw REPL, `cp`, `run`, `mount`), Ctrl-C, a soft reset in 0.2 s,
+  safe mode on a button. No compositor, no cross-compiled C++, no image to rebuild for an app.
+- **The same app on MCU and Linux.** The `display_driver` interface is the one of the MCU boards of
+  [mpy-lvgl-boards](https://github.com/Copper-And-Code/mpy-lvgl-boards): an app for an RP2350 or an
+  ESP32 runs unchanged on a Linux board with a bigger screen, and can then grow into Linux.
+- **An appliance, not a desktop.** At power-on a shell on the display; a tap opens a menu of apps
+  (weather, radio) and power off. The board becomes a device you build.
+- **Apps written with an assistant, and checked.** LVGL MPY Studio's MCP tools let an AI assistant
+  write the glue between the GUI and the system; the simulator and the tests on the board check it.
 
 ## LVGL MPY Studio and its MCP tools
 
