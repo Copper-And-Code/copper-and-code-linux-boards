@@ -46,8 +46,8 @@ start() {
 
     mkdir -p "$GADGET/strings/0x409"
     tr -d '\0' < /proc/device-tree/serial-number > "$GADGET/strings/0x409/serialnumber"
-    echo STMicroelectronics > "$GADGET/strings/0x409/manufacturer"
-    echo STM32MP > "$GADGET/strings/0x409/product"
+    echo Copper-And-Code > "$GADGET/strings/0x409/manufacturer"
+    echo "MicroPython LVGL MP135" > "$GADGET/strings/0x409/product"
 
     mkdir -p "$CONFIG/strings/0x409"
     echo "Config 1: NCM + ACM" > "$CONFIG/strings/0x409/configuration"

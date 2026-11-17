@@ -370,7 +370,7 @@ The exact package names, SDK names, switch settings and Linux/Windows commands a
 `docs/ricognizione.md`. The validated host executable used for this flash was:
 
 ```text
-/home/nunzio/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI
+<STM32CubeProgrammer install directory>/bin/STM32_Programmer_CLI
 ```
 
 The Starter Package was extracted below:
