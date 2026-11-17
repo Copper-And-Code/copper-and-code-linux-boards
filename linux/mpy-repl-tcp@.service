@@ -1,0 +1,12 @@
+[Unit]
+Description=MicroPython REPL on the USB network
+After=mpy-usb-composite.service
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/local/mpy/fs
+Environment=MICROPYPATH=/usr/local/mpy/fs:/usr/local/mpy/fs/lib
+ExecStart=/usr/local/mpy/bin/micropython /usr/local/mpy/lib/mpy_launcher.py
+StandardInput=socket
+StandardOutput=socket
+StandardError=socket

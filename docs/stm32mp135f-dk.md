@@ -13,6 +13,8 @@ the MicroPython REPL.
 - Phase 1 flash and initial inventory: complete.
 - Phase 2 system preparation: complete.
 - Phase 3 Cortex-A7 MicroPython/LVGL cross-build: complete.
+- Phase 4 MCU-style REPL: Linux HIL tests, performance, stress and reboot validation complete.
+  The physical B1 safe-mode check and the Windows HIL checkpoint remain open.
 - Later phases: not started.
 
 ## Phase 1 verified configuration
@@ -153,8 +155,8 @@ SDK directory below it. Outputs and SHA-256 files are written to `dist/`.
 
 | Build | text | data | bss | Total |
 |---|---:|---:|---:|---:|
-| Minimal | 400,806 | 1,136 | 2,052 | 403,994 bytes |
-| LVGL | 1,133,565 | 2,388 | 2,144 | 1,138,097 bytes |
+| Minimal | 401,870 | 1,144 | 2,060 | 405,074 bytes |
+| LVGL | 1,134,629 | 2,396 | 2,152 | 1,139,177 bytes |
 
 Both are stripped ARM EABI5 32-bit executables using `/lib/ld-linux-armhf.so.3`. Their only dynamic
 `NEEDED` entries are `libm.so.6`, `libffi.so.8` and `libc.so.6`.
@@ -173,6 +175,80 @@ output and diff are in `docs/log/stm32mp135f-dk-phase3-tests-basics.txt`.
 
 PyDevices reports that this build does not include the optional `jpegio` module: JPEG images will not
 draw, while PNG and LVGL BIN remain available. JPEG support was not required for this phase.
+
+## Phase 4 MCU-style REPL
+
+The ST-LINK virtual COM port remains the Linux console. MicroPython uses the CDC-ACM function added
+to the existing USB gadget, preserving NCM networking, DHCP and SSH. On the validated host the gadget
+is `/dev/ttyACM2`, but the number is dynamic; the ST-LINK console must not be selected. The board-side
+device is `/dev/ttyGS0`. The REPL filesystem root is `/usr/local/mpy/fs`.
+
+The composite gadget requires the TX FIFO layout supplied by
+`linux/stm32mp135f-dk-usb-composite.dtso`. `scripts/build_mp135_usb.sh` verifies the exact original
+DTB hash, applies the overlay and validates the resulting layout. Do not rebind the gadget while it is
+active: install the DTB and reboot. The original and modified DTB SHA-256 values are respectively
+`bf08a8e8aa6e0e2aacb1e37d76e1045c4702aff2239b8ff32234369b7235c294` and
+`1f8a0bdafc669ee05ca19c3fda920df197a1503ca4471b5d4a305bc99884d939`.
+
+The board-specific `mpyrepl` user C module calls the upstream friendly/raw REPL implementations,
+executes `boot.py` and `main.py`, preserves the REPL mode and restarts in place with `execve` on soft
+reset. A linker wrapper around `mp_hal_set_interrupt_char()` enables terminal `ISIG` only while code
+runs. This is required for Ctrl-C in both normal raw REPL and raw-paste execution; no upstream
+MicroPython source is modified.
+
+| Requirement | Validated result |
+|---|---|
+| Friendly banner and `>>>` prompt | Pass |
+| Ctrl-A / Ctrl-B raw/friendly switching | Pass |
+| Ctrl-C during `mpremote run` raw-paste execution | Pass; `KeyboardInterrupt` and REPL available |
+| Ctrl-D soft reset | Pass; raw mode restored and `main.py` executed |
+| Filesystem `:` rooted at `/usr/local/mpy/fs` | Pass; copy, list, import and delete tested |
+| `main.py` exception | Pass; traceback shown and REPL remains available |
+| B1 safe mode skips `main.py` | **Not physically verified**: PA13 remained high during B1 tests |
+| TCP REPL on `192.168.7.1:8266` | Pass; command, filesystem and soft reset tested |
+
+`tests/hil/test_repl.sh` automates the serial checks, the real `main.py` crash and TCP smoke tests. It
+temporarily replaces `:main.py` and removes it on completion or failure; back up any user application
+before running it. Example:
+
+```sh
+P=/dev/ttyACM2 TCP=socket://192.168.7.1:8266 tests/hil/test_repl.sh
+```
+
+Set `MPREMOTE` and `PYTHON` if they are not on `PATH`. Set `TCP=` to skip TCP. For Git Bash on Windows,
+use `P=COM<n>`; fixture paths are converted with `cygpath`. The Windows checkpoint has not yet been
+run.
+
+Performance and stability measured on the board:
+
+| Test | Result |
+|---|---|
+| Soft reset to raw prompt, 10 samples | min 0.060 s, mean 0.068 s, max 0.073 s |
+| Raw-paste copy of 204,800 bytes | 11.778 s, 17.0 KiB/s, copied size verified |
+| 50 copy + soft-reset cycles | No errors; one PID throughout |
+| Process RSS during stress | 1,524–1,804 KiB; delta 280 KiB |
+| `mpremote mount . exec ...` | Pass; host directory visible as `/remote` |
+| Two complete reboots | NCM, SSH, ACM and TCP recovered; final boot had no failed units or FIFO/Oops errors |
+
+A standalone `mpremote mount .` mounts the directory and then enters the interactive REPL, so it needs
+a terminal; a non-interactive shell should append a command such as `exec` as shown above.
+
+The TCP listener has no authentication or encryption and is bound only to the USB gadget address.
+`FreeBind=yes` allows it to start before the address is assigned during boot. Serial and accepted TCP
+connections run separate MicroPython processes. Sharing LVGL, display, touch or other peripherals
+across those processes has not been designed or validated; use one REPL channel to run an application.
+
+The B1 input is `User-PA13`, device-tree code `0x101` (`BTN_1`), exposed through
+`/dev/input/by-path/platform-gpio-keys-event`. The safe-mode path and key code are implemented, but
+both `EVIOCGKEY` and the kernel GPIO debug interface showed no pressed state during physical tests.
+This remains an open hardware validation item, not a passing test.
+
+Logs are saved as `docs/log/stm32mp135f-dk-phase4-hil.txt`,
+`docs/log/stm32mp135f-dk-phase4-performance.txt`,
+`docs/log/stm32mp135f-dk-phase4-stress.txt`,
+`docs/log/stm32mp135f-dk-phase4-reboot.txt` and
+`docs/log/stm32mp135f-dk-phase4-safe-mode.txt`. See
+`docs/stm32mp135f-dk-install.md` for installation and recovery instructions.
 
 ## Portable `machine` API decision
 

@@ -1,0 +1,13 @@
+cycle=5 pid=2962 rss=1640KiB
+cycle=10 pid=2962 rss=1640KiB
+cycle=15 pid=2962 rss=1524KiB
+cycle=20 pid=2962 rss=1588KiB
+cycle=25 pid=2962 rss=1772KiB
+cycle=30 pid=2962 rss=1588KiB
+cycle=35 pid=2962 rss=1584KiB
+cycle=40 pid=2962 rss=1772KiB
+cycle=45 pid=2962 rss=1588KiB
+cycle=50 pid=2962 rss=1584KiB
+RSS min/max/delta: 1524/1804/280 KiB
+PIDs observed: ['2962']
+PASS: 50 cp + soft-reset cycles, stable PID and RSS

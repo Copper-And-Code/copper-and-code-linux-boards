@@ -1,0 +1,33 @@
+STM32MP135F-DK Phase 4 safe-mode physical validation
+
+Intended input:
+  Button: B1 / USER1
+  GPIO: PA13, active-low with pull-up
+  Device: /dev/input/by-path/platform-gpio-keys-event
+  Device-tree label: User-PA13
+  Device-tree linux,code: 0x101 (BTN_1)
+
+Input capabilities reported by evtest:
+  Input device name: "gpio-keys"
+  Event code 143 (KEY_WAKEUP)
+  Event code 257 (BTN_1)
+
+The initial implementation used BTN_EXTRA and a path missing the by-path component. Both were
+corrected from the device tree and evtest capabilities. The final binary reports
+mpyrepl.user_button_pressed() == False while B1 was reported held.
+
+A direct EVIOCGKEY query returned no pressed bits:
+  []
+
+A 15-second evtest capture showed no key events. A separate 12-second poll of
+/sys/kernel/debug/gpio showed the same state on every sample:
+  gpio-525 (PA13 |User-PA13) in hi IRQ ACTIVE LOW
+
+No hi -> lo -> hi transition was observed. Since PA13 is active-low, the kernel did not detect the
+physical press. A safe-mode restart therefore executed the hello fixture in main.py and did not print
+"Safe mode: main.py skipped". After B1 was released, the normal-startup control check passed:
+main.py executed and the raw REPL became available.
+
+Status: OPEN. Safe mode is implemented with the documented BTN_1 input, but physical validation is
+not passing and must not be claimed. Check the physical button/signal path and repeat the GPIO,
+evtest and service-restart checks.

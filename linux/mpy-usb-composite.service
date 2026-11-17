@@ -1,0 +1,11 @@
+[Unit]
+Description=MicroPython USB NCM and CDC-ACM gadget
+After=local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/mpy/bin/mpy-usb-composite start
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+cp /opt/devel/lvgl/lvgl-mpy-mpu/work/logs/big_200k.bin :big.bin
+rm :big.bin
+Soft reset samples (s): 0.073, 0.070, 0.060, 0.060, 0.070, 0.070, 0.070, 0.070, 0.070, 0.070
+Soft reset min/mean/max: 0.060/0.068/0.073 s
+Copy 200 KiB: 11.778 s, 17.0 KiB/s, verified size 204800
+PASS: reset and copy performance

@@ -1,0 +1,13 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "st,stm32mp135f-dk";
+
+    fragment@0 {
+        target-path = "/soc/bus@5c007000/usb@49000000";
+        __overlay__ {
+            g-tx-fifo-size = <128 128 64 16 16 16 16 16>;
+        };
+    };
+};

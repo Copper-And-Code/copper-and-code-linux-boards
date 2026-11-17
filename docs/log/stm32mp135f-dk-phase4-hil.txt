@@ -1,0 +1,32 @@
+Serial target: /dev/ttyACM2
+linux
+cp /opt/devel/lvgl/mpy-lvgl-stm32/mpy-lvgl-boards/tests/hil/hello.py :hello.py
+Up to date: hello.py
+ls :
+           0 lib/
+           0 hello.py
+           0 main.py
+Hello from STM32MP135F-DK
+PASS: friendly/raw REPL mode switching
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+KeyboardInterrupt:
+
+PASS: Ctrl-C interrupts mpremote raw-paste execution
+cp /opt/devel/lvgl/mpy-lvgl-stm32/mpy-lvgl-boards/tests/hil/crash_main.py :main.py
+
+MPY: soft reboot
+Traceback (most recent call last):
+  File "main.py", line 1, in <module>
+RuntimeError: intentional main.py crash
+MicroPython v1.29.0 on 2026-11-17; linux [GCC 13.4.0] version
+Type "help()" for more information.
+>>>
+PASS: main.py crash leaves the REPL available
+rm :main.py
+TCP target: socket://192.168.7.1:8266
+linux
+ls :
+           0 lib/
+           0 hello.py
+PASS: REPL HIL tests completed
