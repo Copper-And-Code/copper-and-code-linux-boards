@@ -199,6 +199,34 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(linuxproc_run_obj, 2, linuxproc_run);
 // Nothing blocks: read() returns what is there, write() what fits, poll() the exit status or None.
 // The program and its process group are stopped by kill(), close(), or when the object is collected.
 
+// The programs started by Process and still running: a soft reset re-executes MicroPython, which
+// would leave them running with nobody to stop them (a player would go on playing).
+#define LINUXPROC_TRACKED (16)
+static pid_t linuxproc_tracked[LINUXPROC_TRACKED];
+
+static void linuxproc_track(pid_t pid, bool add) {
+    for (int i = 0; i < LINUXPROC_TRACKED; ++i) {
+        if (add ? linuxproc_tracked[i] == 0 : linuxproc_tracked[i] == pid) {
+            linuxproc_tracked[i] = add ? pid : 0;
+            return;
+        }
+    }
+}
+
+// Called by mpyrepl before a soft reset.
+void linuxproc_kill_all(void) {
+    for (int i = 0; i < LINUXPROC_TRACKED; ++i) {
+        if (linuxproc_tracked[i] > 0) {
+            kill(-linuxproc_tracked[i], SIGKILL);
+            kill(linuxproc_tracked[i], SIGKILL);
+            // Collect it now: after the exec nobody would, and it would stay a zombie.
+            while (waitpid(linuxproc_tracked[i], NULL, 0) < 0 && errno == EINTR) {
+            }
+            linuxproc_tracked[i] = 0;
+        }
+    }
+}
+
 typedef struct _linuxproc_process_obj_t {
     mp_obj_base_t base;
     pid_t pid;
@@ -225,6 +253,7 @@ static bool process_reap(linuxproc_process_obj_t *self, int options) {
         } while (result < 0 && errno == EINTR);
         if (result == self->pid || (result < 0 && errno == ECHILD)) {
             self->exited = true;
+            linuxproc_track(self->pid, false);
         }
     }
     return self->exited;
@@ -305,6 +334,7 @@ static mp_obj_t linuxproc_process_make_new(const mp_obj_type_t *type, size_t n_a
     close(slave);
     self->pid = child;
     self->fd = master;
+    linuxproc_track(child, true);
     return MP_OBJ_FROM_PTR(self);
 }
 

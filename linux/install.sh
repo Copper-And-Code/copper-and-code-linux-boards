@@ -5,10 +5,12 @@
 #
 #   micropython  mpy-repl-hub  stm32mp135f-dk.dtb  (each with an optional .sha256)
 #   mpy_launcher.py  mpy-usb-composite.sh  mpy-usb-composite.service  mpy-repl.service
-#   usbotg.default  journald-volatile.conf
+#   usbotg.default  journald-volatile.conf  edit.py  vi.py
 #
 # It can be run again: unchanged files are left alone. SSH settings are not touched. Environment:
 #   MPY_HOSTNAME  hostname to set (default mp135-mpy; empty leaves it unchanged)
+#   MPY_AUTOSTART home (default): the shell and the app menu at power-on, through a main.py
+#                 written only when there is none; none: no main.py
 set -eu
 
 SOURCE=$(cd "$(dirname "$0")" && pwd)
@@ -16,6 +18,7 @@ PREFIX=/usr/local/mpy
 UNITS=/etc/systemd/system
 DTB=/boot/stm32mp135f-dk.dtb
 HOSTNAME_WANTED=${MPY_HOSTNAME-mp135-mpy}
+AUTOSTART=${MPY_AUTOSTART:-home}
 reboot_needed=0
 
 say() { printf 'install: %s\n' "$*"; }
@@ -24,7 +27,7 @@ die() { printf 'install: error: %s\n' "$*" >&2; exit 1; }
 [ "$(id -u)" = 0 ] || die "run as root"
 grep -q "st,stm32mp135f-dk" /proc/device-tree/compatible 2>/dev/null || die "not an STM32MP135F-DK"
 for file in micropython mpy-repl-hub stm32mp135f-dk.dtb mpy_launcher.py mpy-usb-composite.sh \
-    mpy-usb-composite.service mpy-repl.service usbotg.default journald-volatile.conf; do
+    mpy-usb-composite.service mpy-repl.service usbotg.default journald-volatile.conf edit.py vi.py; do
     [ -f "$SOURCE/$file" ] || die "missing $SOURCE/$file"
     if [ -f "$SOURCE/$file.sha256" ]; then
         expected=$(cut -d' ' -f1 "$SOURCE/$file.sha256")
@@ -46,11 +49,22 @@ put() { # source target mode
     say "installed $2"
 }
 
-install -d "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/fs/lib"
+install -d "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/fs/lib" "$PREFIX/fs/bin"
 put "$SOURCE/micropython" "$PREFIX/bin/micropython" 0755
 put "$SOURCE/mpy-repl-hub" "$PREFIX/bin/mpy-repl-hub" 0755
 put "$SOURCE/mpy-usb-composite.sh" "$PREFIX/bin/mpy-usb-composite" 0755
 put "$SOURCE/mpy_launcher.py" "$PREFIX/lib/mpy_launcher.py" 0644
+put "$SOURCE/edit.py" "$PREFIX/fs/bin/edit.py" 0644
+put "$SOURCE/vi.py" "$PREFIX/fs/bin/vi.py" 0644
+# The shell is frozen in the firmware now: old copies in fs/ would only confuse.
+for old in shell_linux.py ansiterm.py ansifont.py; do
+    [ -f "$PREFIX/fs/$old" ] && rm -f "$PREFIX/fs/$old" && say "removed the old $PREFIX/fs/$old"
+done
+if [ "$AUTOSTART" = home ] && [ ! -e "$PREFIX/fs/main.py" ]; then
+    printf '# The shell and the app menu at power-on (mpy_home, frozen in the firmware).\nimport mpy_home\n\nmpy_home.main()\n' > "$PREFIX/fs/main.py"
+    changed="$changed $PREFIX/fs/main.py"
+    say "installed $PREFIX/fs/main.py: shell and app menu at power-on"
+fi
 put "$SOURCE/mpy-usb-composite.service" "$UNITS/mpy-usb-composite.service" 0644
 put "$SOURCE/mpy-repl.service" "$UNITS/mpy-repl.service" 0644
 put "$SOURCE/usbotg.default" /etc/default/usbotg 0644

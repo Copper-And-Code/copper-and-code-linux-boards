@@ -18,8 +18,22 @@ if command -v cygpath >/dev/null 2>&1; then
 fi
 export P MPREMOTE HERE
 
+# The board's own main.py (the home screen) is put back at the end.
+SAVED_MAIN=$(mktemp)
+HAD_MAIN=0
+if "$MPREMOTE" connect "$P" fs cp :main.py "$SAVED_MAIN" >/dev/null 2>&1; then
+    HAD_MAIN=1
+fi
+restore_main() {
+    if [[ $HAD_MAIN == 1 ]]; then
+        "$MPREMOTE" connect "$P" fs cp "$SAVED_MAIN" :main.py >/dev/null
+    else
+        "$MPREMOTE" connect "$P" fs rm :main.py >/dev/null 2>&1 || true
+    fi
+    rm -f "$SAVED_MAIN"
+}
 cleanup() {
-    "$MPREMOTE" connect "$P" fs rm :main.py >/dev/null 2>&1 || true
+    restore_main || true
 }
 trap cleanup EXIT
 
@@ -128,7 +142,7 @@ if b"intentional main.py crash" not in data or not any(marker in data for marker
 print("PASS: main.py crash leaves the REPL available")
 PY
 
-"$MPREMOTE" connect "$P" fs rm :main.py
+restore_main
 trap - EXIT
 "$MPREMOTE" connect "$P" soft-reset
 

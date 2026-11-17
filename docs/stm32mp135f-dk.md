@@ -446,3 +446,20 @@ of `mpy-lvgl-boards`:
   `install.sh` keeps the systemd journal in RAM explicitly (`linux/journald-volatile.conf`). The
   root filesystem and `/usr/local` (its own partition, which holds `fs/`) are writable ext4: a power
   cut while the Studio copies an application can still damage it. A read-only root is for phase 9.
+
+## Home screen
+
+`install.sh` writes a `main.py` that starts `mpy_home` (frozen), unless a `main.py` is already there
+(`MPY_AUTOSTART=none` skips it). At power-on the display shows the shell of `examples/shell-linux`
+(frozen too), with the keyboard of the serial or TCP terminal: built-in commands, the `edit` and `vi`
+editors in `fs/bin`, Python programs (`name.py` in `fs/bin`, or `python file.py`) and Linux programs.
+
+A tap on the terminal opens the app menu: the LVGL MPY Studio apps listed in `settings.json`,
+section `home` (`{"apps": [{"name": ..., "path": ".../app_main.py"}]}`), and Shell. An app starts in
+a fresh process (`mpyrepl.restart()`, a soft reset), so apps never share modules; a small home tab
+at the top centre brings the shell back the same way. Every soft reset stops the Linux programs the
+application started with `linuxproc.Process` (a radio stream does not go on playing).
+
+LVGL MPY Studio and mpremote take the board as on the MCU ports: Ctrl-A on an empty shell line
+hands over to the raw REPL, and after a soft reset asked from the raw REPL `main.py` does not run.
+Results: `docs/log/stm32mp135f-dk-home.txt`.

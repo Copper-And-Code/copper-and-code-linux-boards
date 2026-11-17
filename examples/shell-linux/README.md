@@ -45,9 +45,11 @@ import shell_linux
 shell_linux.main()
 ```
 
-Use `exit` or Ctrl-D to return to the REPL. Autostart is not installed. To opt in, put
-`import shell_linux; shell_linux.main()` in `/usr/local/mpy/fs/main.py`; do not put the interactive
-loop in `boot.py`.
+Use `exit` or Ctrl-D to return to the REPL. `linux/install.sh` starts the shell at power-on through
+`mpy_home` (a `main.py` it writes when there is none), with an app menu on a tap; the shell,
+`ansiterm` and `ansifont` are frozen in the firmware and the editors installed in `fs/bin`. Ctrl-A on
+an empty line hands the board over to the raw REPL, which is what LVGL MPY Studio and mpremote ask
+for when they connect.
 
 ## Use
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 #define _GNU_SOURCE
+#include <errno.h>
 #include <fcntl.h>
 #include <linux/input.h>
 #include <limits.h>
@@ -56,9 +57,15 @@ static bool socket_peer_closed(void) {
     return recv(STDIN_FILENO, &c, 1, MSG_PEEK | MSG_DONTWAIT) == 0;
 }
 
+// linuxproc, when it is built in: stops the Linux programs the application started.
+extern void linuxproc_kill_all(void) __attribute__((weak));
+
 static void exec_self(void) {
     if (!isatty(STDIN_FILENO) && socket_peer_closed()) {
         return;
+    }
+    if (linuxproc_kill_all) {
+        linuxproc_kill_all();
     }
     char *const argv[] = { "micropython", MPYREPL_LAUNCHER, NULL };
     close_range(STDERR_FILENO + 1, UINT_MAX, 0);
@@ -91,7 +98,9 @@ static mp_obj_t mpyrepl_run(mp_obj_t safe_mode) {
     load_mode();
 
     int ret = pyexec_file_if_exists("boot.py");
-    if (!(ret & PYEXEC_FORCED_EXIT) && !mp_obj_is_true(safe_mode)) {
+    // As on the MCU ports, main.py runs only for the friendly REPL: after a soft reset asked from
+    // the raw REPL (mpremote, LVGL MPY Studio) the tool gets the REPL, not the application.
+    if (!(ret & PYEXEC_FORCED_EXIT) && !mp_obj_is_true(safe_mode) && pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
         ret = pyexec_file_if_exists("main.py");
     }
     if (!(ret & PYEXEC_FORCED_EXIT)) {
@@ -118,6 +127,23 @@ static mp_obj_t mpyrepl_run(mp_obj_t safe_mode) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(mpyrepl_run_obj, mpyrepl_run);
 
+// restart(): a soft reset asked by the application, for example to start another app in a clean
+// process. It works from any thread, LVGL callbacks included. The REPL mode is kept.
+static mp_obj_t mpyrepl_restart(void) {
+    save_mode();
+    exec_self();
+    mp_raise_OSError(errno);  // only if exec failed
+}
+static MP_DEFINE_CONST_FUN_OBJ_0(mpyrepl_restart_obj, mpyrepl_restart);
+
+// For an interactive main.py such as a shell: when a tool asks for the raw REPL (Ctrl-A), the
+// program calls this and returns, and the REPL starts in raw mode, as the tool expects.
+static mp_obj_t mpyrepl_raw_repl(void) {
+    pyexec_mode_kind = PYEXEC_MODE_RAW_REPL;
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_0(mpyrepl_raw_repl_obj, mpyrepl_raw_repl);
+
 static mp_obj_t mpyrepl_user_button_pressed(void) {
     uint8_t state[(KEY_MAX + 7) / 8] = {0};
     int fd = open(MPYREPL_USER_BUTTON_DEVICE, O_RDONLY | O_NONBLOCK);
@@ -137,6 +163,8 @@ static MP_DEFINE_CONST_FUN_OBJ_0(mpyrepl_user_button_pressed_obj, mpyrepl_user_b
 static const mp_rom_map_elem_t mpyrepl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_mpyrepl) },
     { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&mpyrepl_run_obj) },
+    { MP_ROM_QSTR(MP_QSTR_raw_repl), MP_ROM_PTR(&mpyrepl_raw_repl_obj) },
+    { MP_ROM_QSTR(MP_QSTR_restart), MP_ROM_PTR(&mpyrepl_restart_obj) },
     { MP_ROM_QSTR(MP_QSTR_user_button_pressed), MP_ROM_PTR(&mpyrepl_user_button_pressed_obj) },
 };
 static MP_DEFINE_CONST_DICT(mpyrepl_module_globals, mpyrepl_module_globals_table);

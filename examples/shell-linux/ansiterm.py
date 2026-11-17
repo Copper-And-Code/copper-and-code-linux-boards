@@ -151,6 +151,8 @@ class Terminal(io.IOBase):
         self.canvas = lv.canvas(self.screen)
         self.canvas.set_buffer(self.fb, self.w, self.h, lv.COLOR_FORMAT.RGB565)
         self.canvas.center()
+        if on_screen is not None:
+            on_screen(self.screen)
 
     def show(self):
         try:
@@ -595,6 +597,8 @@ class Terminal(io.IOBase):
 
 
 term = None
+# Called with each new terminal screen, for example to open a menu on a tap (mpy_home).
+on_screen = None
 
 
 # Ctrl-C during lv.timer_handler(). A driver with CONTRACT 1 (docs/display-driver.md)

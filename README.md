@@ -32,6 +32,8 @@ lvgl-mpy-linux gives the Linux board the microcontroller workflow:
 - **It behaves like a MicroPython board.** A REPL on USB serial and on TCP that works with
   `mpremote` (raw REPL, raw-paste, `cp`, `run`, `mount`), Ctrl-C, Ctrl-D soft reset in 0.2 s, safe
   mode on a button, a "MicroPython ready" screen at power-on.
+- **A home screen.** At power-on a shell on the display (built-in commands, `vi` and `edit`, Python
+  and Linux programs); a tap opens a menu of apps such as the weather and the radio.
 - **Linux in reach of Python.** `linuxproc` runs Linux programs in the background and lets the GUI
   drive them; `machine.Pin` drives the GPIO lines of the kernel.
 

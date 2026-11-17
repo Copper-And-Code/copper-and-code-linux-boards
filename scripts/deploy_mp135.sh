@@ -33,8 +33,9 @@ for file in mpy_launcher.py mpy-usb-composite.sh mpy-usb-composite.service mpy-r
     usbotg.default journald-volatile.conf install.sh uninstall.sh; do
     cp "$REPO/linux/$file" "$STAGE/$file"
 done
+cp "$REPO/examples/shell-linux/edit.py" "$REPO/examples/shell-linux/vi.py" "$STAGE/"
 
 echo "deploy: $(basename "$MICROPYTHON"), $(basename "$HUB"), $(basename "$DTB") -> $BOARD"
 ssh "root@$BOARD" 'rm -rf /tmp/mpy-install && mkdir -p /tmp/mpy-install'
 scp -q "$STAGE"/* "root@$BOARD:/tmp/mpy-install/"
-ssh "root@$BOARD" "MPY_HOSTNAME=${MPY_HOSTNAME-mp135-mpy} sh /tmp/mpy-install/install.sh && install -m 0755 /tmp/mpy-install/uninstall.sh /usr/local/mpy/bin/mpy-uninstall"
+ssh "root@$BOARD" "MPY_HOSTNAME=${MPY_HOSTNAME-mp135-mpy} MPY_AUTOSTART=${MPY_AUTOSTART:-home} sh /tmp/mpy-install/install.sh && install -m 0755 /tmp/mpy-install/uninstall.sh /usr/local/mpy/bin/mpy-uninstall"

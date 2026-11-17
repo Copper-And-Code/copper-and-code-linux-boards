@@ -1012,6 +1012,17 @@ def read_line():
             pos = max(0, pos - 1)
         elif k == "right":
             pos = min(len(line), pos + 1)
+        elif k == "\x01" and not line:
+            # Ctrl-A on an empty line is a tool (mpremote, LVGL MPY Studio) asking for the raw
+            # REPL: leave, and let the REPL start in raw mode.
+            try:
+                import mpyrepl
+
+                mpyrepl.raw_repl()
+            except (ImportError, AttributeError):
+                pass
+            sys.stdout.write("\n")
+            return None
         elif k in ("home", "\x01"):
             pos = 0
         elif k in ("end", "\x05"):

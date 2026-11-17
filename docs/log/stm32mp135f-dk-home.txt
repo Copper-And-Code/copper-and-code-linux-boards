@@ -1,0 +1,24 @@
+Home screen (shell and app menu at power-on), STM32MP135F-DK, 2026-11-17
+
+install.sh wrote /usr/local/mpy/fs/main.py ("import mpy_home; mpy_home.main()"), installed
+fs/bin/edit.py and fs/bin/vi.py and removed the old shell copies (now frozen).
+
+Restart as at power-on (rm /run/mpy-repl-mode): serial shows "MicroPython Linux shell", prompt
+mpy@mp135-mpy:/usr/local/mpy/fs$ ; "uname -a" runs the Linux program.
+
+mpremote over the shell (with history): "raw REPL reached" (Ctrl-A on an empty line hands over);
+after mpremote's soft reset from the raw REPL main.py does not run ("shell loaded: False"), as on
+the MCU ports. Before this change mpyrepl ran main.py in raw mode too.
+
+App menu: settings.json home.apps = Radio, Weather (their Studio upload folders).
+  mpy_home.launch(weather): fresh process, weather_app loaded, shell not loaded, home button on
+  lv.layer_top()
+  mpy_home.launch(radio), tune -> "On air", gst-play-1.0 pid 3660 running;
+  mpy_home.go_home() -> "MicroPython Linux shell", no gst-play left.
+  First try: gst-play was killed but stayed <defunct>; linuxproc_kill_all now reaps it.
+
+LVGL MPY Studio over the shell: device_connect, device_info (compatible), device_upload of the
+weather app with run: LVGL_MPY_STUDIO_APP_READY.
+
+Regression: test_repl.sh PASS (main.py saved and put back), test_tcp_hub.py PASS, t11, t13, t14,
+t17, t21 PASS.
