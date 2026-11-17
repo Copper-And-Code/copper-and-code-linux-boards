@@ -25,6 +25,15 @@ if [ -e /etc/systemd/journald.conf.d/mpy-volatile.conf ]; then
     systemctl restart systemd-journald
     say "journal on the microSD again"
 fi
+# Wi-Fi configured by the Settings app (mpy_wifi): only files that carry its marker.
+for file in /etc/systemd/network/25-mpy-wifi.network /etc/wpa_supplicant/wpa_supplicant-*.conf; do
+    if [ -f "$file" ] && grep -q "^# written by mpy_wifi" "$file"; then
+        unit=$(basename "$file" .conf | sed -n "s/^wpa_supplicant-//p")
+        [ -n "$unit" ] && systemctl disable --now "wpa_supplicant@$unit" >/dev/null 2>&1
+        rm -f "$file"
+        say "removed $file"
+    fi
+done
 # The original gadget startup uses its defaults again.
 rm -f /etc/default/usbotg
 
