@@ -14,3 +14,9 @@ Full cycle:
   at 32.82 s, CDC-ACM gadget Copper-And-Code present
 
 Regression after the cycle: test_repl.sh PASS, test_tcp_hub.py PASS, t11, t12, t13, t14, t16, t17 PASS
+
+Workspace without the /opt/devel/lvgl/lvgl-mpy-mpu symlink (2026-11-17):
+  SDK reinstalled from its installer under work/sdk/ (no lvgl-mpy-mpu path left in
+  environment-setup); host-tools venv recreated: mpremote 1.29.0, pyserial 3.5
+  symlink removed; clean build (788 C files) 379c720; DTB sha256 0c0e3d98a814a9f3... (unchanged)
+  deployed; test_repl.sh, test_tcp_hub.py, t11, t12, t17 PASS
