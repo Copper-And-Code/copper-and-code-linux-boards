@@ -53,3 +53,21 @@ A terminal on the display, the home screen at power-on: built-in commands, the `
 editors, Python programs and Linux programs on a pseudo-terminal, with the keyboard of the serial or
 TCP terminal. A tap opens the app menu.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/shell-linux)
+
+## machine: the hardware
+
+Apps that show MicroPython's `machine` API on a Linux board, in
+[`examples/machine`](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine).
+Their hardware code is the standard API, the same as on a microcontroller; on the STM32MP157C-DK2
+`Pin` is served by Linux and the rest by the Cortex-M4.
+
+### Board Explorer
+
+![Board Explorer](images/board-explorer.png)
+
+The Arduino connector on the screen: tap a pin, make it an input, an output, an analog input or
+the PWM, see its value live. The Cortex-M4 reads back the level of an output Linux drives and
+measures its own PWM on the pin; the LEDs come from Linux's LED class, `machine.Pin` and the M4.
+Nothing to wire.
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/board-explorer)
+

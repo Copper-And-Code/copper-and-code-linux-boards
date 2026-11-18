@@ -1,0 +1,597 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Board Explorer",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "aad17473978547768bef8df66eefb959",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "67cd6566c27049ab94e867ea5b8961be",
+          "name": "title",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 10,
+            "width": 420,
+            "height": 40,
+            "text": "Board Explorer",
+            "textColor": "#FFFFFF",
+            "fontSize": 32,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "a513bbc1ac5341c2b639428bb154be8f",
+          "name": "subtitle",
+          "type": "label",
+          "props": {
+            "x": 440,
+            "y": 20,
+            "width": 344,
+            "height": 24,
+            "text": "machine: Linux + Cortex-M4",
+            "textColor": "#8FA0B5",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_RIGHT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b75aba17f7734bdc825cc40f270d4c39",
+          "name": "pins_panel",
+          "type": "panel",
+          "props": {
+            "x": 10,
+            "y": 62,
+            "width": 470,
+            "height": 318,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "name": "detail_panel",
+          "type": "panel",
+          "props": {
+            "x": 490,
+            "y": 62,
+            "width": 300,
+            "height": 318,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c4fdfc8cd1134489a7e2dd9d5d4c17fd",
+          "name": "pin_title",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 10,
+            "width": 272,
+            "height": 34,
+            "text": "D2",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c7cb181d492640deb8903b9ab097ca77",
+          "name": "pin_info",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 44,
+            "width": 272,
+            "height": 42,
+            "text": "Tap a pin",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "cfe8bb1bcbe6401e8ba9fa45b06011b6",
+          "name": "mode_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 8,
+            "y": 90,
+            "width": 284,
+            "height": 48,
+            "map": "Off,In,In+,Out",
+            "bgColor": "#1E2633",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "mode_buttons_value_changed"
+          },
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "cd2af12335d340838da5ecfd580066b4",
+          "name": "value",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 148,
+            "width": 272,
+            "height": 42,
+            "text": "-",
+            "textColor": "#FFFFFF",
+            "fontSize": 32,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "a190e8907b4b483fb84eb3cff726ef1b",
+          "name": "value_note",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 192,
+            "width": 272,
+            "height": 40,
+            "text": "",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "fa8c5947be3845b3b2db20d6bfe95eb4",
+          "name": "value_bar",
+          "type": "bar",
+          "props": {
+            "x": 14,
+            "y": 238,
+            "width": 272,
+            "height": 14,
+            "min": 0,
+            "max": 1000,
+            "value": 0,
+            "bgColor": "#2A3444",
+            "indicatorColor": "#4CC38A",
+            "mode": "LV_BAR_MODE_NORMAL",
+            "animated": false,
+            "startValue": 0
+          },
+          "events": {},
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "d656f0ca4d1a4c5c901d7493c5330a05",
+          "name": "duty_slider",
+          "type": "slider",
+          "props": {
+            "x": 20,
+            "y": 240,
+            "width": 260,
+            "height": 16,
+            "min": 0,
+            "max": 100,
+            "value": 25,
+            "bgColor": "#2A3444",
+            "indicatorColor": "#B07CFF",
+            "knobColor": "#FFFFFF",
+            "mode": "normal",
+            "isRange": false,
+            "leftValue": 0
+          },
+          "events": {
+            "VALUE_CHANGED": "duty_slider_value_changed"
+          },
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "cdc70c63fa7a4132adb96511d8dff877",
+          "name": "out_switch",
+          "type": "switch",
+          "props": {
+            "x": 14,
+            "y": 236,
+            "width": 80,
+            "height": 40,
+            "checked": false,
+            "onColor": "#E0742F",
+            "offColor": "#2A3444",
+            "knobColor": "#FFFFFF",
+            "disabled": false
+          },
+          "events": {
+            "VALUE_CHANGED": "out_switch_value_changed"
+          },
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "3848b6c9ed78401daa6bf2a69b1763ac",
+          "name": "freq_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 8,
+            "y": 266,
+            "width": 284,
+            "height": 44,
+            "map": "50 Hz,1 kHz,20 kHz",
+            "bgColor": "#1E2633",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "freq_buttons_value_changed"
+          },
+          "parentId": "3a80dafcc3af4e09b8a36dcc8a71af67",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "97fe7e85c5a5400fb711968e80ea663b",
+          "name": "leds_panel",
+          "type": "panel",
+          "props": {
+            "x": 10,
+            "y": 390,
+            "width": 780,
+            "height": 80,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "2e724f4a534b4a76adb1dbbecbc2d6ee",
+          "name": "led_blue_label",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 10,
+            "width": 160,
+            "height": 60,
+            "text": "Blue LED, PD11\nLinux LED class",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "97fe7e85c5a5400fb711968e80ea663b",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "346d0d477ffd41879221afd5862f1a06",
+          "name": "led_blue",
+          "type": "switch",
+          "props": {
+            "x": 176,
+            "y": 20,
+            "width": 70,
+            "height": 38,
+            "checked": false,
+            "onColor": "#2F6FDE",
+            "offColor": "#2A3444",
+            "knobColor": "#FFFFFF",
+            "disabled": false
+          },
+          "events": {
+            "VALUE_CHANGED": "led_blue_value_changed"
+          },
+          "parentId": "97fe7e85c5a5400fb711968e80ea663b",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "145173ab0fad48d893a5a058ad5b0784",
+          "name": "led_red_label",
+          "type": "label",
+          "props": {
+            "x": 268,
+            "y": 10,
+            "width": 150,
+            "height": 60,
+            "text": "Red LED, PA13\nmachine.Pin",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "97fe7e85c5a5400fb711968e80ea663b",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ce8ae8e50e364581adc02c9bbc81def6",
+          "name": "led_red",
+          "type": "switch",
+          "props": {
+            "x": 414,
+            "y": 20,
+            "width": 70,
+            "height": 38,
+            "checked": false,
+            "onColor": "#E5484D",
+            "offColor": "#2A3444",
+            "knobColor": "#FFFFFF",
+            "disabled": false
+          },
+          "events": {
+            "VALUE_CHANGED": "led_red_value_changed"
+          },
+          "parentId": "97fe7e85c5a5400fb711968e80ea663b",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "533ae8dc29b64035ad7dccb58cdcefcf",
+          "name": "led_orange_label",
+          "type": "label",
+          "props": {
+            "x": 520,
+            "y": 10,
+            "width": 170,
+            "height": 60,
+            "text": "Orange LED, PH7\nCortex-M4",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "97fe7e85c5a5400fb711968e80ea663b",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "2066587e8bfb43978d09e820a83b7481",
+          "name": "led_orange",
+          "type": "switch",
+          "props": {
+            "x": 690,
+            "y": 20,
+            "width": 70,
+            "height": 38,
+            "checked": false,
+            "onColor": "#E0742F",
+            "offColor": "#2A3444",
+            "knobColor": "#FFFFFF",
+            "disabled": false
+          },
+          "events": {
+            "VALUE_CHANGED": "led_orange_value_changed"
+          },
+          "parentId": "97fe7e85c5a5400fb711968e80ea663b",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "22cc3b4c8cf44ec4a4faed2167f3b979",
+          "name": "tick",
+          "type": "timer",
+          "props": {
+            "period": 200,
+            "enabled": true
+          },
+          "events": {
+            "TICK": "tick_tick"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import explorer_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "explorer_app.start(ui)"
+      },
+      "mode_buttons_value_changed": {
+        "widget": "mode_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "explorer_app.mode_changed(e.get_target_obj())"
+      },
+      "out_switch_value_changed": {
+        "widget": "out_switch",
+        "event": "VALUE_CHANGED",
+        "body": "explorer_app.out_changed(e.get_target_obj())"
+      },
+      "duty_slider_value_changed": {
+        "widget": "duty_slider",
+        "event": "VALUE_CHANGED",
+        "body": "explorer_app.duty_changed(e.get_target_obj())"
+      },
+      "freq_buttons_value_changed": {
+        "widget": "freq_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "explorer_app.freq_changed(e.get_target_obj())"
+      },
+      "led_red_value_changed": {
+        "widget": "led_red",
+        "event": "VALUE_CHANGED",
+        "body": "explorer_app.led_changed(\"red\", e.get_target_obj())"
+      },
+      "led_orange_value_changed": {
+        "widget": "led_orange",
+        "event": "VALUE_CHANGED",
+        "body": "explorer_app.led_changed(\"orange\", e.get_target_obj())"
+      },
+      "tick_tick": {
+        "widget": "tick",
+        "event": "TICK",
+        "body": "explorer_app.tick()"
+      },
+      "led_blue_value_changed": {
+        "widget": "led_blue",
+        "event": "VALUE_CHANGED",
+        "body": "explorer_app.led_changed(\"blue\", e.get_target_obj())"
+      }
+    }
+  },
+  "currentPageId": "aad17473978547768bef8df66eefb959",
+  "assets": {},
+  "variables": [],
+  "projectId": "12294df88fc845588a6e85dfe14cc48f",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "362a6c4c013144109696d10c4bbd8cc5",
+      "name": "board",
+      "source": "# SPDX-License-Identifier: MIT\n# The board's Arduino connector as machine sees it, and the hardware behind it: Pin on Linux GPIO\n# lines, ADC, PWM and I2C on the Cortex-M4 (mpy_m4). In the LVGL MPY Studio simulator there is no\n# hardware: a stand-in gives changing values, so the screen can be tried without a board.\n\nimport time\n\ntry:\n    import machine\n    import mpy_m4\n\n    HARDWARE = mpy_m4.available() and hasattr(machine, \"PWM\")\nexcept ImportError:\n    machine = mpy_m4 = None\n    HARDWARE = False\n\n# name, MCU pin, kind: gpio (a Linux GPIO line), adc, pwm, i2c, spi, uart (the M4's)\nPINS = [\n    (\"D0\", \"PE7\", \"uart\"), (\"D1\", \"PE8\", \"uart\"), (\"D2\", \"PE1\", \"gpio\"), (\"D3\", \"PD14\", \"gpio\"),\n    (\"D4\", \"PE10\", \"gpio\"), (\"D5\", \"PD15\", \"gpio\"), (\"D6\", \"PE9\", \"pwm\"), (\"D7\", \"PD1\", \"gpio\"),\n    (\"D8\", \"PG3\", \"gpio\"), (\"D9\", \"PH6\", \"gpio\"), (\"D10\", \"PE11\", \"gpio\"), (\"D11\", \"PE14\", \"spi\"),\n    (\"D12\", \"PE13\", \"spi\"), (\"D13\", \"PE12\", \"spi\"), (\"D14\", \"PA12\", \"i2c\"), (\"D15\", \"PA11\", \"i2c\"),\n    (\"A0\", \"ANA0\", \"adc\"), (\"A1\", \"ANA1\", \"adc\"), (\"A2\", \"PF14\", \"adc\"), (\"A3\", \"PF13\", \"adc\"),\n    (\"A4\", \"PC3\", \"adc\"), (\"A5\", \"PF12\", \"adc\"),\n]\n\nDESCRIPTIONS = {\n    \"gpio\": \"A Linux GPIO line: machine.Pin\",\n    \"adc\": \"Analog input, 0 to 2.5 V: machine.ADC on the Cortex-M4\",\n    \"pwm\": \"TIM1 channel 1: machine.PWM on the Cortex-M4\",\n    \"i2c\": \"I2C5: machine.I2C(5) on the Cortex-M4\",\n    \"spi\": \"SPI4: machine.SPI(4) on the Cortex-M4\",\n    \"uart\": \"UART7: machine.UART(7) on the Cortex-M4\",\n}\n\n\ndef firmware():\n    if not HARDWARE:\n        return \"simulator: values are made up\"\n    try:\n        return mpy_m4.info()\n    except OSError as error:\n        return \"Cortex-M4: %s\" % error\n\n\nclass Hardware:\n    # What the screen asks of the board; the same calls in the simulator's stand-in below.\n\n    def __init__(self):\n        self._pins = {}  # MCU pin -> (machine.Pin, \"in\" or \"out\")\n        self._pwm = None\n        self._adcs = {}\n        self._leds = {}\n\n    def release(self, pin):\n        old = self._pins.pop(pin, None)\n        if old is not None:\n            old[0].deinit()\n        if pin == \"PE9\" and self._pwm is not None:\n            self._pwm.deinit()\n            self._pwm = None\n\n    def pin_in(self, pin, pull_up):\n        self.release(pin)\n        pull = machine.Pin.PULL_UP if pull_up else None\n        self._pins[pin] = (machine.Pin(pin, machine.Pin.IN, pull), \"in\")\n\n    def pin_out(self, pin, value):\n        if pin in self._pins and self._pins[pin][1] == \"out\":\n            self._pins[pin][0].value(value)\n            return\n        self.release(pin)\n        self._pins[pin] = (machine.Pin(pin, machine.Pin.OUT, value=value), \"out\")\n\n    def pin_value(self, pin):\n        return self._pins[pin][0].value()\n\n    def seen_by_m4(self, pin):\n        # The level the Cortex-M4 reads on the pin, whoever drives it.\n        frequency, high = mpy_m4.measure(pin, 2)\n        return 1 if high > 0.5 else 0\n\n    def adc_uv(self, pin):\n        if pin not in self._adcs:\n            self._adcs[pin] = machine.ADC(pin)\n        return self._adcs[pin].read_uv()\n\n    def pwm(self, frequency, percent):\n        duty = percent * 65535 // 100\n        if self._pwm is None:\n            self._pwm = machine.PWM(\"PE9\", freq=frequency, duty_u16=duty)\n        else:\n            self._pwm.init(freq=frequency, duty_u16=duty)\n\n    def measure(self, pin, frequency):\n        # A few periods of the signal, at least 10 ms.\n        return mpy_m4.measure(pin, max(10, min(1000, 3000 // frequency + 1)))\n\n    def scan(self):\n        return machine.I2C(5).scan()\n\n    def led(self, name, on):\n        if name == \"orange\":  # PH7, which the device tree gives the Cortex-M4\n            mpy_m4.led(on)\n        elif name == \"blue\":\n            # PD11 belongs to Linux's LED class as \"heartbeat\": on is steady, off gives the\n            # blinking back to the kernel.\n            root = \"/sys/class/leds/heartbeat/\"\n            with open(root + \"trigger\", \"w\") as f:\n                f.write(\"none\" if on else \"heartbeat\")\n            if on:\n                with open(root + \"brightness\", \"w\") as f:\n                    f.write(\"1\")\n        else:\n            # PA13, active low. (PA14, the green LED, is also the USER1 button, whose interrupt the\n            # device tree gives the M4: Linux may read it but not drive it.)\n            if \"PA13\" not in self._leds:\n                self._leds[\"PA13\"] = machine.Pin(\"PA13\", machine.Pin.OUT, value=1)\n            self._leds[\"PA13\"].value(0 if on else 1)\n\n\nclass Simulated:\n    # The simulator's stand-in: an output reads back what was set, inputs and ADCs change slowly.\n\n    def __init__(self):\n        self._out = {}\n        self._pwm = (1000, 25)\n\n    def release(self, pin):\n        self._out.pop(pin, None)\n\n    def pin_in(self, pin, pull_up):\n        self._out.pop(pin, None)\n\n    def pin_out(self, pin, value):\n        self._out[pin] = value\n\n    def pin_value(self, pin):\n        if pin in self._out:\n            return self._out[pin]\n        return (time.ticks_ms() // 1000 + len(pin)) % 2\n\n    def seen_by_m4(self, pin):\n        return self.pin_value(pin)\n\n    def adc_uv(self, pin):\n        phase = (time.ticks_ms() // 50 + 37 * len(pin) + ord(pin[-1])) % 200\n        return 400000 + abs(phase - 100) * 15000\n\n    def pwm(self, frequency, percent):\n        self._pwm = (frequency, percent)\n\n    def measure(self, pin, frequency):\n        return float(self._pwm[0]), self._pwm[1] / 100\n\n    def scan(self):\n        return [0x3C, 0x76]\n\n    def led(self, name, on):\n        pass\n\n\nhardware = Hardware() if HARDWARE else Simulated()\n"
+    },
+    {
+      "id": "636b764873374ad79d636620193aaeab",
+      "name": "explorer_app",
+      "source": "# SPDX-License-Identifier: MIT\n# Board Explorer: the Arduino connector on the screen. Tap a pin, choose what it does, see its\n# value live. GPIO pins are Linux GPIO lines (machine.Pin); the M4 reads back the level an output\n# really has. ADC, PWM and I2C are served by the Cortex-M4, which also measures the PWM on its pin.\n\nimport time\n\nimport lvgl as lv\n\nimport board\n\nCOLORS = {\n    \"off\": 0x2A3444, \"in\": 0x2F6FDE, \"out\": 0xE0742F, \"adc\": 0x2E9E6A, \"pwm\": 0x8A5CF6,\n    \"bus\": 0x2B8A9E,\n}\nMODES = {\n    \"gpio\": [\"Off\", \"In\", \"In+\", \"Out\"],\n    \"pwm\": [\"Off\", \"PWM\"],\n    \"adc\": [\"ADC\"],\n    \"i2c\": [\"Scan\"],\n    \"spi\": [],\n    \"uart\": [],\n}\nFREQUENCIES = [50, 1000, 20000]\n\n_ui = None\n_buttons = {}   # name -> (button, label)\n_state = {}     # name -> mode text (\"Off\", \"In\", \"In+\", \"Out\", \"ADC\", \"PWM\", \"Scan\")\n_selected = None\n_map = None     # the button matrix's map, kept alive\n_pwm = [1000, 25]\n_out = {}       # name -> 0 or 1, what an output is set to\n_measured = None\n_measured_at = 0\n_scan = None\n_ticks = 0\n_error = None   # what went wrong in the last action, shown until the next one\n\n\ndef _pin(name):\n    for entry in board.PINS:\n        if entry[0] == name:\n            return entry\n    return None\n\n\ndef _font(size):\n    return getattr(lv, \"font_montserrat_%d\" % size)\n\n\ndef _hide(obj, hidden):\n    if hidden:\n        obj.add_flag(lv.obj.FLAG.HIDDEN)\n    else:\n        obj.remove_flag(lv.obj.FLAG.HIDDEN)\n\n\ndef _color(name):\n    kind = _pin(name)[2]\n    mode = _state.get(name, \"Off\")\n    if kind in (\"i2c\", \"spi\", \"uart\"):\n        return COLORS[\"bus\"]\n    if kind == \"adc\":\n        return COLORS[\"adc\"]\n    if mode == \"PWM\":\n        return COLORS[\"pwm\"]\n    if mode == \"Out\":\n        return COLORS[\"out\"]\n    if mode in (\"In\", \"In+\"):\n        return COLORS[\"in\"]\n    return COLORS[\"off\"]\n\n\ndef _caption(name):\n    kind = _pin(name)[2]\n    mode = _state.get(name, \"Off\")\n    if kind in (\"i2c\", \"spi\", \"uart\"):\n        return kind.upper()\n    if kind == \"adc\":\n        return _state.get(name + \":v\", \"\")\n    if mode == \"PWM\":\n        return \"%d%%\" % _pwm[1]\n    if mode == \"Out\":\n        return \"H\" if _out.get(name) else \"L\"\n    if mode in (\"In\", \"In+\"):\n        return _state.get(name + \":v\", \"\")\n    return \"-\"\n\n\ndef _paint(name):\n    button, label = _buttons[name]\n    button.set_style_bg_color(lv.color_hex(_color(name)), 0)\n    button.set_style_border_width(3 if name == _selected else 0, 0)\n    label.set_text(\"%s\\n%s\" % (name, _caption(name)))\n\n\ndef _build_pins(panel):\n    for text, y in ((\"DIGITAL\", 6), (\"ANALOG\", 196)):\n        caption = lv.label(panel)\n        caption.set_text(text)\n        caption.set_pos(10, y)\n        caption.set_style_text_color(lv.color_hex(0x8FA0B5), 0)\n        caption.set_style_text_font(_font(14), 0)\n    for index, (name, mcu, kind) in enumerate(board.PINS):\n        if name.startswith(\"D\"):\n            column, row = index % 8, index // 8\n            x, y = 7 + column * 57, 28 + row * 80\n        else:\n            column = index - 16\n            x, y = 7 + column * 57, 218\n        button = lv.button(panel)\n        button.set_pos(x, y)\n        button.set_size(52, 70)\n        button.set_style_radius(10, 0)\n        button.set_style_border_color(lv.color_hex(0xFFFFFF), 0)\n        button.set_style_shadow_width(0, 0)\n        label = lv.label(button)\n        label.set_style_text_font(_font(16), 0)\n        label.set_style_text_align(lv.TEXT_ALIGN.CENTER, 0)\n        label.center()\n        button.add_event_cb(lambda e, n=name: select(n), lv.EVENT.CLICKED, None)\n        _buttons[name] = (button, label)\n        if kind == \"adc\":\n            _state[name] = \"ADC\"\n\n\ndef _set_modes(name):\n    global _map\n    modes = MODES[_pin(name)[2]]\n    matrix = _ui.mode_buttons\n    _hide(matrix, not modes)\n    if not modes:\n        return\n    _map = modes + [\"\"]\n    matrix.set_map(_map)\n    matrix.set_button_ctrl_all(lv.buttonmatrix.CTRL.CHECKABLE)\n    matrix.set_one_checked(True)\n    current = _state.get(name, modes[0])\n    if current in modes:\n        matrix.set_button_ctrl(modes.index(current), lv.buttonmatrix.CTRL.CHECKED)\n\n\ndef _show_controls(name):\n    kind = _pin(name)[2]\n    mode = _state.get(name, \"Off\")\n    _hide(_ui.value_bar, kind != \"adc\")\n    _hide(_ui.duty_slider, mode != \"PWM\")\n    _hide(_ui.freq_buttons, mode != \"PWM\")\n    _hide(_ui.out_switch, mode != \"Out\")\n    if mode == \"PWM\":\n        _ui.duty_slider.set_value(_pwm[1], False)\n        _ui.freq_buttons.set_button_ctrl_all(lv.buttonmatrix.CTRL.CHECKABLE)\n        _ui.freq_buttons.set_one_checked(True)\n        _ui.freq_buttons.set_button_ctrl(FREQUENCIES.index(_pwm[0]), lv.buttonmatrix.CTRL.CHECKED)\n    if mode == \"Out\":\n        if _out.get(name):\n            _ui.out_switch.add_state(lv.STATE.CHECKED)\n        else:\n            _ui.out_switch.remove_state(lv.STATE.CHECKED)\n\n\ndef select(name):\n    global _selected, _measured, _error\n    previous, _selected = _selected, name\n    _measured = None\n    _error = None\n    if previous:\n        _paint(previous)\n    _paint(name)\n    entry = _pin(name)\n    _ui.pin_title.set_text(\"%s  -  %s\" % (name, entry[1]))\n    _ui.pin_info.set_text(board.DESCRIPTIONS[entry[2]])\n    _set_modes(name)\n    _show_controls(name)\n    _ui.value_note.set_text(\"\")\n    refresh()\n\n\ndef _apply(name, mode):\n    # Set the hardware for a new mode of a pin.\n    mcu = _pin(name)[1]\n    hw = board.hardware\n    try:\n        if mode in (\"In\", \"In+\"):\n            hw.pin_in(mcu, mode == \"In+\")\n        elif mode == \"Out\":\n            hw.pin_out(mcu, _out.get(name, 0))\n        elif mode == \"PWM\":\n            hw.pwm(_pwm[0], _pwm[1])\n        elif mode == \"Scan\":\n            global _scan\n            _scan = hw.scan()\n        elif mode == \"Off\":\n            hw.release(mcu)\n        _state[name] = mode\n    except OSError as error:\n        global _error\n        _error = \"Error: %s\" % error\n\n\ndef mode_changed(matrix):\n    global _error\n    if not _selected:\n        return\n    _error = None\n    index = matrix.get_selected_button()\n    modes = MODES[_pin(_selected)[2]]\n    if 0 <= index < len(modes):\n        _apply(_selected, modes[index])\n        _show_controls(_selected)\n        _paint(_selected)\n        refresh()\n\n\ndef out_changed(switch):\n    if _selected and _state.get(_selected) == \"Out\":\n        _out[_selected] = 1 if switch.has_state(lv.STATE.CHECKED) else 0\n        _apply(_selected, \"Out\")\n        _paint(_selected)\n        refresh()\n\n\ndef duty_changed(slider):\n    global _measured\n    _pwm[1] = slider.get_value()\n    _measured = None\n    if _state.get(\"D6\") == \"PWM\":\n        _apply(\"D6\", \"PWM\")\n        _paint(\"D6\")\n\n\ndef freq_changed(matrix):\n    global _measured\n    index = matrix.get_selected_button()\n    if 0 <= index < len(FREQUENCIES):\n        _pwm[0] = FREQUENCIES[index]\n        _measured = None\n        if _state.get(\"D6\") == \"PWM\":\n            _apply(\"D6\", \"PWM\")\n\n\ndef led_changed(name, switch):\n    global _error\n    _error = None\n    try:\n        board.hardware.led(name, switch.has_state(lv.STATE.CHECKED))\n    except OSError as error:\n        _error = \"%s LED: %s\" % (name.capitalize(), error)\n        refresh()\n\n\ndef refresh():\n    # The selected pin's value, in words.\n    global _measured, _measured_at\n    if not _selected:\n        return\n    name, mcu, kind = _pin(_selected)\n    mode = _state.get(_selected, \"Off\")\n    hw = board.hardware\n    value, note = \"-\", \"\"\n    try:\n        if kind == \"adc\":\n            uv = hw.adc_uv(name)\n            value = \"%.3f V\" % (uv / 1000000)\n            _ui.value_bar.set_value(min(1000, uv // 2500), False)\n            note = \"Floating while nothing is wired: it drifts.\" if uv < 300000 else \"\"\n        elif mode in (\"In\", \"In+\"):\n            value = \"%d\" % hw.pin_value(mcu)\n            note = \"Read by Linux. Pull-up on.\" if mode == \"In+\" else \"Read by Linux.\"\n        elif mode == \"Out\":\n            set_to = _out.get(_selected, 0)\n            seen = hw.seen_by_m4(mcu)\n            value = \"%s\" % (\"HIGH\" if set_to else \"LOW\")\n            note = \"Set by Linux; the Cortex-M4 reads %d on the pin.\" % seen\n        elif mode == \"PWM\":\n            now = time.ticks_ms()\n            if _measured is None or time.ticks_diff(now, _measured_at) > 1000:\n                _measured = hw.measure(mcu, _pwm[0])\n                _measured_at = now\n            frequency, high = _measured\n            value = \"%d Hz  %d%%\" % (_pwm[0], _pwm[1])\n            note = \"Measured on the pin by the M4: %.1f Hz, %.1f%%\" % (frequency, high * 100)\n        elif mode == \"Scan\":\n            found = _scan or []\n            value = \"%d device%s\" % (len(found), \"\" if len(found) == 1 else \"s\")\n            note = \" \".join(\"0x%02X\" % a for a in found) if found else \"Nothing answers on I2C5.\"\n        elif kind in (\"spi\", \"uart\"):\n            value = kind.upper()\n            note = \"Used through machine.%s: see the docs.\" % (\"SPI(4)\" if kind == \"spi\" else \"UART(7)\")\n        else:\n            note = \"Choose In, In+ or Out.\"\n    except OSError as error:\n        note = \"Error: %s\" % error\n    _ui.value.set_text(value)\n    # An error of the last action stays until the next one.\n    _ui.value_note.set_text(_error or note)\n\n\ndef tick():\n    # Every 200 ms: the selected pin; every second the inputs and ADCs of the whole connector.\n    global _ticks\n    _ticks += 1\n    refresh()\n    if _ticks % 5:\n        return\n    hw = board.hardware\n    for name, mcu, kind in board.PINS:\n        mode = _state.get(name)\n        try:\n            if kind == \"adc\":\n                _state[name + \":v\"] = \"%.2f\" % (hw.adc_uv(name) / 1000000)\n            elif mode in (\"In\", \"In+\"):\n                _state[name + \":v\"] = \"%d\" % hw.pin_value(mcu)\n            else:\n                continue\n        except OSError:\n            _state[name + \":v\"] = \"?\"\n        _paint(name)\n\n\ndef _style_matrix(matrix, accent):\n    # Separate rounded keys on the dark panel; the chosen one in the accent colour.\n    matrix.set_style_bg_opa(lv.OPA.TRANSP, 0)\n    matrix.set_style_border_width(0, 0)\n    matrix.set_style_outline_width(0, lv.STATE.FOCUS_KEY)\n    matrix.set_style_pad_all(4, 0)\n    matrix.set_style_pad_gap(6, 0)\n    items = lv.PART.ITEMS\n    matrix.set_style_bg_color(lv.color_hex(0x2A3444), items)\n    matrix.set_style_bg_opa(lv.OPA.COVER, items)\n    matrix.set_style_radius(8, items)\n    matrix.set_style_border_width(0, items)\n    matrix.set_style_shadow_width(0, items)\n    matrix.set_style_text_color(lv.color_hex(0xFFFFFF), items)\n    matrix.set_style_text_font(_font(16), items)\n    matrix.set_style_bg_color(lv.color_hex(accent), items | lv.STATE.CHECKED)\n\n\ndef start(ui):\n    global _ui\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    _style_matrix(ui.mode_buttons, 0x2F6FDE)\n    _style_matrix(ui.freq_buttons, COLORS[\"pwm\"])\n    ui.subtitle.set_text(board.firmware())\n    _build_pins(ui.pins_panel)\n    for name in _buttons:\n        _paint(name)\n    select(\"D2\")\n"
+    }
+  ]
+}

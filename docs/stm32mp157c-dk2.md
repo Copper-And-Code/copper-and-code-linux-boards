@@ -49,13 +49,16 @@ print(gps.readline())
 Timer(0, period=500, callback=lambda t: print("tick"))
 
 Pin("PA14", Pin.IN, Pin.PULL_UP).value()   # Pin stays on Linux GPIO lines, as on the STM32MP135F-DK
+                                           # (PA14 is the USER1 button: as an input only, see below)
 ```
 
 How it fits together:
 
 - **Device tree.** The `m4-examples` device tree gives the Cortex-M4 the Arduino connector's ADC,
   DAC, I2C5, SPI4, UART7, TIM1 and TIM2, and the orange LED; Linux keeps the display, touch, Wi-Fi,
-  audio and USB. Linux only reserves those pins: the firmware sets them itself.
+  audio and USB. Linux only reserves those pins: the firmware sets them itself. It also gives the
+  M4 the USER1 button's interrupt (PA14, shared with the green LED): Linux may read PA14 but not
+  drive it (`EIO`).
 - **Firmware** (`mcu/stm32mp157c-dk2/`, built by `scripts/build_m4.sh` with `arm-none-eabi-gcc`,
   without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our `main.c` and the
   protocol. `install.sh` puts it in `/lib/firmware/mpy_m4.elf`.
