@@ -754,9 +754,9 @@ Before the first installation the board is reachable over the original ST USB ne
 <code>192.168.7.1</code>.</p>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
 <p>From the repository root, after the build:</p>
-<div class="highlight"><pre><span></span><code>scripts/deploy_mp135.sh<span class="w">            </span><span class="c1"># BOARD defaults to 192.168.7.1</span>
+<div class="highlight"><pre><span></span><code>scripts/deploy.sh<span class="w">            </span><span class="c1"># BOARD defaults to 192.168.7.1</span>
 </code></pre></div>
-<p><code>deploy_mp135.sh</code> copies the newest MicroPython binary, <code>mpy-repl-hub</code> and DTB from <code>dist/</code> (select
+<p><code>deploy.sh</code> copies the newest MicroPython binary, <code>mpy-repl-hub</code> and DTB from <code>dist/</code> (select
 others with <code>MICROPYTHON=</code>, <code>HUB=</code>, <code>DTB=</code>), the launcher, the units and the scripts of <code>linux/</code> to
 <code>/tmp/mpy-install</code> on the board, and runs <code>linux/install.sh</code> there. <code>install.sh</code>:</p>
 <ul>
@@ -773,9 +773,9 @@ others with <code>MICROPYTHON=</code>, <code>HUB=</code>, <code>DTB=</code>), th
 <li>says whether a reboot is needed (new DTB or no gadget yet), restarts the REPL when only programs
   changed, or reports that nothing changed.</li>
 </ul>
-<p>The uninstaller is installed as <code>/usr/local/mpy/bin/mpy-uninstall</code>. Run <code>deploy_mp135.sh</code> again after
+<p>The uninstaller is installed as <code>/usr/local/mpy/bin/mpy-uninstall</code>. Run <code>deploy.sh</code> again after
 every build: an unchanged installation reports <code>nothing changed</code>.</p>
-<p>On Windows, <code>scripts/deploy_mp135.sh</code> runs from Git Bash with the OpenSSH client of Windows. Without
+<p>On Windows, <code>scripts/deploy.sh</code> runs from Git Bash with the OpenSSH client of Windows. Without
 Bash, copy the files listed at the top of <code>linux/install.sh</code> to a folder on the board (for example
 with <code>scp</code> from PowerShell) and run <code>sh install.sh</code> there.</p>
 <p>The expected DTB SHA-256 values for this exact release are:</p>
@@ -848,7 +848,7 @@ demo), run on the board and reboot:</p>
 reboot
 </code></pre></div>
 <p>The board is then reachable again over the original ST USB network gadget at <code>192.168.7.1</code>; running
-<code>scripts/deploy_mp135.sh</code> installs everything again.</p>
+<code>scripts/deploy.sh</code> installs everything again.</p>
 <p>If the board does not boot or the USB gadget fails, use the ST-LINK Linux console and do the same by
 hand:</p>
 <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>/boot/stm32mp135f-dk.dtb.st-original<span class="w"> </span>/boot/stm32mp135f-dk.dtb

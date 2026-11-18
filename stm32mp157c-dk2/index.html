@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#stm32mp157c-dk2-plan-not-started" class="md-skip">
+        <a href="#stm32mp157c-dk2" class="md-skip">
           Skip to content
         </a>
       
@@ -671,9 +671,14 @@
 
 
 
-<h1 id="stm32mp157c-dk2-plan-not-started">STM32MP157C-DK2: plan (not started)<a class="headerlink" href="#stm32mp157c-dk2-plan-not-started" title="Permanent link">&para;</a></h1>
-<p>Second board of this project, after the STM32MP135F-DK is complete. Product page:
-<a href="https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html">https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html</a>.</p>
+<h1 id="stm32mp157c-dk2">STM32MP157C-DK2<a class="headerlink" href="#stm32mp157c-dk2" title="Permanent link">&para;</a></h1>
+<p>Second board of this project. <strong>Status:</strong> OpenSTLinux flashed, our firmware installed with
+<code>scripts/deploy.sh</code>, the shell and the REPL working (serial and TCP), the 480x800 panel turned to
+800x480 in software (about 50 full frames per second). The Cortex-M4 and <code>machine</code> over RPMsg are
+next. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>. Product page:
+<a href="https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html">https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html</a>.
+Flashing and boot: <a href="https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image">Populate the target and boot the image</a>
+on the ST wiki.</p>
 <p>The goal is the same as on the STM32MP135F-DK (MicroPython unix port with LVGL on the Cortex-A7,
 the MCU-style REPL, <code>display_driver</code>, LVGL MPY Studio), plus a <code>machine</code> backend served by the
 board's Cortex-M4. This document separates what was checked from what is still assumed.</p>

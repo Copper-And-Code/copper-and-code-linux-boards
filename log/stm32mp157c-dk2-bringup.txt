@@ -1,0 +1,37 @@
+STM32MP157C-DK2 bring-up, 2026-11-18
+
+Flash: STM32CubeProgrammer 2.23.0, DFU in HS mode, Device ID 0x500 (STM32MP15), flash layout
+FlashLayout_sdcard_stm32mp157c-dk2-optee.tsv of the Starter Package openstlinux-6.6-yocto-scarthgap-
+mpu-v26.06.10: "Flashing service completed successfully" (rootfs 6 min 18 s).
+Boot from the microSD: U-Boot 2023.10-stm32mp-r3.1, Linux 6.6.129, OpenSTLinux Weston 5.0.17, root
+autologin on ttySTM0; "Reached target Sound Card" (STM32MP15-DK, CS42L51 codec).
+Board: model "STMicroelectronics STM32MP157C-DK2 Discovery Board", 2 x Cortex-A7 at 650 MHz; bash,
+vi, less present; USB controller 49000000.usb-otg, Type-C data role device.
+
+Hostname: st-hostname appended part of the MAC to "stm32mp1"; disabled, hostname mp157-mpy.
+
+Our firmware (the same binary as the STM32MP135F-DK):
+  linuxfb.open() -> (480, 800, 16, 1024): pitch 1024 bytes; backlight 5a000000.dsi.0;
+  touch_evdev.find_touch() -> /dev/input/event1 (FT6236)
+  MPY_DISPLAY_ROTATION=90: WIDTH 800, HEIGHT 480, PANEL 480x800; checked by eye: landscape, the
+  right way up; stty size in the shell -> 30 100; a 100-character line fills one row.
+  Bare newlines stepped across the screen (STM32MP135F-DK too): ansiterm now returns to the
+  first column on a newline on Linux (onlcr); checked by eye with cat and ls.
+  linux sh: /usr/bin/sh, pipes, Ctrl-C stops sleep 30 and stays in sh, exit back to the shell.
+
+USB gadget: with the release's DTB the host refused the NCM interface ("cdc_ncm 3-7:1.0: bind()
+failure"); the board said "dwc2 49000000.usb-otg: dwc2_hsotg_ep_enable: No suitable fifo found".
+The release gives g-tx-fifo-size <256 16 16 16 16 16 16 16>; linux/stm32mp157c-dk2-usb-composite.dtso
+sets <128 128 64 16 16 16 16 16> as on the STM32MP135F-DK. scripts/build_mp157_usb.sh checks the base
+DTB (sha256 e6e7e256...) and the result. Copied once over the console (base64, sha256 4c1e58e7...
+checked on the board), original kept as /boot/stm32mp157c-dk2.dtb.st-original. After a reboot: no
+FIFO error, host interface up at 192.168.7.86, SSH and serial (MicroPython LVGL MP157 on ttyACM1).
+
+scripts/deploy.sh (MPY_SSH_ALIAS=stm32mp157c-dk2): install.sh recognised "board STM32MP157C-DK2",
+installed the drop-in MPY_DISPLAY_ROTATION=90, kept ST's /etc/default/usbotg as .st-original,
+disabled Weston and the splash, enabled the services. After the reboot: mpy-usb-composite and
+mpy-repl active, Weston inactive, no failed units.
+
+Tests on the DK2 (P=/dev/ttyACM1): test_repl.sh PASS; test_tcp_hub.py PASS (after it stopped
+expecting the STM32MP135F-DK's 480 width); t12: 2020 flushes in 10 s of 25% of the screen each,
+about 50 full 800x480 frames per second (19 Mpixel/s; the STM32MP135F-DK does 7.5).
