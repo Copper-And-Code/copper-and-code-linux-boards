@@ -2,6 +2,8 @@
 
 Second board of this project, after the STM32MP135F-DK is complete. Product page:
 <https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html>.
+Flashing and boot: [Populate the target and boot the image](https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image)
+on the ST wiki.
 
 The goal is the same as on the STM32MP135F-DK (MicroPython unix port with LVGL on the Cortex-A7,
 the MCU-style REPL, `display_driver`, LVGL MPY Studio), plus a `machine` backend served by the

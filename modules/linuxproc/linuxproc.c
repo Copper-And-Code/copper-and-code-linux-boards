@@ -20,6 +20,8 @@
 #include "py/mphal.h"
 #include "py/runtime.h"
 
+static void linuxproc_track(pid_t pid, bool add);
+
 static mp_obj_t linuxproc_run(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_argv, ARG_output, ARG_rows, ARG_cols, ARG_input_fd };
     static const mp_arg_t allowed_args[] = {
@@ -90,6 +92,7 @@ static mp_obj_t linuxproc_run(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         _exit(127);
     }
     close(slave);
+    linuxproc_track(child, true);
 
     int status = 0;
     bool child_done = false;
@@ -177,6 +180,7 @@ static mp_obj_t linuxproc_run(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         while (waitpid(child, &status, 0) < 0 && errno == EINTR) {
         }
         close(master);
+        linuxproc_track(child, false);
         nlr_raise(nlr.ret_val);
     }
     if (!child_done) {
@@ -184,6 +188,7 @@ static mp_obj_t linuxproc_run(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         }
     }
     close(master);
+    linuxproc_track(child, false);
     if (WIFEXITED(status)) {
         return MP_OBJ_NEW_SMALL_INT(WEXITSTATUS(status));
     }

@@ -197,6 +197,61 @@ static mp_obj_t linuxfb_blit(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW(linuxfb_blit_obj, 5, linuxfb_blit);
 
+// blit_rotated(x, y, width, height, buffer, rotation): copy a rectangle LVGL rendered in the rotated
+// (logical) orientation to the panel, turning it on the way, as lv_display_rotate_area() describes.
+// rotation is 90, 180 or 270; the buffer holds width x height RGB565 pixels with no padding. A
+// logical pixel (lx, ly) goes to the panel at (ly, H - 1 - lx) for 90, (W - 1 - lx, H - 1 - ly) for
+// 180 and (W - 1 - ly, lx) for 270, where W x H is the panel.
+static mp_obj_t linuxfb_blit_rotated(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+    linuxfb_check_open();
+    mp_int_t x = mp_obj_get_int(args[0]);
+    mp_int_t y = mp_obj_get_int(args[1]);
+    mp_int_t width = mp_obj_get_int(args[2]);
+    mp_int_t height = mp_obj_get_int(args[3]);
+    mp_int_t rotation = mp_obj_get_int(args[5]);
+    if (rotation != 90 && rotation != 180 && rotation != 270) {
+        mp_raise_ValueError(MP_ERROR_TEXT("linuxfb: rotation must be 90, 180 or 270"));
+    }
+    // The logical screen: turned a quarter, the panel's width and height swap.
+    mp_int_t logical_w = rotation == 180 ? (mp_int_t)fb.width : (mp_int_t)fb.height;
+    mp_int_t logical_h = rotation == 180 ? (mp_int_t)fb.height : (mp_int_t)fb.width;
+    if (x < 0 || y < 0 || width <= 0 || height <= 0 || width > logical_w || height > logical_h
+        || x > logical_w - width || y > logical_h - height) {
+        mp_raise_ValueError(MP_ERROR_TEXT("linuxfb: invalid rectangle"));
+    }
+    mp_buffer_info_t buffer;
+    mp_get_buffer_raise(args[4], &buffer, MP_BUFFER_READ);
+    if ((uint64_t)buffer.len < (uint64_t)width * (uint64_t)height * 2) {
+        mp_raise_ValueError(MP_ERROR_TEXT("linuxfb: buffer too small"));
+    }
+    const uint16_t *source = buffer.buf;
+    size_t pitch = fb.pitch / 2;  // in pixels
+    uint16_t *panel = (uint16_t *)fb.map;
+    mp_int_t panel_w = fb.width, panel_h = fb.height;
+    for (mp_int_t row = 0; row < height; ++row) {
+        mp_int_t ly = y + row;
+        const uint16_t *line = source + (size_t)row * width;
+        for (mp_int_t col = 0; col < width; ++col) {
+            mp_int_t lx = x + col;
+            mp_int_t px, py;
+            if (rotation == 90) {
+                px = ly;
+                py = panel_h - 1 - lx;
+            } else if (rotation == 180) {
+                px = panel_w - 1 - lx;
+                py = panel_h - 1 - ly;
+            } else {
+                px = panel_w - 1 - ly;
+                py = lx;
+            }
+            panel[(size_t)py * pitch + (size_t)px] = line[col];
+        }
+    }
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linuxfb_blit_rotated_obj, 6, 6, linuxfb_blit_rotated);
+
 static mp_obj_t linuxfb_close(void) {
     linuxfb_cleanup();
     return mp_const_none;
@@ -207,6 +262,7 @@ static const mp_rom_map_elem_t linuxfb_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_linuxfb) },
     { MP_ROM_QSTR(MP_QSTR_open), MP_ROM_PTR(&linuxfb_open_obj) },
     { MP_ROM_QSTR(MP_QSTR_blit), MP_ROM_PTR(&linuxfb_blit_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit_rotated), MP_ROM_PTR(&linuxfb_blit_rotated_obj) },
     { MP_ROM_QSTR(MP_QSTR_close), MP_ROM_PTR(&linuxfb_close_obj) },
 };
 static MP_DEFINE_CONST_DICT(linuxfb_module_globals, linuxfb_module_globals_table);

@@ -19,6 +19,7 @@ import mpy_settings
 import mpyrepl
 
 NEXT = "/run/mpy-home-next"  # the app to run after the restart; in RAM, so a reboot forgets it
+LINUX_SHELL = "linux-shell"  # NEXT for the Linux shell instead of an app
 BACK = 0x121820
 TILE = 0x1E2633
 ACCENT = 0x2F6FDE
@@ -82,6 +83,7 @@ def menu():
     for app in apps():
         _tile(grid, app["name"], TILE, lambda p=app["path"]: launch(p))
     _tile(grid, lv.SYMBOL.KEYBOARD + "  Shell", ACCENT, lambda: ansiterm.term.show())
+    _tile(grid, lv.SYMBOL.KEYBOARD + "  Linux shell", 0x2A3444, lambda: launch(LINUX_SHELL))
     _tile(grid, lv.SYMBOL.POWER + "  Power off", 0xB3261E, lambda: confirm_power_off(screen))
     if not apps():
         note = _label(screen, "Add apps to settings.json, section \"home\"", 14, 0x9AA6B8)
@@ -162,7 +164,7 @@ def main():
         os.remove(NEXT)  # the next soft reset, or the home button, goes back to the shell
     except OSError:
         path = None
-    if path:
+    if path and path != LINUX_SHELL:
         try:
             run_app(path)
             return
@@ -172,4 +174,18 @@ def main():
     import shell_linux
 
     ansiterm.on_screen = _on_terminal
-    shell_linux.main()
+    startup = None
+    if path == LINUX_SHELL:
+        # The system's own shell, full screen; its `exit` leaves the MicroPython shell. While it
+        # runs, Ctrl-C and Ctrl-A are its own: LVGL MPY Studio and mpremote wait for `exit`.
+        bash = any(_exists(d + "/bash") for d in ("/bin", "/usr/bin"))
+        startup = "linux bash -l" if bash else "linux sh -l"
+    shell_linux.main(startup)
+
+
+def _exists(path):
+    try:
+        os.stat(path)
+        return True
+    except OSError:
+        return False

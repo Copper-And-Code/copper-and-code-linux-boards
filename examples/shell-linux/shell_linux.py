@@ -905,9 +905,23 @@ def run_line(line):
 # ---- The line editor ----
 
 
+_host = None
+
+
+def hostname():
+    global _host
+    if _host is None:
+        try:
+            with open("/proc/sys/kernel/hostname") as f:
+                _host = f.read().strip() or "mpy"
+        except OSError:
+            _host = "mpy"
+    return _host
+
+
 def prompt():
     """The prompt, and how many columns it takes."""
-    host, path = "mp135-mpy", os.getcwd() or "/"
+    host, path = hostname(), os.getcwd() or "/"
     text = "%smpy@%s%s:%s%s%s$ " % (GREEN, host, RESET, BLUE, path, RESET)
     return text, len(host) + len(path) + 7
 
@@ -1075,10 +1089,18 @@ def start_terminal():
     return ansiterm
 
 
-def main():
+def main(startup=None):
+    """startup: a command line run first, for example "linux bash -l" (mpy_home's Linux shell)."""
     screen = start_terminal()
     print("MicroPython Linux shell, `help` lists the commands,")
     print("`exit` or Ctrl-D ends it")
+    if startup:
+        try:
+            run_line(startup)
+        except KeyboardInterrupt:
+            print("^C")
+        except Exception as e:
+            sys.print_exception(e)
     try:
         while True:
             # A Ctrl-C can arrive anywhere, not only in run_line(): the display driver hands

@@ -2,7 +2,9 @@
 # Linux boards: the panel through a DRM dumb buffer (RGB565, the connector's preferred mode), the
 # first touchscreen through evdev, the first backlight in sysfs. display_driver contract 1.
 #
-# Environment: MPY_BACKLIGHT (a /sys/class/backlight/... directory), MPY_TOUCH_NAME, MPY_TOUCH_RANGE.
+# Environment: MPY_BACKLIGHT (a /sys/class/backlight/... directory), MPY_TOUCH_NAME, MPY_TOUCH_RANGE,
+# MPY_DISPLAY_ROTATION (0, 90, 180 or 270: for example 90 turns a 480x800 portrait panel into an
+# 800x480 landscape screen; LVGL renders turned and linuxfb.blit_rotated() turns it back).
 
 import _thread
 import os
@@ -35,29 +37,47 @@ _drm_width, _drm_height, _bpp, _stride = linuxfb.open()
 if _bpp != 16:
     linuxfb.close()
     raise RuntimeError("unexpected DRM mode: %sx%s, %s bpp" % (_drm_width, _drm_height, _bpp))
-WIDTH = _drm_width
-HEIGHT = _drm_height
+ROTATION = int(os.getenv("MPY_DISPLAY_ROTATION") or 0)
+if ROTATION not in (0, 90, 180, 270):
+    linuxfb.close()
+    raise ValueError("MPY_DISPLAY_ROTATION must be 0, 90, 180 or 270")
+PANEL_WIDTH = _drm_width
+PANEL_HEIGHT = _drm_height
+# What LVGL and the application see.
+WIDTH, HEIGHT = (_drm_height, _drm_width) if ROTATION in (90, 270) else (_drm_width, _drm_height)
 
 if not lv.is_initialized():
     lv.init()
-_buffer = bytearray(WIDTH * HEIGHT * 2)
-display = lv.display_create(WIDTH, HEIGHT)
+display = lv.display_create(PANEL_WIDTH, PANEL_HEIGHT)
 display.set_color_format(lv.COLOR_FORMAT.RGB565)
-display.set_buffers(_buffer, None, len(_buffer), lv.DISPLAY_RENDER_MODE.DIRECT)
+if ROTATION == 0:
+    # One full-screen buffer copied to the panel as it is: only the changed rectangles move.
+    _buffer = bytearray(WIDTH * HEIGHT * 2)
+    display.set_buffers(_buffer, None, len(_buffer), lv.DISPLAY_RENDER_MODE.DIRECT)
+else:
+    # LVGL renders a part of the screen at a time in the turned orientation; blit_rotated() turns
+    # each part into the panel's own while it copies it.
+    _buffer = bytearray(WIDTH * HEIGHT // 4 * 2)
+    display.set_buffers(_buffer, None, len(_buffer), lv.DISPLAY_RENDER_MODE.PARTIAL)
+    display.set_rotation(getattr(lv.DISPLAY_ROTATION, "_%d" % ROTATION))
 display.get_refr_timer().set_period(REFR_PERIOD_MS)
 
 
 def _flush(disp, area, _color_p):
     x, y = area.x1, area.y1
-    offset = (y * WIDTH + x) * 2
-    linuxfb.blit(x, y, area.get_width(), area.get_height(), memoryview(_buffer)[offset:], WIDTH * 2)
+    if ROTATION:
+        linuxfb.blit_rotated(x, y, area.get_width(), area.get_height(), _buffer, ROTATION)
+    else:
+        offset = (y * WIDTH + x) * 2
+        linuxfb.blit(x, y, area.get_width(), area.get_height(), memoryview(_buffer)[offset:], WIDTH * 2)
     disp.flush_ready()
 
 
 display.set_flush_cb(_flush)
 
 try:
-    touch = touch_evdev.TouchEvdev(WIDTH, HEIGHT)
+    # The panel's own coordinates: LVGL turns them with the display.
+    touch = touch_evdev.TouchEvdev(PANEL_WIDTH, PANEL_HEIGHT)
 except OSError as error:
     touch = None
     print("display_driver: no touch:", error)

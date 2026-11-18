@@ -18,6 +18,7 @@
 #
 # The font is in ansifont.py, under its own license.
 import io
+import sys
 import micropython
 import os
 from array import array
@@ -27,6 +28,10 @@ import display_driver
 from ansifont import FONT
 
 CELL_W, CELL_H = 8, 16
+# A new line also goes back to the first column, as a Linux terminal does with onlcr. On the MCU
+# ports MicroPython sends "\r\n" itself; the unix port leaves that to the terminal, so programs
+# that print "\n" would otherwise step across the screen.
+ONLCR = sys.platform == "linux"
 FG, BG = 7, 0  # default colours, palette indexes
 
 
@@ -396,6 +401,8 @@ class Terminal(io.IOBase):
         if c == 13:
             self.x = 0
         elif c == 10 or c == 11 or c == 12:
+            if c == 10 and ONLCR:
+                self.x = 0
             self.line_feed()
         elif c == 8:
             self.x = max(0, self.x - 1)
