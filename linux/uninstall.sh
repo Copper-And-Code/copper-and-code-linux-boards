@@ -1,7 +1,7 @@
 #!/bin/sh
 # SPDX-License-Identifier: MIT
-# Restore the OpenSTLinux configuration on the STM32MP135F-DK: original device tree, original USB
-# gadget, Weston and its demo. Run on the board as root, then reboot.
+# Restore the OpenSTLinux configuration on the STM32MP135F-DK or STM32MP157C-DK2: original device
+# tree, original USB gadget, Weston and its demo. Run on the board as root, then reboot.
 #
 #   uninstall.sh [--purge]    --purge also removes /usr/local/mpy (programs and the fs/ folder)
 set -eu
@@ -16,6 +16,8 @@ say() { printf 'uninstall: %s\n' "$*"; }
 for unit in mpy-repl.service mpy-usb-composite.service mpy-repl-tcp.socket; do
     systemctl disable --now "$unit" >/dev/null 2>&1 || true
 done
+rm -f "$UNITS/mpy-repl.service.d/board.conf"
+rmdir "$UNITS/mpy-repl.service.d" 2>/dev/null || true
 rm -f "$UNITS/mpy-repl.service" "$UNITS/mpy-usb-composite.service" \
     "$UNITS/mpy-repl-tcp.socket" "$UNITS/mpy-repl-tcp@.service"
 say "removed the MicroPython services"
@@ -34,8 +36,12 @@ for file in /etc/systemd/network/25-mpy-wifi.network /etc/wpa_supplicant/wpa_sup
         say "removed $file"
     fi
 done
-# The original gadget startup uses its defaults again.
-rm -f /etc/default/usbotg
+# The original gadget startup uses its defaults again: ST's file back where the image had one.
+if [ -e /etc/default/usbotg.st-original ]; then
+    mv /etc/default/usbotg.st-original /etc/default/usbotg
+else
+    rm -f /etc/default/usbotg
+fi
 
 if [ -e "$DTB.st-original" ]; then
     cp -p "$DTB.st-original" "$DTB"

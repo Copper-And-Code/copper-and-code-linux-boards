@@ -56,10 +56,10 @@ Before the first installation the board is reachable over the original ST USB ne
 From the repository root, after the build:
 
 ```sh
-scripts/deploy_mp135.sh            # BOARD defaults to 192.168.7.1
+scripts/deploy.sh            # BOARD defaults to 192.168.7.1
 ```
 
-`deploy_mp135.sh` copies the newest MicroPython binary, `mpy-repl-hub` and DTB from `dist/` (select
+`deploy.sh` copies the newest MicroPython binary, `mpy-repl-hub` and DTB from `dist/` (select
 others with `MICROPYTHON=`, `HUB=`, `DTB=`), the launcher, the units and the scripts of `linux/` to
 `/tmp/mpy-install` on the board, and runs `linux/install.sh` there. `install.sh`:
 
@@ -76,10 +76,10 @@ others with `MICROPYTHON=`, `HUB=`, `DTB=`), the launcher, the units and the scr
 - says whether a reboot is needed (new DTB or no gadget yet), restarts the REPL when only programs
   changed, or reports that nothing changed.
 
-The uninstaller is installed as `/usr/local/mpy/bin/mpy-uninstall`. Run `deploy_mp135.sh` again after
+The uninstaller is installed as `/usr/local/mpy/bin/mpy-uninstall`. Run `deploy.sh` again after
 every build: an unchanged installation reports `nothing changed`.
 
-On Windows, `scripts/deploy_mp135.sh` runs from Git Bash with the OpenSSH client of Windows. Without
+On Windows, `scripts/deploy.sh` runs from Git Bash with the OpenSSH client of Windows. Without
 Bash, copy the files listed at the top of `linux/install.sh` to a folder on the board (for example
 with `scp` from PowerShell) and run `sh install.sh` there.
 
@@ -188,7 +188,7 @@ reboot
 ```
 
 The board is then reachable again over the original ST USB network gadget at `192.168.7.1`; running
-`scripts/deploy_mp135.sh` installs everything again.
+`scripts/deploy.sh` installs everything again.
 
 If the board does not boot or the USB gadget fails, use the ST-LINK Linux console and do the same by
 hand:

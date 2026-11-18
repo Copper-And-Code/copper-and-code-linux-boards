@@ -105,7 +105,7 @@ board then needs a unix variant in `boards/unix/` built with its toolchain, and 
    ```sh
    scripts/build_mp135.sh lvgl
    scripts/build_mp135_usb.sh
-   scripts/deploy_mp135.sh          # over SSH; reboot when it asks
+   scripts/deploy.sh          # over SSH; reboot when it asks
    ```
 
 3. The screen shows "MicroPython ready". Talk to it:

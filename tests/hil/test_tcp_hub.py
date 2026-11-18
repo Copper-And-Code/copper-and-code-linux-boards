@@ -83,10 +83,9 @@ tcp_pid = mpremote(tcp, "print(open('/proc/self/stat').read().split()[0])")
 assert serial_pid == tcp_pid, (serial_pid, tcp_pid)
 print("PASS: serial and TCP share MicroPython process", serial_pid)
 
-shown = mpremote(tcp, "import display_driver; print(display_driver.WIDTH, display_driver.running())")
-assert shown == "480 True", shown
-shown = mpremote(PORT, "import display_driver; print(display_driver.WIDTH, display_driver.running())")
-assert shown == "480 True", shown
+over_tcp = mpremote(tcp, "import display_driver; print(display_driver.WIDTH, display_driver.running())")
+over_serial = mpremote(PORT, "import display_driver; print(display_driver.WIDTH, display_driver.running())")
+assert over_tcp == over_serial and over_tcp.endswith(" True"), (over_tcp, over_serial)
 print("PASS: display_driver imported from TCP and serial in the same process")
 
 print("PASS: TCP hub HIL tests completed")

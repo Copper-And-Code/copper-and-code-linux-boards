@@ -1,14 +1,16 @@
 #!/bin/sh
 # SPDX-License-Identifier: MIT
-# Install MicroPython, the REPL hub and the services on the STM32MP135F-DK. Run on the board as
-# root from a directory that holds the files (scripts/deploy_mp135.sh copies them):
+# Install MicroPython, the REPL hub and the services on an STM32MP135F-DK or STM32MP157C-DK2. Run
+# on the board as root from a directory that holds the files (scripts/deploy.sh copies them):
 #
-#   micropython  mpy-repl-hub  stm32mp135f-dk.dtb  (each with an optional .sha256)
+#   micropython  mpy-repl-hub  (each with an optional .sha256)
+#   stm32mp135f-dk.dtb or stm32mp157c-dk2.dtb  (the board's: USB FIFOs; on the STM32MP135F-DK
+#                                               also the B1 button)
 #   mpy_launcher.py  mpy-usb-composite.sh  mpy-usb-composite.service  mpy-repl.service
 #   usbotg.default  journald-volatile.conf  edit.py  vi.py
 #
 # It can be run again: unchanged files are left alone. SSH settings are not touched. Environment:
-#   MPY_HOSTNAME  hostname to set (default mp135-mpy; empty leaves it unchanged)
+#   MPY_HOSTNAME  hostname to set (default mp135-mpy or mp157-mpy; empty leaves it unchanged)
 #   MPY_AUTOSTART home (default): the shell and the app menu at power-on, through a main.py
 #                 written only when there is none; none: no main.py
 set -eu
@@ -16,8 +18,6 @@ set -eu
 SOURCE=$(cd "$(dirname "$0")" && pwd)
 PREFIX=/usr/local/mpy
 UNITS=/etc/systemd/system
-DTB=/boot/stm32mp135f-dk.dtb
-HOSTNAME_WANTED=${MPY_HOSTNAME-mp135-mpy}
 AUTOSTART=${MPY_AUTOSTART:-home}
 reboot_needed=0
 
@@ -25,9 +25,25 @@ say() { printf 'install: %s\n' "$*"; }
 die() { printf 'install: error: %s\n' "$*" >&2; exit 1; }
 
 [ "$(id -u)" = 0 ] || die "run as root"
-grep -q "st,stm32mp135f-dk" /proc/device-tree/compatible 2>/dev/null || die "not an STM32MP135F-DK"
-for file in micropython mpy-repl-hub stm32mp135f-dk.dtb mpy_launcher.py mpy-usb-composite.sh \
-    mpy-usb-composite.service mpy-repl.service usbotg.default journald-volatile.conf edit.py vi.py; do
+# What differs between the boards: the device tree file, the screen's orientation, the hostname.
+case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
+    *st,stm32mp135f-dk*)
+        BOARD="STM32MP135F-DK"
+        DTB_NAME=stm32mp135f-dk.dtb  # with the USB FIFOs of the composite gadget and B1 on PA14
+        ROTATION=0
+        HOSTNAME_DEFAULT=mp135-mpy ;;
+    *st,stm32mp157c-dk2*)
+        BOARD="STM32MP157C-DK2"
+        DTB_NAME=stm32mp157c-dk2.dtb # with the USB FIFOs of the composite gadget
+        ROTATION=90                  # its 480x800 portrait panel as an 800x480 landscape screen
+        HOSTNAME_DEFAULT=mp157-mpy ;;
+    *) die "not an STM32MP135F-DK or STM32MP157C-DK2" ;;
+esac
+HOSTNAME_WANTED=${MPY_HOSTNAME-$HOSTNAME_DEFAULT}
+say "board $BOARD"
+files="micropython mpy-repl-hub mpy_launcher.py mpy-usb-composite.sh mpy-usb-composite.service
+    mpy-repl.service usbotg.default journald-volatile.conf edit.py vi.py $DTB_NAME"
+for file in $files; do
     [ -f "$SOURCE/$file" ] || die "missing $SOURCE/$file"
     if [ -f "$SOURCE/$file.sha256" ]; then
         expected=$(cut -d' ' -f1 "$SOURCE/$file.sha256")
@@ -67,6 +83,21 @@ if [ "$AUTOSTART" = home ] && [ ! -e "$PREFIX/fs/main.py" ]; then
 fi
 put "$SOURCE/mpy-usb-composite.service" "$UNITS/mpy-usb-composite.service" 0644
 put "$SOURCE/mpy-repl.service" "$UNITS/mpy-repl.service" 0644
+# The board's own settings of the service, in a drop-in.
+install -d "$UNITS/mpy-repl.service.d"
+if [ "$ROTATION" != 0 ]; then
+    printf '[Service]\nEnvironment=MPY_DISPLAY_ROTATION=%s\n' "$ROTATION" > "$SOURCE/board.conf"
+    put "$SOURCE/board.conf" "$UNITS/mpy-repl.service.d/board.conf" 0644
+elif [ -e "$UNITS/mpy-repl.service.d/board.conf" ]; then
+    rm -f "$UNITS/mpy-repl.service.d/board.conf"
+    changed="$changed board.conf"
+fi
+# ST's /etc/default/usbotg (when the image has one) is kept once, for uninstall.sh.
+if [ -e /etc/default/usbotg ] && [ ! -e /etc/default/usbotg.st-original ] \
+    && ! cmp -s "$SOURCE/usbotg.default" /etc/default/usbotg; then
+    cp -p /etc/default/usbotg /etc/default/usbotg.st-original
+    say "kept the original /etc/default/usbotg as /etc/default/usbotg.st-original"
+fi
 put "$SOURCE/usbotg.default" /etc/default/usbotg 0644
 install -d /etc/systemd/journald.conf.d
 journal_before=$changed
@@ -79,13 +110,16 @@ if [ "$changed" != "$journal_before" ]; then
 fi
 
 # The original DTB is kept once, for uninstall.sh and for recovery from the ST-LINK console.
-if [ ! -e "$DTB.st-original" ]; then
-    cp -p "$DTB" "$DTB.st-original"
-    say "kept the original DTB as $DTB.st-original"
+if [ -n "$DTB_NAME" ]; then
+    DTB=/boot/$DTB_NAME
+    if [ ! -e "$DTB.st-original" ]; then
+        cp -p "$DTB" "$DTB.st-original"
+        say "kept the original DTB as $DTB.st-original"
+    fi
+    before=$(sha256sum "$DTB" | cut -d' ' -f1)
+    put "$SOURCE/$DTB_NAME" "$DTB" 0644
+    [ "$(sha256sum "$DTB" | cut -d' ' -f1)" = "$before" ] || reboot_needed=1
 fi
-before=$(sha256sum "$DTB" | cut -d' ' -f1)
-put "$SOURCE/stm32mp135f-dk.dtb" "$DTB" 0644
-[ "$(sha256sum "$DTB" | cut -d' ' -f1)" = "$before" ] || reboot_needed=1
 
 # Earlier installations ran one MicroPython per TCP connection.
 if [ -e "$UNITS/mpy-repl-tcp.socket" ] || [ -e "$UNITS/mpy-repl-tcp@.service" ]; then

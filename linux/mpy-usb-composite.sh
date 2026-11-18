@@ -26,15 +26,23 @@ start() {
         exit 1
     fi
 
+    # The board's USB device controller: 49000000.usb on the STM32MP135F-DK, 49000000.usb-otg on
+    # the STM32MP157C-DK2. It can appear a moment after this service starts.
     retries=100
-    while [ ! -e /sys/class/udc/49000000.usb ] && [ "$retries" -gt 0 ]; do
+    while [ -z "$(ls /sys/class/udc 2>/dev/null)" ] && [ "$retries" -gt 0 ]; do
         sleep 0.1
         retries=$((retries - 1))
     done
-    [ -e /sys/class/udc/49000000.usb ] || {
-        echo "USB device controller 49000000.usb is unavailable" >&2
+    udc=$(ls /sys/class/udc 2>/dev/null | head -n 1)
+    [ -n "$udc" ] || {
+        echo "no USB device controller in /sys/class/udc" >&2
         exit 1
     }
+    case $(tr '\0' ' ' < /proc/device-tree/compatible) in
+        *stm32mp157*) board=MP157 ;;
+        *stm32mp135*) board=MP135 ;;
+        *) board=Linux ;;
+    esac
 
     mkdir "$GADGET"
     echo 0x1d6b > "$GADGET/idVendor"
@@ -48,7 +56,7 @@ start() {
     mkdir -p "$GADGET/strings/0x409"
     tr -d '\0' < /proc/device-tree/serial-number > "$GADGET/strings/0x409/serialnumber"
     echo Copper-And-Code > "$GADGET/strings/0x409/manufacturer"
-    echo "MicroPython LVGL MP135" > "$GADGET/strings/0x409/product"
+    echo "MicroPython LVGL $board" > "$GADGET/strings/0x409/product"
 
     mkdir -p "$CONFIG/strings/0x409"
     echo "Config 1: NCM + ACM" > "$CONFIG/strings/0x409/configuration"
@@ -68,7 +76,7 @@ start() {
     ln -s "$GADGET/functions/ncm.0" "$CONFIG/ncm.0"
     ln -s "$GADGET/functions/acm.0" "$CONFIG/acm.0"
     ln -s "$CONFIG" "$GADGET/os_desc/c.1"
-    echo 49000000.usb > "$GADGET/UDC"
+    echo "$udc" > "$GADGET/UDC"
 
     sleep 0.2
     ifconfig "$(cat "$GADGET/functions/ncm.0/ifname")" up

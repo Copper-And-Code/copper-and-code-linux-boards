@@ -1,6 +1,9 @@
-# STM32MP157C-DK2: plan (not started)
+# STM32MP157C-DK2
 
-Second board of this project, after the STM32MP135F-DK is complete. Product page:
+Second board of this project. **Status:** OpenSTLinux flashed, our firmware installed with
+`scripts/deploy.sh`, the shell and the REPL working (serial and TCP), the 480x800 panel turned to
+800x480 in software (about 50 full frames per second). The Cortex-M4 and `machine` over RPMsg are
+next. Bring-up log: `docs/log/stm32mp157c-dk2-bringup.txt`. Product page:
 <https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html>.
 Flashing and boot: [Populate the target and boot the image](https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image)
 on the ST wiki.

@@ -20,7 +20,7 @@ the MicroPython REPL.
 - Phase 6 LVGL MPY Studio: the Studio imports the board definition in `studio-board/` from a file.
 - Phase 7 start-up and robustness: ready screen, REPL independent of the display, systemd watchdog
   on the REPL hub, journal in RAM; the 10 power cycles by hand remain.
-- Phase 8 packaging: `scripts/deploy_mp135.sh`, `linux/install.sh` and `linux/uninstall.sh`, checked
+- Phase 8 packaging: `scripts/deploy.sh`, `linux/install.sh` and `linux/uninstall.sh`, checked
   with a full uninstall, reboot, install and reboot cycle.
 - Later phases: not started.
 
