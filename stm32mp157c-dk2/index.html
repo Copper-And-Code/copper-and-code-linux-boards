@@ -485,6 +485,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#spi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPI
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -683,6 +694,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#spi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPI
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -729,12 +751,12 @@
 
 <h1 id="stm32mp157c-dk2">STM32MP157C-DK2<a class="headerlink" href="#stm32mp157c-dk2" title="Permanent link">&para;</a></h1>
 <p>Second board of this project, and the first with a microcontroller beside Linux: its Cortex-M4
-serves <code>machine.I2C</code>, <code>machine.ADC</code> and <code>machine.PWM</code> to MicroPython on the Cortex-A7.</p>
+serves <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code> and <code>SPI</code> to MicroPython on the Cortex-A7.</p>
 <p><strong>Status:</strong> OpenSTLinux flashed; our build installed with <code>scripts/deploy.sh</code> (the same MicroPython
 binary as the STM32MP135F-DK); shell, app menu and REPL working (serial and TCP); the 480×800 panel
 turned to 800×480 in software (about 50 full frames per second); Wi-Fi, weather and the web radio
 with sound through the board's codec; <code>machine.Pin</code> on Linux GPIO lines, <code>machine.I2C</code>,
-<code>machine.ADC</code> and <code>machine.PWM</code> on the Cortex-M4. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>.
+<code>ADC</code>, <code>PWM</code> and <code>SPI</code> on the Cortex-M4. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>.
 Product page: <a href="https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html">https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html</a>. Flashing and boot:
 <a href="https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image">Populate the target and boot the image</a>
 on the ST wiki.</p>
@@ -770,7 +792,7 @@ on the ST wiki.</p>
 </tbody>
 </table>
 <h2 id="machine-on-the-cortex-m4"><code>machine</code> on the Cortex-M4<a class="headerlink" href="#machine-on-the-cortex-m4" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">PWM</span><span class="p">,</span> <span class="n">Pin</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">PWM</span><span class="p">,</span> <span class="n">SPI</span><span class="p">,</span> <span class="n">Pin</span>
 
 <span class="n">i2c</span> <span class="o">=</span> <span class="n">I2C</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">400000</span><span class="p">)</span>        <span class="c1"># Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">i2c</span><span class="o">.</span><span class="n">scan</span><span class="p">())</span>
@@ -780,6 +802,10 @@ on the ST wiki.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">ADC</span><span class="p">(</span><span class="n">ADC</span><span class="o">.</span><span class="n">CORE_VREF</span><span class="p">)</span><span class="o">.</span><span class="n">read_uv</span><span class="p">())</span>
 
 <span class="n">servo</span> <span class="o">=</span> <span class="n">PWM</span><span class="p">(</span><span class="s2">"D6"</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">duty_ns</span><span class="o">=</span><span class="mi">1500000</span><span class="p">)</span>   <span class="c1"># TIM1 channel 1 on PE9, Arduino D6</span>
+
+<span class="n">spi</span> <span class="o">=</span> <span class="n">SPI</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">baudrate</span><span class="o">=</span><span class="mi">8000000</span><span class="p">)</span>                 <span class="c1"># SCK D13, MISO D12, MOSI D11</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="n">Pin</span><span class="p">(</span><span class="s2">"PE11"</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">OUT</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>             <span class="c1"># D10: a Linux GPIO line as chip select</span>
+<span class="n">cs</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="n">spi</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mh">0x9F</span><span class="p">);</span> <span class="n">cs</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="n">Pin</span><span class="p">(</span><span class="s2">"PA14"</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">PULL_UP</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>   <span class="c1"># Pin stays on Linux GPIO lines, as on the STM32MP135F-DK</span>
 </code></pre></div>
@@ -791,7 +817,7 @@ on the ST wiki.</p>
 <li><strong>Firmware</strong> (<code>mcu/stm32mp157c-dk2/</code>, built by <code>scripts/build_m4.sh</code> with <code>arm-none-eabi-gcc</code>,
   without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our <code>main.c</code> and the
   protocol. <code>install.sh</code> puts it in <code>/lib/firmware/mpy_m4.elf</code>.</li>
-<li><strong>Start.</strong> The first use of <code>machine.I2C</code>, <code>machine.ADC</code> or <code>machine.PWM</code> loads the firmware through remoteproc
+<li><strong>Start.</strong> The first use of <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code> or <code>SPI</code> loads the firmware through remoteproc
   if the M4 is off (about 0.6 s). A new firmware installed by <code>deploy.sh</code> takes over at once.</li>
 <li><strong>Link.</strong> One RPMsg virtual serial port (<code>/dev/ttyRPMSG*</code>; the number changes when the M4
   restarts, so <code>mpy_m4</code> looks it up). Requests and answers carry a length, a sequence number and an
@@ -799,7 +825,7 @@ on the ST wiki.</p>
   about 0.35 ms there and back.</li>
 <li><strong>Python.</strong> <code>mpy_m4</code> (frozen) has the classes; the frozen <code>machine</code> module takes the place of
   MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from <code>umachine</code>
-  and adds <code>I2C</code>, <code>ADC</code> and <code>PWM</code> on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.</li>
+  and adds <code>I2C</code>, <code>ADC</code>, <code>PWM</code> and <code>SPI</code> on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.</li>
 </ul>
 <h3 id="i2c">I2C<a class="headerlink" href="#i2c" title="Permanent link">&para;</a></h3>
 <p>Bus 5 only (<code>I2C(5)</code>, the default): SDA PA12, SCL PA11, on the Arduino connector (D14, D15) and on
@@ -904,9 +930,22 @@ supported.</p>
 and returns its frequency and the share of time it was high: that is how the tests check the PWM
 without instruments. Measured on PE9: 1 kHz 25% gives 1000.00 Hz 25.00%; 50 Hz 1.5 ms gives
 50.00 Hz 7.50%; 100 kHz 30% gives 99,990 Hz (208.9 MHz / 2089) 29.95%; 0% and 100% are steady.</p>
+<h3 id="spi">SPI<a class="headerlink" href="#spi" title="Permanent link">&para;</a></h3>
+<p>SPI4: SCK PE12 (D13), MISO PE13 (D12), MOSI PE14 (D11), on the Arduino connector. <code>SPI(4)</code> with the
+MicroPython API: <code>init()</code>, <code>deinit()</code>, <code>read()</code>, <code>readinto()</code>, <code>write()</code>, <code>write_readinto()</code>,
+<code>polarity</code>, <code>phase</code>, <code>firstbit</code> (<code>SPI.MSB</code>, <code>SPI.LSB</code>); 8-bit frames only. The rate is the fastest
+not above the one asked: the 64 MHz kernel clock over 2, 4, ... 256, so 32 MHz down to 250 kHz.
+Transfers longer than 400 bytes go in pieces of 400.</p>
+<p>The chip select is the program's, as on most MicroPython boards: PE11 (D10) is not used by Linux,
+so <code>Pin("PE11", Pin.OUT)</code> drives it through the kernel's GPIO lines, beside the SPI on the M4.</p>
+<p>Checked without a device: during a transfer the M4 samples its own SCK and MOSI pins and rebuilds
+the bytes it sees at the sampling edges; in the four modes, MSB and LSB first, at 500 kHz, they are
+the bytes sent, with 2 edges a bit (the sampling keeps up to about 1 MHz). MISO reads 0xFF with
+its internal pull-up and 0x00 with the pull-down. 1024 bytes at 32 MHz take 1.4 ms (732 kB/s); a
+short transfer about 0.36 ms there and back. Not checked yet: a real SPI device.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>SPI</code> on SPI4, then <code>Timer</code>, <code>UART</code> and the DAC; more PWM channels (TIM1 channels 2 and 4 share
+<li><code>Timer</code>, <code>UART</code> (UART7 on D0/D1) and the DAC; more PWM channels (TIM1 channels 2 and 4 share
   pins with SPI4).</li>
 <li>An I2C sensor and a known voltage on A0 for the HIL tests.</li>
 <li>A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at
@@ -935,7 +974,7 @@ without instruments. Measured on PE9: 1 kHz 25% gives 1000.00 Hz 25.00%; 50 Hz 1
 </tr>
 <tr>
 <td><code>tests/hil/test_m4.sh</code></td>
-<td>Tests of <code>machine.I2C</code>, <code>machine.ADC</code> and <code>machine.PWM</code> on the board</td>
+<td>Tests of <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code> and <code>SPI</code> on the board</td>
 </tr>
 </tbody>
 </table>
