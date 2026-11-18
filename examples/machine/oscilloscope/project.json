@@ -446,10 +446,6 @@
       "mainPath": "/main.py"
     }
   },
-  "runTarget": {
-    "kind": "board",
-    "language": "micropython"
-  },
   "modules": [
     {
       "id": "a5270955e1fd42b491262b85e5de6fe0",

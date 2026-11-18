@@ -82,3 +82,14 @@ square wave is on the screen. The Cortex-M4's TIM2 paces the conversions in hard
 the screen never waits. (Above: the Studio simulator.)
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/oscilloscope)
 
+### Timing Lab
+
+![Timing Lab](images/timing-lab.png)
+
+Something every 10 ms, three ways: a Python thread that sleeps, `machine.Timer` callbacks, and the
+expiries the Cortex-M4 counts. A histogram shows the intervals; a switch loads Linux with two busy
+processes. Measured: even idle, Linux stretches some intervals to tens of milliseconds (the GIL
+while the screen is drawn), loaded to over 100 ms; the M4's count stays whole, with no drift.
+What must happen at an exact time belongs on the M4. Nothing to wire.
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/timing-lab)
+
