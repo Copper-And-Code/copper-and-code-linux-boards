@@ -119,6 +119,9 @@ then collects them, 200 at a time. `array('H')` gets 16-bit values, a `bytearray
 bits; afterwards `adc.freq` is the exact rate (TIM2's clock over its period) and `adc.overruns`
 the conversions lost (none so far). The sampling time is the longest that fits the rate (810.5
 ADC cycles up to 10 kHz, 64.5 at 100 kHz).
+For a GUI that must not wait, the same in steps (not in MicroPython's API): `adc.capture(count,
+freq)` starts and returns the exact rate, `adc.capture_done()`, `adc.capture_read(buf)`; the
+oscilloscope example draws from them.
 
 Measured: VREFINT at 1 kHz, 10 kHz and 100 kHz averages 1.206 V; the times between the first and
 the last conversion give 1000.00 Hz, 9999.90 Hz and 99,989.4 Hz (TIM2's 208.9 MHz over 2089);

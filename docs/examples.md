@@ -71,3 +71,14 @@ measures its own PWM on the pin; the LEDs come from Linux's LED class, `machine.
 Nothing to wire.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/board-explorer)
 
+### Oscilloscope
+
+![Oscilloscope](images/oscilloscope-simulator.png)
+
+One of A0 to A5 on a chart, 0.25 to 20 ms a division, triggered on an edge, with minimum, maximum,
+peak to peak, frequency and duty, and a 1 kHz test signal on D6: one wire from D6 to A0 and the
+square wave is on the screen. The Cortex-M4's TIM2 paces the conversions in hardware, up to
+100,000 samples a second; Python starts a capture, collects it when it is done and draws it, so
+the screen never waits. (Above: the Studio simulator.)
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/oscilloscope)
+

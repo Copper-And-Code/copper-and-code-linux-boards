@@ -502,24 +502,37 @@ class ADC:
         # hardware, so the samples are evenly spaced whatever Linux does; Python waits meanwhile
         # (sleeping: the GUI goes on) and collects them. array('H'): 16-bit values; bytearray:
         # their top 8 bits. Afterwards: self.freq, the exact rate; self.overruns (0 normally).
-        count = len(buf)
+        self.capture(len(buf), freq)
+        time.sleep_ms(self._count * 1000 * self._period // self._clock)
+        deadline = time.ticks_add(time.ticks_ms(), 1000)
+        while not self.capture_done():
+            if time.ticks_diff(deadline, time.ticks_ms()) < 0:
+                raise OSError(_ETIMEDOUT, "the capture did not finish")
+            time.sleep_ms(2)
+        self.capture_read(buf)
+
+    # The same in steps, for a GUI that must not wait (not in MicroPython's API): capture()
+    # starts and returns, capture_done() tells when the M4 has all the samples, capture_read()
+    # collects them. One capture at a time on the board.
+
+    def capture(self, count, freq):
         if not 0 < count <= _CAPTURE_MAX:
             raise ValueError("1 to %d samples at a time" % _CAPTURE_MAX)
         if not 1 <= freq <= 100000:
             raise ValueError("freq 1 to 100000 Hz")
         answer = link.request(_ADC_CAPTURE, self._args + struct.pack("<II", count, int(freq)))
-        clock, period, _ = struct.unpack("<III", answer)
-        self.freq = clock / period
-        time.sleep_ms(count * 1000 * period // clock)
-        deadline = time.ticks_add(time.ticks_ms(), 1000)
-        while True:
-            state, taken, cycles, overruns = struct.unpack("<BIII", link.request(_ADC_CAPTURE_STATUS))
-            if state == 2:
-                break
-            if time.ticks_diff(deadline, time.ticks_ms()) < 0:
-                raise OSError(_ETIMEDOUT, "the capture did not finish")
-            time.sleep_ms(2)
+        self._clock, self._period, _ = struct.unpack("<III", answer)
+        self._count = count
+        self.freq = self._clock / self._period
+        return self.freq
+
+    def capture_done(self):
+        state, taken, cycles, overruns = struct.unpack("<BIII", link.request(_ADC_CAPTURE_STATUS))
         self.overruns = overruns
+        return state == 2 and taken == self._count
+
+    def capture_read(self, buf):
+        count = min(len(buf), self._count)
         wide = not isinstance(buf, (bytearray, bytes))
         if wide:
             import uctypes
@@ -532,6 +545,7 @@ class ADC:
             else:
                 for i in range(len(part) // 2):
                     buf[first + i] = part[2 * i + 1]
+        return count
 
 
 class SPI:

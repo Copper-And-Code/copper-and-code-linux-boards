@@ -1,0 +1,465 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Oscilloscope",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "fa3b5adeedff4ad5b4a40b1c84f3059f",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "bd0bd3b65da143e6918460139eaee8c6",
+          "name": "title",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 8,
+            "width": 300,
+            "height": 40,
+            "text": "Oscilloscope",
+            "textColor": "#FFFFFF",
+            "fontSize": 32,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b957e5ef24a043c8b7acff098b74ff13",
+          "name": "status",
+          "type": "label",
+          "props": {
+            "x": 320,
+            "y": 18,
+            "width": 270,
+            "height": 24,
+            "text": "",
+            "textColor": "#8FA0B5",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_RIGHT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "a17e68b3203c41a4978f419f1ee7bcdb",
+          "name": "scope",
+          "type": "chart",
+          "props": {
+            "x": 10,
+            "y": 54,
+            "width": 580,
+            "height": 340,
+            "chartType": "line",
+            "data": "",
+            "data2": "",
+            "bgColor": "#0B1016",
+            "lineColor": "#4CC38A",
+            "lineColor2": "#FF5722",
+            "pointCount": 250,
+            "showPoints": false,
+            "rangeYMin": 0,
+            "rangeYMax": 2500,
+            "divLineCount": 5,
+            "divLineCountSec": 9,
+            "updateMode": "shift"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "32fe9d12930140339a03d66a43ee61a6",
+          "name": "scale",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 400,
+            "width": 574,
+            "height": 22,
+            "text": "0.5 V/div",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "9481a19ab4a04a6a91c92a6811d9cc8a",
+          "name": "measures",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 424,
+            "width": 574,
+            "height": 48,
+            "text": "",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "name": "controls",
+          "type": "panel",
+          "props": {
+            "x": 600,
+            "y": 54,
+            "width": 190,
+            "height": 418,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "bdaaa22668264f1aac4a3c3238cf893a",
+          "name": "input_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 6,
+            "width": 170,
+            "height": 20,
+            "text": "INPUT",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "f5d1769a07c444a28d2d7a18b6e20512",
+          "name": "input_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 2,
+            "y": 26,
+            "width": 186,
+            "height": 84,
+            "map": "A0,A1,A2\nA3,A4,A5",
+            "bgColor": "#1E2633",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "input_buttons_value_changed"
+          },
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "f2af4edc71ea405da4369c3409943f31",
+          "name": "time_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 114,
+            "width": 170,
+            "height": 20,
+            "text": "TIME / DIV",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "a644aa0f74b848098ef9e604cb71d33e",
+          "name": "time_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 2,
+            "y": 134,
+            "width": 186,
+            "height": 84,
+            "map": "0.25 ms,1 ms\n5 ms,20 ms",
+            "bgColor": "#1E2633",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "time_buttons_value_changed"
+          },
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "7cb0105dc2e74bd3a7a0ce60a0dfe15c",
+          "name": "trigger_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 222,
+            "width": 170,
+            "height": 20,
+            "text": "TRIGGER",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "57a17b40f7034041bca21589d4043a59",
+          "name": "trigger_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 2,
+            "y": 242,
+            "width": 186,
+            "height": 46,
+            "map": "Auto,Rise,Fall",
+            "bgColor": "#1E2633",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "trigger_buttons_value_changed"
+          },
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "28c908b26d0542ce816de7c942a80f95",
+          "name": "generator_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 296,
+            "width": 110,
+            "height": 40,
+            "text": "Test signal\nD6: 1 kHz",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b79f3bf02d794296b6848a4eca4ac3a2",
+          "name": "generator",
+          "type": "switch",
+          "props": {
+            "x": 118,
+            "y": 300,
+            "width": 62,
+            "height": 34,
+            "checked": false,
+            "onColor": "#8A5CF6",
+            "offColor": "#2A3444",
+            "knobColor": "#FFFFFF",
+            "disabled": false
+          },
+          "events": {
+            "VALUE_CHANGED": "generator_value_changed"
+          },
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "db2fc5fca3e84c328a8f0ab911f18e80",
+          "name": "run_button",
+          "type": "button",
+          "props": {
+            "x": 8,
+            "y": 352,
+            "width": 174,
+            "height": 56,
+            "text": "Stop",
+            "bgColor": "#E0742F",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 12
+          },
+          "events": {
+            "CLICKED": "run_button_clicked"
+          },
+          "parentId": "7e7ef2f5815545fe94cf9bb30a72fd37",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "a20f8b971d0e4093a0697fa9f6abc27d",
+          "name": "tick",
+          "type": "timer",
+          "props": {
+            "period": 40,
+            "enabled": true
+          },
+          "events": {
+            "TICK": "tick_tick"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import scope_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "scope_app.start(ui)"
+      },
+      "input_buttons_value_changed": {
+        "widget": "input_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "scope_app.input_changed(e.get_target_obj())"
+      },
+      "time_buttons_value_changed": {
+        "widget": "time_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "scope_app.time_changed(e.get_target_obj())"
+      },
+      "trigger_buttons_value_changed": {
+        "widget": "trigger_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "scope_app.trigger_changed(e.get_target_obj())"
+      },
+      "run_button_clicked": {
+        "widget": "run_button",
+        "event": "CLICKED",
+        "body": "scope_app.run_clicked()"
+      },
+      "generator_value_changed": {
+        "widget": "generator",
+        "event": "VALUE_CHANGED",
+        "body": "scope_app.generator_changed(e.get_target_obj())"
+      },
+      "tick_tick": {
+        "widget": "tick",
+        "event": "TICK",
+        "body": "scope_app.tick()"
+      }
+    }
+  },
+  "currentPageId": "fa3b5adeedff4ad5b4a40b1c84f3059f",
+  "assets": {},
+  "variables": [],
+  "projectId": "c8858b9359664640adad8a6d8659388d",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "a5270955e1fd42b491262b85e5de6fe0",
+      "name": "probe",
+      "source": "# SPDX-License-Identifier: MIT\n# What the oscilloscope measures with: an ADC input sampled at a fixed rate by the board (on the\n# STM32MP157C-DK2 the Cortex-M4's TIM2 triggers each conversion), and a PWM test signal on D6.\n# In the LVGL MPY Studio simulator a stand-in makes up signals: the test signal on A0, a 50 Hz\n# sine on A1, noise elsewhere.\n\nimport math\nimport time\n\ntry:\n    import machine\n\n    HARDWARE = hasattr(machine, \"ADC\") and hasattr(machine.ADC, \"capture\")\nexcept ImportError:\n    machine = None\n    HARDWARE = False\n\nFULL_SCALE_MV = 2500  # the ADC's reference: 0 to 2.5 V on 16 bits\n\n\nclass Board:\n    def __init__(self):\n        self._adcs = {}\n        self._adc = None\n        self._pwm = None\n\n    def start(self, pin, count, rate):\n        # Start a capture of count samples at rate Hz; returns the exact rate.\n        if pin not in self._adcs:\n            self._adcs[pin] = machine.ADC(pin)\n        self._adc = self._adcs[pin]\n        return self._adc.capture(count, rate)\n\n    def done(self):\n        return self._adc.capture_done()\n\n    def read(self, buf):\n        self._adc.capture_read(buf)\n        return self._adc.overruns\n\n    def generator(self, on):\n        if on and self._pwm is None:\n            self._pwm = machine.PWM(\"D6\", freq=1000, duty_u16=16384)  # 1 kHz, 25%\n        elif not on and self._pwm is not None:\n            self._pwm.deinit()\n            self._pwm = None\n\n\nclass Simulated:\n    def __init__(self):\n        self._pin = \"A0\"\n        self._rate = 1000\n        self._count = 0\n        self._start = 0\n        self._generator = False\n\n    def start(self, pin, count, rate):\n        self._pin, self._count, self._rate = pin, count, rate\n        self._start = time.ticks_ms()\n        return float(rate)\n\n    def done(self):\n        return time.ticks_diff(time.ticks_ms(), self._start) >= self._count * 1000 // self._rate\n\n    def _volts(self, t):\n        if self._pin == \"A0\" and self._generator:\n            return 2.5 if (t * 1000) % 1 < 0.25 else 0.0\n        if self._pin == \"A1\":\n            return 1.25 + 0.75 * math.sin(2 * math.pi * 50 * t)\n        return 0.05 + 0.05 * math.sin(2 * math.pi * 3 * t)\n\n    def read(self, buf):\n        offset = self._start / 1000\n        seed = self._start\n        for i in range(min(len(buf), self._count)):\n            seed = (seed * 1103515245 + 12345) & 0x7FFFFFFF\n            noise = (seed % 200 - 100) / 10000\n            volts = min(2.5, max(0.0, self._volts(offset + i / self._rate) + noise))\n            buf[i] = int(volts * 65535 / 2.5)\n        return 0\n\n    def generator(self, on):\n        self._generator = on\n\n\nprobe = Board() if HARDWARE else Simulated()\n"
+    },
+    {
+      "id": "3626c46e709a442a95734af7d5192cfc",
+      "name": "scope_app",
+      "source": "# SPDX-License-Identifier: MIT\n# The oscilloscope: capture, trigger, measure, draw, again. Each capture is twice the screen's\n# width, so a trigger can be found in its first half; the samples are evenly spaced because the\n# board's hardware paces them, while this code runs from the page's timer and never waits.\n\nimport array\nimport time\n\nimport lvgl as lv\n\nfrom probe import FULL_SCALE_MV, probe\n\nPOINTS = 250              # on the screen: 10 divisions\nCAPTURE = 2 * POINTS      # per capture: room to find a trigger\nTIMEBASES = [0.25, 1, 5, 20]  # ms per division\nINPUTS = [\"A0\", \"A1\", \"A2\", \"A3\", \"A4\", \"A5\"]\nTRIGGERS = [\"Auto\", \"Rise\", \"Fall\"]\n\n_ui = None\n_series = None\n_samples = array.array(\"H\", bytes(2 * CAPTURE))\n_input = \"A0\"\n_timebase = 1\n_trigger = \"Auto\"\n_running = True\n_busy = False      # a capture is under way on the board\n_rate = 0.0\n_misses = 0\n_frames = []       # times of the last frames drawn, for the frame rate\n\n\ndef _font(size):\n    return getattr(lv, \"font_montserrat_%d\" % size)\n\n\ndef _style_matrix(matrix, accent):\n    matrix.set_style_bg_opa(lv.OPA.TRANSP, 0)\n    matrix.set_style_border_width(0, 0)\n    matrix.set_style_pad_all(4, 0)\n    matrix.set_style_pad_gap(6, 0)\n    items = lv.PART.ITEMS\n    matrix.set_style_bg_color(lv.color_hex(0x2A3444), items)\n    matrix.set_style_bg_opa(lv.OPA.COVER, items)\n    matrix.set_style_radius(8, items)\n    matrix.set_style_border_width(0, items)\n    matrix.set_style_shadow_width(0, items)\n    matrix.set_style_text_color(lv.color_hex(0xFFFFFF), items)\n    matrix.set_style_text_font(_font(16), items)\n    matrix.set_style_bg_color(lv.color_hex(accent), items | lv.STATE.CHECKED)\n    matrix.set_button_ctrl_all(lv.buttonmatrix.CTRL.CHECKABLE)\n    matrix.set_one_checked(True)\n\n\ndef _rate_for(timebase):\n    return POINTS * 1000 / (10 * timebase)\n\n\ndef _find_trigger(level, hysteresis):\n    # The first crossing of level in the first half of the capture, after the signal was on the\n    # other side by more than the hysteresis; None if there is none.\n    rising = _trigger != \"Fall\"\n    armed = False\n    for i in range(CAPTURE - POINTS):\n        value = _samples[i]\n        if rising:\n            if value < level - hysteresis:\n                armed = True\n            elif armed and value >= level:\n                return i\n        else:\n            if value > level + hysteresis:\n                armed = True\n            elif armed and value <= level:\n                return i\n    return None\n\n\ndef _measure(low, high, level, hysteresis):\n    # Frequency from the rising crossings over the whole capture, duty from the time above level.\n    crossings = []\n    armed = False\n    above = 0\n    for i in range(CAPTURE):\n        value = _samples[i]\n        if value >= level:\n            above += 1\n        if value < level - hysteresis:\n            armed = True\n        elif armed and value >= level:\n            crossings.append(i)\n            armed = False\n    mv = lambda raw: raw * FULL_SCALE_MV / 65535 / 1000\n    text = \"min %.2f V   max %.2f V   Vpp %.2f V\" % (mv(low), mv(high), mv(high - low))\n    if len(crossings) >= 2 and high - low > 1300:\n        frequency = (len(crossings) - 1) * _rate / (crossings[-1] - crossings[0])\n        text += \"\\nfrequency %.1f Hz   duty %.1f %%\" % (frequency, 100 * above / CAPTURE)\n    else:\n        text += \"\\nfrequency -   (no repeating signal)\"\n    return text\n\n\ndef _draw(first):\n    for i in range(POINTS):\n        _ui.scope.set_series_value_by_id(_series, i, _samples[first + i] * FULL_SCALE_MV // 65535)\n    _ui.scope.refresh()\n\n\ndef _process():\n    global _misses\n    low, high = min(_samples), max(_samples)\n    level = (low + high) // 2\n    hysteresis = max((high - low) // 10, 300)\n    first = _find_trigger(level, hysteresis) if high - low > 1300 else None\n    if first is None:\n        _misses += 1\n        if _trigger != \"Auto\" and _misses < 10:\n            _ui.status.set_text(\"%s: waiting for a trigger\" % _input)\n            return\n        first = 0\n    else:\n        _misses = 0\n    _draw(first)\n    _ui.measures.set_text(_measure(low, high, level, hysteresis))\n    now = time.ticks_ms()\n    _frames.append(now)\n    while len(_frames) > 10:\n        _frames.pop(0)\n    fps = \"\"\n    if len(_frames) > 1:\n        fps = \"   %.0f frames/s\" % (1000 * (len(_frames) - 1) / max(1, time.ticks_diff(now, _frames[0])))\n    _ui.status.set_text(\"%s   %s%s\" % (_input, \"triggered\" if _misses == 0 else \"free running\", fps))\n\n\ndef tick():\n    # From the page's timer: start a capture, or collect a finished one and draw it.\n    global _busy, _rate\n    if not _running:\n        return\n    try:\n        if not _busy:\n            _rate = probe.start(_input, CAPTURE, _rate_for(_timebase))\n            _busy = True\n            _ui.scale.set_text(\"0.5 V/div    %g ms/div    %.0f samples/s\" % (_timebase, _rate))\n        elif probe.done():\n            overruns = probe.read(_samples)\n            _busy = False\n            _process()\n            if overruns:\n                _ui.status.set_text(\"%d samples lost\" % overruns)\n    except OSError as error:\n        _busy = False\n        _ui.status.set_text(\"Error: %s\" % error)\n\n\ndef _restart():\n    # A new setting: the capture under way is left to finish and thrown away.\n    global _busy, _misses\n    if _busy:\n        while not probe.done():\n            time.sleep_ms(1)\n        _busy = False\n    _misses = 0\n\n\ndef input_changed(matrix):\n    global _input\n    index = matrix.get_selected_button()\n    if 0 <= index < len(INPUTS):\n        _restart()\n        _input = INPUTS[index]\n\n\ndef time_changed(matrix):\n    global _timebase\n    index = matrix.get_selected_button()\n    if 0 <= index < len(TIMEBASES):\n        _restart()\n        _timebase = TIMEBASES[index]\n\n\ndef trigger_changed(matrix):\n    global _trigger\n    index = matrix.get_selected_button()\n    if 0 <= index < len(TRIGGERS):\n        _trigger = TRIGGERS[index]\n\n\ndef run_clicked():\n    global _running\n    _running = not _running\n    button = _ui.run_button\n    button.get_child(0).set_text(\"Stop\" if _running else \"Run\")\n    button.set_style_bg_color(lv.color_hex(0xE0742F if _running else 0x2E9E6A), 0)\n    if not _running:\n        _ui.status.set_text(\"%s   stopped\" % _input)\n\n\ndef generator_changed(switch):\n    try:\n        probe.generator(switch.has_state(lv.STATE.CHECKED))\n    except OSError as error:\n        _ui.status.set_text(\"Test signal: %s\" % error)\n\n\ndef start(ui):\n    global _ui, _series\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    chart = ui.scope\n    series = chart.get_series_next(None)\n    while series:  # the designer's sample series\n        chart.remove_series(series)\n        series = chart.get_series_next(None)\n    chart.set_point_count(POINTS)\n    try:\n        chart.set_axis_range(lv.chart.AXIS.PRIMARY_Y, 0, FULL_SCALE_MV)\n    except AttributeError:\n        chart.set_range(lv.chart.AXIS.PRIMARY_Y, 0, FULL_SCALE_MV)\n    chart.set_style_size(0, 0, lv.PART.INDICATOR)\n    chart.set_style_line_width(2, lv.PART.ITEMS)\n    chart.set_style_line_color(lv.color_hex(0x2A3444), lv.PART.MAIN)\n    chart.set_style_border_width(0, 0)\n    _series = chart.add_series(lv.color_hex(0x4CC38A), lv.chart.AXIS.PRIMARY_Y)\n    for matrix, accent, choices, current in ((ui.input_buttons, 0x2E9E6A, INPUTS, _input),\n                                             (ui.time_buttons, 0x2F6FDE, TIMEBASES, _timebase),\n                                             (ui.trigger_buttons, 0x8A5CF6, TRIGGERS, _trigger)):\n        _style_matrix(matrix, accent)\n        matrix.set_button_ctrl(choices.index(current), lv.buttonmatrix.CTRL.CHECKED)\n"
+    }
+  ]
+}
