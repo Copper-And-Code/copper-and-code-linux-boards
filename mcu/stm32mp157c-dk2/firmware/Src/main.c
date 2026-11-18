@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Cortex-M4 firmware of lvgl-mpy-linux for the STM32MP157C-DK2: it serves machine.I2C,
-// machine.ADC, machine.PWM, machine.SPI and machine.UART to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
+// machine.ADC, machine.PWM, machine.SPI, machine.UART and machine.Timer to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
 // virtual serial port (/dev/ttyRPMSG0 on Linux).
 //
 // Linux loads it through remoteproc and, from the "m4-examples" device tree, gives it its
@@ -826,6 +826,96 @@ static void handle_uart(uint8_t sequence, uint8_t operation, const uint8_t *args
     send(sequence, E_INVAL, NULL, 0);
 }
 
+// ---- timers on the cycle counter, extended to 64 bits
+
+static uint64_t cycles_now(void) {
+    // DWT->CYCCNT wraps every 20 s at 209 MHz; the main loop calls this far more often.
+    static uint32_t last;
+    static uint64_t high;
+    uint32_t now = DWT->CYCCNT;
+    if (now < last) {
+        high += 1ULL << 32;
+    }
+    last = now;
+    return high | now;
+}
+
+static struct {
+    uint8_t on, periodic, unacked;  // unacked: an event sent, Linux has not said it handled it
+    uint32_t count;                 // expiries not reported yet
+    uint64_t period, deadline;      // cycles
+    uint64_t first;                 // when the oldest unreported expiry was due
+} timers[MPY_M4_TIMERS];
+static uint32_t core_hz;
+
+static void event(uint8_t kind, const uint8_t *data, size_t size) {
+    send(0, kind, data, size);
+}
+
+static void timers_poll(void) {
+    uint64_t now = cycles_now();
+    for (int i = 0; i < MPY_M4_TIMERS; ++i) {
+        if (timers[i].on && now >= timers[i].deadline) {
+            // Every expiry is counted, however late the loop got here.
+            uint32_t count = 1;
+            if (!timers[i].count) {
+                timers[i].first = timers[i].deadline;
+            }
+            if (timers[i].periodic) {
+                count += (now - timers[i].deadline) / timers[i].period;
+                timers[i].deadline += (uint64_t)count * timers[i].period;
+            } else {
+                timers[i].on = 0;
+            }
+            timers[i].count += count;
+        }
+        if (timers[i].count && !timers[i].unacked) {
+            uint32_t count = timers[i].count;
+            uint32_t late_us = (now - timers[i].first) * 1000000 / core_hz;
+            uint8_t data[9] = {i, count, count >> 8, count >> 16, count >> 24, late_us, late_us >> 8,
+                late_us >> 16, late_us >> 24};
+            event(EVENT_TIMER, data, sizeof(data));
+            timers[i].count = 0;
+            timers[i].unacked = 1;
+        }
+    }
+}
+
+static void handle_timer(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
+    if (operation == OP_EVENT_ACK) {
+        for (int i = 0; i < MPY_M4_TIMERS; ++i) {
+            timers[i].unacked = 0;
+        }
+        send(sequence, 0, NULL, 0);
+        return;
+    }
+    if (operation == OP_TIMER_DEINIT && size == 1 && (args[0] < MPY_M4_TIMERS || args[0] == 0xFF)) {
+        for (int i = 0; i < MPY_M4_TIMERS; ++i) {
+            if (args[0] == 0xFF || args[0] == i) {
+                timers[i].on = 0;
+                timers[i].count = 0;
+                timers[i].unacked = 0;
+            }
+        }
+        send(sequence, 0, NULL, 0);
+        return;
+    }
+    if (operation == OP_TIMER_INIT && size == 6 && args[0] < MPY_M4_TIMERS && args[1] <= 1 &&
+        get32(args + 2) >= MPY_M4_TIMER_MIN_US) {
+        int i = args[0];
+        timers[i].on = 0;
+        timers[i].count = 0;
+        timers[i].unacked = 0;
+        timers[i].periodic = args[1];
+        timers[i].period = (uint64_t)get32(args + 2) * core_hz / 1000000;
+        timers[i].deadline = cycles_now() + timers[i].period;
+        timers[i].on = 1;
+        send(sequence, 0, NULL, 0);
+        return;
+    }
+    send(sequence, E_INVAL, NULL, 0);
+}
+
 // ---- a pin sampled for a while, timed by the cycle counter
 
 static void handle_measure(uint8_t sequence, const uint8_t *args, size_t size) {
@@ -866,8 +956,8 @@ static void handle_measure(uint8_t sequence, const uint8_t *args, size_t size) {
 static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
     switch (operation) {
         case OP_INFO: {
-            static const uint8_t info[] = "\x01" FIRMWARE_TEXT;  // MPY_M4_PROTOCOL_VERSION, text
-            _Static_assert(MPY_M4_PROTOCOL_VERSION == 1, "the version byte of info");
+            static const uint8_t info[] = "\x02" FIRMWARE_TEXT;  // MPY_M4_PROTOCOL_VERSION, text
+            _Static_assert(MPY_M4_PROTOCOL_VERSION == 2, "the version byte of info");
             send(sequence, 0, info, sizeof(info) - 1);
             return;
         }
@@ -911,6 +1001,11 @@ static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, siz
         case OP_UART_DEINIT:
             handle_uart(sequence, operation, args, size);
             return;
+        case OP_TIMER_INIT:
+        case OP_TIMER_DEINIT:
+        case OP_EVENT_ACK:
+            handle_timer(sequence, operation, args, size);
+            return;
         case OP_PIN_MEASURE:
             handle_measure(sequence, args, size);
             return;
@@ -953,8 +1048,13 @@ int main(void) {
         Error_Handler();
     }
 
+    core_hz = HAL_RCC_GetMCUFreq();
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
     while (1) {
         OPENAMP_check_for_message();
         handle_received();
+        timers_poll();
     }
 }

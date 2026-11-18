@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# machine.I2C, ADC, PWM, SPI and UART served by the Cortex-M4 of an STM32MP15 board, as on a
+# machine.I2C, ADC, PWM, SPI, UART and Timer served by the Cortex-M4 of an STM32MP15 board, as on a
 # microcontroller: the same MicroPython code runs on both.
 #
 #   from machine import I2C, ADC
@@ -9,6 +9,7 @@
 #   PWM("D6", freq=1000, duty_u16=16384)   # TIM1 channel 1 on PE9 (Arduino D6)
 #   SPI(4, baudrate=1000000)         # SCK D13, MISO D12, MOSI D11; chip select: Pin("PE11") (D10)
 #   UART(7, 9600)                    # RX D0, TX D1
+#   Timer(0, period=500, callback=lambda t: print("tick"))    # 8 timers of the M4, 1 ms and up
 #
 # The firmware (mcu/stm32mp157c-dk2, mpy_m4.elf) runs on the M4, loaded by Linux through
 # remoteproc; the two talk over an RPMsg virtual serial port with the protocol of
@@ -18,12 +19,15 @@
 import os
 import select
 import struct
+import sys
 import termios
 import time
 
+import _thread
+
 REMOTEPROC = "/sys/class/remoteproc/remoteproc0"
 FIRMWARE = "mpy_m4.elf"
-PROTOCOL = 1
+PROTOCOL = 2
 
 _INFO = 0x01
 _LED = 0x02
@@ -47,8 +51,13 @@ _UART_READ = 0x62
 _UART_STATUS = 0x63
 _UART_BREAK = 0x64
 _UART_DEINIT = 0x65
+_TIMER_INIT = 0x70
+_TIMER_DEINIT = 0x71
+_EVENT_ACK = 0x72
+_EVENT_TIMER = 1
 
 _MAX_DATA = 400
+_EIO = 5
 _EOPNOTSUPP = 95
 _ETIMEDOUT = 110
 
@@ -82,11 +91,19 @@ def _port():
 
 
 class _Link:
-    # One request at a time, answered by the same sequence number.
+    # Requests and answers, one at a time, matched by sequence number (1 to 255). Frames with
+    # sequence 0 are events the M4 sends unasked (a timer's expiry); they can arrive between a
+    # request and its answer. Whoever reads them (the thread making a request, or the reader
+    # thread that watches the port when nobody asks) queues them; handlers run after the port's
+    # lock is released, so a handler may make requests itself.
 
     def __init__(self):
         self._file = None
         self._sequence = 0
+        self._io = _thread.allocate_lock()
+        self._events = []
+        self.handlers = {}  # event kind -> function(data)
+        self._reader = False
 
     def _open(self):
         if not available():
@@ -104,12 +121,17 @@ class _Link:
         termios.setraw(self._file.fileno())
         self._poll = select.poll()
         self._poll.register(self._file.fileno(), select.POLLIN)
+        self._watch = select.poll()  # the reader thread's own
+        self._watch.register(self._file.fileno(), select.POLLIN)
         while self._poll.poll(0):  # leftovers of an earlier session
             self._file.read(256)
-        info = self.request(_INFO)
+        info = self._exchange(_INFO, b"", 1000)
         if info[0] != PROTOCOL:
+            self.close()
             raise OSError(_EOPNOTSUPP, "Cortex-M4 firmware speaks protocol %d, not %d" % (info[0], PROTOCOL))
         self.firmware = info[1:].decode()
+        # Timers left running by an earlier program would send events nobody waits for.
+        self._exchange(_TIMER_DEINIT, b"\xff", 1000)
 
     def close(self):
         if self._file:
@@ -124,16 +146,21 @@ class _Link:
             data += self._file.read(count - len(data))
         return data
 
-    def request(self, operation, arguments=b"", timeout_ms=1000):
-        if self._file is None:
-            self._open()
-        self._sequence = (self._sequence + 1) & 0xFF
+    def _frame(self, timeout_ms):
+        length = struct.unpack("<H", self._read(2, timeout_ms))[0]
+        if not 2 <= length <= 600:
+            raise OSError(_EIO, "out of step with the Cortex-M4")
+        return self._read(length, timeout_ms)
+
+    def _exchange(self, operation, arguments, timeout_ms):
+        self._sequence = self._sequence % 255 + 1
         try:
             self._file.write(struct.pack("<HBB", 2 + len(arguments), self._sequence, operation) + arguments)
             while True:
-                length = struct.unpack("<H", self._read(2, timeout_ms))[0]
-                answer = self._read(length, timeout_ms)
-                if answer[0] == self._sequence:
+                answer = self._frame(timeout_ms)
+                if answer[0] == 0:
+                    self._events.append(answer[1:])
+                elif answer[0] == self._sequence:
                     break  # anything else answers a request given up on
         except OSError:
             self.close()  # out of step: open again at the next request
@@ -141,6 +168,60 @@ class _Link:
         if answer[1]:
             raise OSError(answer[1])
         return answer[2:]
+
+    def request(self, operation, arguments=b"", timeout_ms=1000):
+        with self._io:
+            if self._file is None:
+                self._open()
+            answer = self._exchange(operation, arguments, timeout_ms)
+        self._dispatch()
+        return answer
+
+    def _dispatch(self):
+        # Handlers run here, then the M4 hears that they ran: only then does it send each timer's
+        # next event (meanwhile it counts the expiries into it).
+        handled = False
+        while self._events:
+            frame = self._events.pop(0)
+            handled = True
+            handler = self.handlers.get(frame[0])
+            if handler:
+                try:
+                    handler(frame[1:])
+                except Exception as error:  # as a scheduled callback: report and go on
+                    sys.print_exception(error)
+        if handled:
+            try:
+                with self._io:
+                    if self._file:
+                        self._exchange(_EVENT_ACK, b"", 1000)
+            except OSError:
+                pass
+            if self._events:  # came with the acknowledgement's answer
+                self._dispatch()
+
+    def listen(self):
+        # Start the reader thread, once: it reads events while nobody makes requests.
+        if not self._reader:
+            self._reader = True
+            _thread.start_new_thread(self._listen, ())
+
+    def _listen(self):
+        while True:
+            watch = self._watch if self._file else None
+            if watch is None or not watch.poll(20):
+                if watch is None:
+                    time.sleep_ms(20)
+                continue
+            with self._io:
+                try:
+                    while self._file and self._poll.poll(0):
+                        frame = self._frame(200)
+                        if frame[0] == 0:
+                            self._events.append(frame[1:])
+                except OSError:
+                    self.close()
+            self._dispatch()
 
 
 link = _Link()
@@ -624,4 +705,75 @@ class UART:
 
     def sendbreak(self):
         link.request(_UART_BREAK)
+
+
+class Timer:
+    # machine.Timer on the M4: 8 timers (0 to 7; -1 takes a free one), counted by the M4's clock.
+    # At each expiry the M4 sends an event and the callback runs on Linux, in the thread that
+    # reads the M4 (or in one making a request): Linux decides when, typically within a
+    # millisecond; the M4 decides how many. Expiries Linux could not take in time come as one
+    # call, counted in missed. Periods from 1 ms (freq up to 1000 Hz).
+
+    ONE_SHOT = 0
+    PERIODIC = 1
+    _all = {}
+
+    def __init__(self, id=-1, *, mode=1, period=-1, freq=-1, callback=None, hard=False, **ignored):
+        if id == -1:
+            free = [i for i in range(8) if i not in Timer._all]
+            id = free[0] if free else None
+            if id is None:
+                raise OSError(16, "all 8 timers of the Cortex-M4 are in use")  # EBUSY
+        elif not 0 <= id < 8:
+            raise ValueError("Timer(%r): the Cortex-M4 has timers 0 to 7 (or -1)" % (id,))
+        self._id = id
+        self._callback = None
+        self.missed = 0  # not in machine.Timer: expiries merged into a later call
+        self.late_us = 0  # not in machine.Timer: how late the M4 sent the last event
+        if period != -1 or freq != -1:
+            self.init(mode=mode, period=period, freq=freq, callback=callback)
+
+    def init(self, *, mode=1, period=-1, freq=-1, callback=None, tick_hz=1000, hard=False, **ignored):
+        if mode not in (Timer.ONE_SHOT, Timer.PERIODIC):
+            raise ValueError("mode is Timer.ONE_SHOT or Timer.PERIODIC")
+        if freq != -1:
+            if not 0 < freq <= 1000:
+                raise ValueError("freq up to 1000 Hz")
+            us = round(1000000 / freq)
+        elif period != -1:
+            us = round(period * 1000000 / tick_hz)
+        else:
+            raise ValueError("period or freq is needed")
+        if us < 1000:
+            raise ValueError("the period is at least 1 ms")
+        self._callback = callback
+        self._mode = mode
+        self._us = us
+        Timer._all[self._id] = self
+        link.handlers[_EVENT_TIMER] = Timer._event
+        link.listen()
+        link.request(_TIMER_INIT, struct.pack("<BBI", self._id, mode, us))
+
+    def deinit(self):
+        link.request(_TIMER_DEINIT, bytes([self._id]))
+        if Timer._all.get(self._id) is self:
+            del Timer._all[self._id]
+
+    def __repr__(self):
+        if Timer._all.get(self._id) is not self:
+            return "Timer(%d)" % self._id
+        return "Timer(%d, mode=%s, period=%d us)" % (self._id, ("ONE_SHOT", "PERIODIC")[self._mode], self._us)
+
+    @staticmethod
+    def _event(data):
+        number, count, late = struct.unpack("<BII", data)
+        timer = Timer._all.get(number)
+        if timer is None:
+            return
+        timer.missed += count - 1
+        timer.late_us = late
+        if timer._mode == Timer.ONE_SHOT:
+            del Timer._all[number]
+        if timer._callback:
+            timer._callback(timer)
 

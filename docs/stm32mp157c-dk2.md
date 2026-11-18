@@ -1,13 +1,13 @@
 # STM32MP157C-DK2
 
 Second board of this project, and the first with a microcontroller beside Linux: its Cortex-M4
-serves `machine.I2C`, `ADC`, `PWM`, `SPI` and `UART` to MicroPython on the Cortex-A7.
+serves `machine.I2C`, `ADC`, `PWM`, `SPI`, `UART` and `Timer` to MicroPython on the Cortex-A7.
 
 **Status:** OpenSTLinux flashed; our build installed with `scripts/deploy.sh` (the same MicroPython
 binary as the STM32MP135F-DK); shell, app menu and REPL working (serial and TCP); the 480×800 panel
 turned to 800×480 in software (about 50 full frames per second); Wi-Fi, weather and the web radio
 with sound through the board's codec; `machine.Pin` on Linux GPIO lines, `machine.I2C`,
-`ADC`, `PWM`, `SPI` and `UART` on the Cortex-M4. Bring-up log: `docs/log/stm32mp157c-dk2-bringup.txt`.
+`ADC`, `PWM`, `SPI`, `UART` and `Timer` on the Cortex-M4. Bring-up log: `docs/log/stm32mp157c-dk2-bringup.txt`.
 Product page: <https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html>. Flashing and boot:
 [Populate the target and boot the image](https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image)
 on the ST wiki.
@@ -25,7 +25,7 @@ on the ST wiki.
 ## `machine` on the Cortex-M4
 
 ```python
-from machine import I2C, ADC, PWM, SPI, UART, Pin
+from machine import I2C, ADC, PWM, SPI, UART, Timer, Pin
 
 i2c = I2C(5, freq=400000)        # Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5
 print(i2c.scan())
@@ -43,6 +43,8 @@ cs(0); spi.read(3, 0x9F); cs(1)
 gps = UART(7, 9600, timeout=1000)             # RX D0, TX D1
 print(gps.readline())
 
+Timer(0, period=500, callback=lambda t: print("tick"))
+
 Pin("PA14", Pin.IN, Pin.PULL_UP).value()   # Pin stays on Linux GPIO lines, as on the STM32MP135F-DK
 ```
 
@@ -54,15 +56,19 @@ How it fits together:
 - **Firmware** (`mcu/stm32mp157c-dk2/`, built by `scripts/build_m4.sh` with `arm-none-eabi-gcc`,
   without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our `main.c` and the
   protocol. `install.sh` puts it in `/lib/firmware/mpy_m4.elf`.
-- **Start.** The first use of `machine.I2C`, `ADC`, `PWM`, `SPI` or `UART` loads the firmware through remoteproc
+- **Start.** The first use of `machine.I2C`, `ADC`, `PWM`, `SPI`, `UART` or `Timer` loads the firmware through remoteproc
   if the M4 is off (about 0.6 s). A new firmware installed by `deploy.sh` takes over at once.
+- **Events.** The M4 can also speak unasked: a frame with sequence number 0 is an event (a timer's
+  expiry). A thread of `mpy_m4` reads the port while nobody makes requests; events read during a
+  request are kept for later. Handlers run outside the port's lock, so a callback may use the M4
+  itself. Then Python acknowledges, and only then does the M4 send that timer's next event.
 - **Link.** One RPMsg virtual serial port (`/dev/ttyRPMSG*`; the number changes when the M4
   restarts, so `mpy_m4` looks it up). Requests and answers carry a length, a sequence number and an
   errno: the protocol is in `mcu/stm32mp157c-dk2/firmware/Inc/mpy_m4_protocol.h`. A request takes
   about 0.35 ms there and back.
 - **Python.** `mpy_m4` (frozen) has the classes; the frozen `machine` module takes the place of
   MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from `umachine`
-  and adds `I2C`, `ADC`, `PWM`, `SPI` and `UART` on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.
+  and adds `I2C`, `ADC`, `PWM`, `SPI`, `UART` and `Timer` on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.
 
 ### I2C
 
@@ -154,12 +160,30 @@ the rate on the pin while sending 0x55 (a square wave at half the rate): 0.14% u
 every rate, the same offset everywhere, well inside what a serial line tolerates. Not checked yet:
 a real device on the line.
 
+### Timer
+
+`Timer(id, mode=Timer.PERIODIC, period=ms, callback=f)` or `freq=Hz`, `init()`, `deinit()`,
+`Timer.ONE_SHOT`; 8 timers (0 to 7, or -1 for a free one), periods from 1 ms (up to 1000 Hz).
+
+The M4 counts, Linux calls: the expiries are timed by the M4's clock and none is lost, while the
+callback runs on Linux, in `mpy_m4`'s reader thread, when Linux gets to it (typically within a
+millisecond; a 10 ms timer's gaps have a median of 10.000 ms, single ones from 5 to 15 ms). Until
+Python has handled an event, the M4 sends no further one for that timer: it counts the expiries
+into the next, and the callback finds them in `timer.missed` (not in MicroPython's API, like
+`timer.late_us`, how late the M4 sent the event). So a busy Linux never piles events up.
+
+As with MicroPython's soft callbacks, the callback waits while the main thread runs Python
+without a pause: the GIL of MicroPython's unix port is not fair, and a loop that never sleeps,
+waits or does I/O keeps it (the LVGL thread waits the same way). Measured at 1 kHz for 0.5 s of
+such a loop: a few calls, the rest in `missed`, the count right. Anything that must happen at an
+exact time belongs on the M4 itself: the next step is ADC sampling at a fixed rate.
+
 ### What the M4 has that is not used
 
 | Peripheral | Why not |
 |---|---|
 | DAC | Its outputs PA4 and PA5 are the CC lines of the USB-C power connector (CN6), which tell the board what powers it; they do not reach the connectors. Left alone. |
-| TIM2, DMA2 | Kept for `machine.Timer` and for ADC sampling at a fixed rate. |
+| TIM2, DMA2 | Kept for ADC sampling at a fixed rate (`machine.Timer` uses the M4's cycle counter). |
 | HASH, CRYP, CRC, RNG | MicroPython on Linux has `hashlib` and `os.urandom`, the board `/dev/hwrng`. |
 
 Linux keeps every timer off, so TIM4 (D3, D5) and TIM12 (D9) could give more PWM outputs, once
@@ -168,8 +192,7 @@ edge events) belong on the Linux side.
 
 ## Next
 
-- `machine.Timer` and ADC sampling at a fixed rate (TIM2, DMA2): the M4 will need to send events
-  to Python without being asked.
+- ADC sampling at a fixed rate (TIM2, DMA2), into a buffer Python collects.
 - More PWM outputs on TIM4 and TIM12; `machine.WDT` and `Pin.irq` on Linux.
 - An I2C sensor and a known voltage on A0 for the HIL tests.
 - A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at
@@ -182,4 +205,4 @@ edge events) belong on the Linux side.
 | `mcu/stm32mp157c-dk2/` | Cortex-M4 firmware: `Makefile`, `firmware/` (our sources) |
 | `python/linux/mpy_m4.py`, `python/linux/machine.py` | The Python side, frozen in the firmware |
 | `scripts/build_m4.sh`, `scripts/build_mp157_usb.sh` | Firmware and device tree builds |
-| `tests/hil/test_m4.sh` | Tests of `machine.I2C`, `ADC`, `PWM`, `SPI` and `UART` on the board |
+| `tests/hil/test_m4.sh` | Tests of `machine.I2C`, `ADC`, `PWM`, `SPI`, `UART` and `Timer` on the board |

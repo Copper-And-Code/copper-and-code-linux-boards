@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# machine.I2C, ADC, PWM, SPI and UART served by the Cortex-M4 of the STM32MP157C-DK2, with nothing
-# wired to the connectors: the bus is empty, the internal reference is known, the M4 measures the
+# machine.I2C, ADC, PWM, SPI, UART and Timer served by the Cortex-M4 of the STM32MP157C-DK2, with
+# nothing wired to the connectors: the bus is empty, the internal reference is known, the M4 measures the
 # PWM and the UART and watches the SPI on its own pins, the UART loops back on a single wire.
 #
 #   P=/dev/ttyACM1 tests/hil/test_m4.sh
@@ -85,7 +85,7 @@ for duty in (0, 65535):
 pwm.freq(100000)
 pwm.duty_u16(19661)
 f, d = mpy_m4.measure('D6', 100)
-near(f, 100000, 20); near(d, 0.3, 0.002)
+near(f, 100000, 20); near(d, 0.3, 0.005)  # 80 samples a period: an interrupt shows
 pwm.deinit()
 assert mpy_m4.measure('D6', 20) == (0, 0)
 for bad in (lambda: machine.PWM('PA14'), lambda: machine.PWM('D6', invert=True), lambda: machine.PWM('D6', freq=0)):
@@ -159,6 +159,42 @@ for bad in (lambda: machine.UART(1), lambda: machine.UART(7, bits=9, parity=0), 
     except ValueError:
         pass
 print('PASS: UART7 8N1, 7E2, 8O1 and 1 Mbaud looped back, readline, timeout, 3 KB, 9600 baud on the pin')
+
+# Timers: the M4 counts, Linux runs the callbacks; events wait for Linux's acknowledgement.
+calls = []
+t = machine.Timer(0, period=10, callback=lambda t: calls.append(time.ticks_us()))
+time.sleep_ms(1000)
+t.deinit()
+near(len(calls) + t.missed, 100, 2)
+gaps = sorted(time.ticks_diff(b, a) for a, b in zip(calls, calls[1:]))
+near(gaps[len(gaps) // 2], 10000, 300)
+shot = []
+start = time.ticks_us()
+machine.Timer(-1, mode=machine.Timer.ONE_SHOT, period=50, callback=lambda t: shot.append(time.ticks_diff(time.ticks_us(), start)))
+time.sleep_ms(150)
+assert len(shot) == 1 and 49000 < shot[0] < 60000, shot
+reads = []
+t = machine.Timer(1, freq=100, callback=lambda t: reads.append(machine.ADC(machine.ADC.CORE_VREF).read_uv()))
+start = time.ticks_ms()
+while time.ticks_diff(time.ticks_ms(), start) < 300:
+    machine.ADC('A0').read_u16()  # requests of the main thread beside the callbacks' own
+t.deinit()
+assert 25 <= len(reads) <= 32 and all(1150000 < v < 1270000 for v in reads), reads
+calls = []
+t = machine.Timer(2, freq=1000, callback=lambda t: calls.append(1))
+start = time.ticks_ms()
+while time.ticks_diff(time.ticks_ms(), start) < 500:
+    pass  # a busy main thread: callbacks wait, the M4 counts, nothing piles up
+time.sleep_ms(50)
+t.deinit()
+assert len(calls) < 100 and 400 < len(calls) + t.missed <= 560, (len(calls), t.missed)
+for bad in (lambda: machine.Timer(8), lambda: machine.Timer(0, period=0), lambda: machine.Timer(0, freq=2000)):
+    try:
+        bad()
+        raise AssertionError('no ValueError')
+    except ValueError:
+        pass
+print('PASS: Timer 10 ms (median gap %d us), one shot 50 ms, requests in callbacks, 1 kHz under a busy main thread' % gaps[len(gaps) // 2])
 
 mpy_m4.led(True)
 time.sleep_ms(200)

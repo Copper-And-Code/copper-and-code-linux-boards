@@ -4,15 +4,17 @@
 //
 //   request:  length u16, sequence u8, operation u8, arguments
 //   answer:   length u16, sequence u8, status u8, result
+//   event:    length u16, 0, kind u8, data          (sent by the M4 unasked)
 //
-// length counts the bytes after itself. The answer repeats the request's sequence number. status
+// length counts the bytes after itself. The answer repeats the request's sequence number, never 0:
+// sequence 0 marks an event, which can come between a request and its answer. status
 // is 0 or a Linux errno value, which Python raises as OSError: ENODEV when no device answers an
 // I2C address, EIO when one stops answering, ETIMEDOUT, EINVAL for bad arguments, EOPNOTSUPP for
 // an unknown operation.
 #ifndef MPY_M4_PROTOCOL_H
 #define MPY_M4_PROTOCOL_H
 
-#define MPY_M4_PROTOCOL_VERSION 1
+#define MPY_M4_PROTOCOL_VERSION 2  // 2: events (timers), acknowledged
 #define MPY_M4_MAX_FRAME 480  // what one RPMsg buffer carries (496 bytes, less the header)
 #define MPY_M4_MAX_DATA 400   // bytes of one I2C transfer
 
@@ -57,11 +59,24 @@ enum {
     OP_UART_BREAK = 0x64,
     OP_UART_DEINIT = 0x65,     // the pins back to analog, UART7 off
 
+    // Timers of the M4 (8, numbered 0 to 7), on the cycle counter: at each expiry an event
+    // EVENT_TIMER. Expiries the M4 could not report in time are counted in the next event.
+    OP_TIMER_INIT = 0x70,      // timer u8, mode u8 (0 one shot, 1 periodic), period us u32 (>= 1000)
+    OP_TIMER_DEINIT = 0x71,    // timer u8 (0xFF: all)
+    OP_EVENT_ACK = 0x72,       // Linux has handled the events so far: each timer may send its next
+                               //   one. Until then a timer counts its expiries into that next event,
+                               //   so a busy Linux never piles events up in the serial port.
+
     // What a pin does, sampled by the M4 for a while: for tests without instruments.
     OP_PIN_MEASURE = 0x40,     // port u8, pin u8, milliseconds u16
                                //   -> samples u32, cycles high u32, rising edges u32,
                                //      cycles u32, core Hz u32
 };
+
+// Events (the status byte of a frame with sequence 0).
+#define EVENT_TIMER 1  // timer u8, expiries u32, late us u32 (from the first expiry to the sending)
+#define MPY_M4_TIMERS 8
+#define MPY_M4_TIMER_MIN_US 1000
 
 // Channels of ADC_READ beyond the inputs 0 to 19; ADC2 only.
 #define ADC_CHANNEL_CODE_VREFINT 0x80
