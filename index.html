@@ -917,8 +917,9 @@ MicroPython <code>machine</code> API (<code>WDT</code>, <code>Pin.irq</code>) wi
 hardware code moves between boards unchanged.</p>
 <p>A board that pairs Linux with a microcontroller gets the best of both: Python and the GUI on
 Linux, the real-time work on the MCU. On the STM32MP157C-DK2 <code>machine</code> talks to our firmware on the
-Cortex-M4 over RPMsg (about 0.35 ms a request), so a Python app reads sensors with microcontroller
-timing while Linux keeps the screen, the network and the programs. On boards without an MCU the
+Cortex-M4 over RPMsg (about 0.3 ms a request: <a href="stm32mp157c-dk2/#latency">measured latency</a>), so a Python app
+reads sensors with microcontroller timing while Linux keeps the screen, the network and the
+programs. On boards without an MCU the
 same classes will use the kernel's drivers.
 See <a href="stm32mp157c-dk2/">the STM32MP157C-DK2</a>.</p>
 <h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
