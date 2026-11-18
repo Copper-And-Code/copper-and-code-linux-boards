@@ -1,10 +1,12 @@
-# STM32MP135F-DK board definition for LVGL MPY Studio
+# Board definitions for LVGL MPY Studio
 
 This folder keeps the LVGL MPY Studio board definition of the STM32MP135F-DK next to the firmware it
 describes, outside the Studio repository: the Studio imports it from the file.
 
 - `boards/stm32mp135f_dk_480x272.json`: the board profile (480×272, RGB565, `display_driver`,
   `mpremote` over the USB CDC-ACM REPL).
+- `boards/stm32mp157c_dk2_800x480.json`: the STM32MP157C-DK2, 800×480 (its 480×800 panel turned by
+  `display_driver`), checked compatible by the Studio on the board.
 
 ## Using it in the Studio
 
