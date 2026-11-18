@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Settings",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "86c8fece0e8d493c9a6aa4ab9b2cc0ea",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "fc48cfb5a8a247649f8859179ee66db9",
+          "name": "header",
+          "type": "label",
+          "props": {
+            "x": 13,
+            "y": 11,
+            "width": 333,
+            "height": 49,
+            "text": "Wi-Fi",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c1d2a8c0a3bb4665a89a02945a4ef3a5",
+          "name": "scan_button",
+          "type": "button",
+          "props": {
+            "x": 620,
+            "y": 7,
+            "width": 170,
+            "height": 56,
+            "text": "Scan",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 13
+          },
+          "events": {
+            "CLICKED": "scan_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "476583a543e14b2991c34c98a4659190",
+          "name": "wifi_status",
+          "type": "label",
+          "props": {
+            "x": 13,
+            "y": 67,
+            "width": 773,
+            "height": 32,
+            "text": "",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_DOTS",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b0c45ee596c641c687db1f2a1bccaa43",
+          "name": "network_list",
+          "type": "list",
+          "props": {
+            "x": 10,
+            "y": 106,
+            "width": 333,
+            "height": 364,
+            "items": "",
+            "bgColor": "#1E2633",
+            "textColor": "#E6EAF0",
+            "selectedColor": "#2FA36B",
+            "fontSize": 24
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "0825ca3bb54e46ab88cecd4723b1945f",
+          "name": "ssid",
+          "type": "textarea",
+          "props": {
+            "x": 360,
+            "y": 106,
+            "width": 430,
+            "height": 71,
+            "text": "",
+            "placeholder": "Network name",
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "oneLine": true,
+            "password": false,
+            "maxLength": 32,
+            "acceptedChars": ""
+          },
+          "events": {
+            "FOCUSED": "ssid_focused"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "3589b0f33eb54712914b1322c8e07a87",
+          "name": "password",
+          "type": "textarea",
+          "props": {
+            "x": 360,
+            "y": 187,
+            "width": 430,
+            "height": 71,
+            "text": "",
+            "placeholder": "Password",
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "oneLine": true,
+            "password": true,
+            "maxLength": 63,
+            "acceptedChars": ""
+          },
+          "events": {
+            "FOCUSED": "password_focused"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ff13922c29744f54ab66eafa3e318a51",
+          "name": "connect_button",
+          "type": "button",
+          "props": {
+            "x": 360,
+            "y": 272,
+            "width": 430,
+            "height": 81,
+            "text": "Save and connect",
+            "bgColor": "#2FA36B",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 17
+          },
+          "events": {
+            "CLICKED": "connect_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c4f5b90bb7b4429eae3943bd90e82431",
+          "name": "message",
+          "type": "label",
+          "props": {
+            "x": 360,
+            "y": 367,
+            "width": 430,
+            "height": 102,
+            "text": "",
+            "textColor": "#E6EAF0",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "9f235a0356334fb68c18a4dd3b4d2ad5",
+          "name": "keyboard",
+          "type": "keyboard",
+          "props": {
+            "x": 0,
+            "y": 247,
+            "width": 800,
+            "height": 233,
+            "mode": "text_lower",
+            "textarea": "",
+            "popover": true
+          },
+          "events": {
+            "READY": "keyboard_ready",
+            "CANCEL": "keyboard_cancel"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "cad00cf5cfbe4670b4088b28499d1bda",
+          "name": "tick",
+          "type": "timer",
+          "props": {
+            "period": 300,
+            "enabled": true
+          },
+          "events": {
+            "TICK": "tick_tick"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import settings_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "settings_app.start(ui)"
+      },
+      "scan_button_clicked": {
+        "widget": "scan_button",
+        "event": "CLICKED",
+        "body": "settings_app.scan()"
+      },
+      "connect_button_clicked": {
+        "widget": "connect_button",
+        "event": "CLICKED",
+        "body": "settings_app.connect()"
+      },
+      "ssid_focused": {
+        "widget": "ssid",
+        "event": "FOCUSED",
+        "body": "settings_app.edit(ui.ssid)"
+      },
+      "password_focused": {
+        "widget": "password",
+        "event": "FOCUSED",
+        "body": "settings_app.edit(ui.password)"
+      },
+      "keyboard_ready": {
+        "widget": "keyboard",
+        "event": "READY",
+        "body": "settings_app.done_editing()"
+      },
+      "keyboard_cancel": {
+        "widget": "keyboard",
+        "event": "CANCEL",
+        "body": "settings_app.done_editing()"
+      },
+      "tick_tick": {
+        "widget": "tick",
+        "event": "TICK",
+        "body": "settings_app.tick()"
+      }
+    }
+  },
+  "currentPageId": "86c8fece0e8d493c9a6aa4ab9b2cc0ea",
+  "assets": {},
+  "variables": [],
+  "projectId": "f8b878b055184ec2a02a17af118aa791",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "8fd6040e677e400daf28634f195b2a7b",
+      "name": "settings_app",
+      "source": "# SPDX-License-Identifier: MIT\n# Settings: choose a Wi-Fi network and save it in settings.json, where every app finds it\n# (mpy_settings, mpy_wifi.ensure()). Scan and connect run in the background; the page's timer\n# follows them, so the screen never freezes.\n#\n# In the LVGL MPY Studio simulator there is no Wi-Fi: three demo networks are shown and the\n# settings are kept in memory.\n\nimport time\n\nimport lvgl as lv\n\ntry:\n    import mpy_settings\n    import mpy_wifi\nexcept ImportError:\n    mpy_settings = mpy_wifi = None\n\nGREEN = lv.color_hex(0x2FA36B)\nROW = lv.color_hex(0x1E2633)\nDEMO = [(\"Home\", -48.0, True), (\"Workshop\", -66.0, True), (\"Cafe Guest\", -79.0, False)]\nCONNECT_SECONDS = 30\n\n_ui = None\n_job = None\n_job_kind = None\n_waiting_until = None\n_checked = 0\n_demo_settings = {}\n\n\ndef _row_font():\n    # List rows follow the screen: bigger letters on an 800x480 screen than on a 480x272 one.\n    height = lv.display_get_default().get_vertical_resolution()\n    return lv.font_montserrat_24 if height >= 400 else lv.font_montserrat_14\n\n\ndef _say(text):\n    _ui.message.set_text(text)\n\n\ndef _bars(dbm):\n    # signal as words a maker reads at a glance\n    return \"strong\" if dbm > -60 else \"good\" if dbm > -70 else \"weak\"\n\n\ndef start(ui):\n    global _ui\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    ui.network_list.set_style_border_width(0, 0)\n    ui.network_list.set_style_radius(10, 0)\n    ui.network_list.set_style_pad_all(4, 0)\n    ui.network_list.set_style_pad_row(4, 0)\n    ui.scan_button.get_child(0).set_text(lv.SYMBOL.REFRESH + \" Scan\")\n    ui.keyboard.set_size(lv.pct(100), lv.pct(48))\n    ui.keyboard.align(lv.ALIGN.BOTTOM_MID, 0, 0)\n    ui.keyboard.add_flag(lv.obj.FLAG.HIDDEN)\n    wifi = mpy_settings.get(\"wifi\") if mpy_settings else _demo_settings.get(\"wifi\")\n    if wifi:\n        ui.ssid.set_text(wifi.get(\"ssid\", \"\"))\n        ui.password.set_text(wifi.get(\"password\", \"\"))\n    show_status()\n    scan()\n\n\ndef edit(textarea):\n    _ui.keyboard.set_textarea(textarea)\n    _ui.keyboard.remove_flag(lv.obj.FLAG.HIDDEN)\n\n\ndef done_editing():\n    _ui.keyboard.add_flag(lv.obj.FLAG.HIDDEN)\n    _ui.keyboard.set_textarea(None)\n    _ui.ssid.remove_state(lv.STATE.FOCUSED)\n    _ui.password.remove_state(lv.STATE.FOCUSED)\n\n\ndef scan():\n    global _job, _job_kind\n    if _job is not None:\n        return\n    if mpy_wifi is None:\n        _fill(DEMO)\n        _say(\"Demo networks (simulator)\")\n        return\n    try:\n        _job, _job_kind = mpy_wifi.start_scan(), \"scan\"\n        _say(\"Scanning...\")\n    except OSError as error:\n        _say(\"Scan failed: %s\" % error)\n\n\ndef _fill(networks):\n    _ui.network_list.clean()\n    for name, dbm, secured in networks:\n        row = lv.button(_ui.network_list)\n        row.set_width(lv.pct(100))\n        row.set_style_bg_color(ROW, 0)\n        row.set_style_shadow_width(0, 0)\n        label = lv.label(row)\n        label.set_text(\"%s %s\\n%s%s\" % (lv.SYMBOL.WIFI, name, _bars(dbm), \"  locked\" if secured else \"  open\"))\n        label.set_style_text_font(_row_font(), 0)\n        label.set_long_mode(lv.label.LONG_MODE.DOTS)\n        label.set_width(lv.pct(100))\n        row.add_event_cb(lambda e, n=name: choose(n), lv.EVENT.CLICKED, None)\n\n\ndef choose(name):\n    _ui.ssid.set_text(name)\n    _ui.password.set_text(\"\")\n    edit(_ui.password)\n\n\ndef connect():\n    global _job, _job_kind, _waiting_until\n    done_editing()\n    ssid = _ui.ssid.get_text().strip()\n    password = _ui.password.get_text()\n    if not ssid:\n        _say(\"Choose or type a network name\")\n        return\n    if password and not 8 <= len(password) <= 63:\n        _say(\"The password must have 8 to 63 characters\")\n        return\n    values = {\"ssid\": ssid, \"password\": password}\n    if mpy_wifi is None:\n        _demo_settings[\"wifi\"] = values\n        _say(\"Saved (simulator): \" + ssid)\n        return\n    mpy_settings.update(\"wifi\", values)\n    try:\n        _job, _job_kind = mpy_wifi.start_connect(ssid, password), \"connect\"\n    except (OSError, ValueError) as error:\n        _say(\"Saved, but cannot connect: %s\" % error)\n        return\n    _waiting_until = time.ticks_add(time.ticks_ms(), CONNECT_SECONDS * 1000)\n    _say(\"Saved. Connecting to %s...\" % ssid)\n\n\ndef show_status():\n    global _checked\n    _checked = time.ticks_ms()\n    if mpy_wifi is None:\n        _ui.wifi_status.set_text(\"Simulator: no Wi-Fi\")\n        return False\n    info = mpy_wifi.status()\n    online = info.get(\"state\") == \"COMPLETED\" and \"ip\" in info\n    if online:\n        _ui.wifi_status.set_text(\"%s Connected to %s, address %s\" % (lv.SYMBOL.OK, info.get(\"ssid\", \"?\"), info[\"ip\"]))\n    elif info.get(\"state\") == \"NO_INTERFACE\":\n        _ui.wifi_status.set_text(\"This board has no Wi-Fi\")\n    else:\n        _ui.wifi_status.set_text(\"Not connected (%s)\" % info.get(\"state\", \"?\").lower())\n    return online\n\n\ndef tick():\n    global _job, _waiting_until\n    if _ui is None:\n        return\n    if _job is not None and _job.poll() is not None:\n        job, _job = _job, None\n        if _job_kind == \"scan\":\n            found = mpy_wifi.scan_results(job) if job.status == 0 else []\n            _fill(found)\n            _say(\"%d networks found\" % len(found) if job.status == 0 else \"Scan failed\")\n        elif job.status != 0:\n            _waiting_until = None\n            _say(\"Could not start Wi-Fi (%d)\" % job.status)\n    if time.ticks_diff(time.ticks_ms(), _checked) >= 2000 or _waiting_until is not None:\n        online = show_status()\n        if _waiting_until is not None:\n            if online:\n                _waiting_until = None\n                _say(\"Connected. Apps that need the internet use this network.\")\n            elif time.ticks_diff(_waiting_until, time.ticks_ms()) <= 0:\n                _waiting_until = None\n                _say(\"Not connected: check the password and the signal.\")\n"
+    }
+  ]
+}

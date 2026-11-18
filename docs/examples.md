@@ -5,6 +5,10 @@ with the Studio's MCP tools. Open it in the Studio, try it in the simulator (dem
 the network and the sound), connect to the board and run it. To have it in the home screen's menu,
 add it to `settings.json`, section `home`.
 
+Each example has two projects with the same Python modules: `project.json` for 480×272 (STM32MP135F-DK)
+and `project-800x480.json` for 800×480 (STM32MP157C-DK2). Sizes drawn by the code follow the widgets,
+so the modules fit both.
+
 Source: [examples on GitHub](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples).
 
 ## Weather

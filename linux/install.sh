@@ -3,7 +3,7 @@
 # Install MicroPython, the REPL hub and the services on an STM32MP135F-DK or STM32MP157C-DK2. Run
 # on the board as root from a directory that holds the files (scripts/deploy.sh copies them):
 #
-#   micropython  mpy-repl-hub  (each with an optional .sha256)
+#   micropython  mpy-repl-hub  mpy-screenshot  (each with an optional .sha256)
 #   stm32mp135f-dk.dtb or stm32mp157c-dk2.dtb  (the board's: USB FIFOs; on the STM32MP135F-DK
 #                                               also the B1 button)
 #   mpy_launcher.py  mpy-usb-composite.sh  mpy-usb-composite.service  mpy-repl.service
@@ -41,7 +41,7 @@ case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
 esac
 HOSTNAME_WANTED=${MPY_HOSTNAME-$HOSTNAME_DEFAULT}
 say "board $BOARD"
-files="micropython mpy-repl-hub mpy_launcher.py mpy-usb-composite.sh mpy-usb-composite.service
+files="micropython mpy-repl-hub mpy-screenshot mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.service
     mpy-repl.service usbotg.default journald-volatile.conf edit.py vi.py $DTB_NAME"
 for file in $files; do
     [ -f "$SOURCE/$file" ] || die "missing $SOURCE/$file"
@@ -68,8 +68,10 @@ put() { # source target mode
 install -d "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/fs/lib" "$PREFIX/fs/bin"
 put "$SOURCE/micropython" "$PREFIX/bin/micropython" 0755
 put "$SOURCE/mpy-repl-hub" "$PREFIX/bin/mpy-repl-hub" 0755
+put "$SOURCE/mpy-screenshot" "$PREFIX/bin/mpy-screenshot" 0755
 put "$SOURCE/mpy-usb-composite.sh" "$PREFIX/bin/mpy-usb-composite" 0755
 put "$SOURCE/mpy_launcher.py" "$PREFIX/lib/mpy_launcher.py" 0644
+put "$SOURCE/mpy_tap.py" "$PREFIX/lib/mpy_tap.py" 0644
 put "$SOURCE/edit.py" "$PREFIX/fs/bin/edit.py" 0644
 put "$SOURCE/vi.py" "$PREFIX/fs/bin/vi.py" 0644
 # The shell is frozen in the firmware now: old copies in fs/ would only confuse.

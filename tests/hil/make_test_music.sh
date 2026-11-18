@@ -10,5 +10,5 @@ for i in 1 2 3; do
     ffmpeg -loglevel error -y -f lavfi -i "sine=frequency=$((220 * i)):duration=10" \
         -metadata title="Test tone $i" -metadata artist="lvgl-mpy-linux" -b:a 128k "$DIR/tone$i.mp3"
 done
-ssh "root@$BOARD" 'mkdir -p /usr/local/mpy/fs/music'
-scp -q "$DIR"/*.mp3 "root@$BOARD:/usr/local/mpy/fs/music/"
+ssh ${MPY_SSH_ALIAS:+-o HostKeyAlias=$MPY_SSH_ALIAS} "root@$BOARD" 'mkdir -p /usr/local/mpy/fs/music'
+scp -q ${MPY_SSH_ALIAS:+-o HostKeyAlias=$MPY_SSH_ALIAS} "$DIR"/*.mp3 "root@$BOARD:/usr/local/mpy/fs/music/"

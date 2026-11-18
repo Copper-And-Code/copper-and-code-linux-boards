@@ -1,0 +1,836 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Weather",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "b9154134c2a54388a0d5fa12beb493a8",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "bd229dd6fa59445ea20cedc527bac57d",
+          "name": "place",
+          "type": "label",
+          "props": {
+            "x": 20,
+            "y": 11,
+            "width": 600,
+            "height": 49,
+            "text": "Weather",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "longMode": "LV_LABEL_LONG_MODE_DOTS",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "37f8c970614b454a9ae030448e1a5b6b",
+          "name": "updated",
+          "type": "label",
+          "props": {
+            "x": 20,
+            "y": 64,
+            "width": 600,
+            "height": 32,
+            "text": "",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "06d4ca2f715c4874b04ed4f8473a2972",
+          "name": "settings_button",
+          "type": "button",
+          "props": {
+            "x": 697,
+            "y": 14,
+            "width": 90,
+            "height": 74,
+            "text": "Set",
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "radius": 17
+          },
+          "events": {
+            "CLICKED": "settings_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "e6708961481840deac0f1f00a052efac",
+          "name": "hero",
+          "type": "panel",
+          "props": {
+            "x": 13,
+            "y": 102,
+            "width": 773,
+            "height": 198,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 23,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "68182d3eedb94eb1b867d1398c286b74",
+          "name": "now_temp",
+          "type": "label",
+          "props": {
+            "x": 187,
+            "y": 11,
+            "width": 250,
+            "height": 81,
+            "text": "--",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "e6708961481840deac0f1f00a052efac",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "8cf25d298671423e8b9c6bcf6897fb22",
+          "name": "now_text",
+          "type": "label",
+          "props": {
+            "x": 187,
+            "y": 99,
+            "width": 283,
+            "height": 78,
+            "text": "",
+            "textColor": "#E6EAF0",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "e6708961481840deac0f1f00a052efac",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "fa9313d7fdb84d329a6d14a57413cbde",
+          "name": "now_details",
+          "type": "label",
+          "props": {
+            "x": 483,
+            "y": 18,
+            "width": 277,
+            "height": 162,
+            "text": "",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "e6708961481840deac0f1f00a052efac",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "1c3b2feb8e2e4675b812c6603d3710b7",
+          "name": "day_0",
+          "type": "panel",
+          "props": {
+            "x": 13,
+            "y": 311,
+            "width": 147,
+            "height": 159,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 20,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "6de2c366646e454fadd7bdbac35d29a5",
+          "name": "day_1",
+          "type": "panel",
+          "props": {
+            "x": 170,
+            "y": 311,
+            "width": 147,
+            "height": 159,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 20,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "e3c5fd20794046cabac5d25aeb86c7da",
+          "name": "day_2",
+          "type": "panel",
+          "props": {
+            "x": 327,
+            "y": 311,
+            "width": 147,
+            "height": 159,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 20,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "8096a12aedb54eb5a9c80dba74b3fa95",
+          "name": "day_3",
+          "type": "panel",
+          "props": {
+            "x": 483,
+            "y": 311,
+            "width": 147,
+            "height": 159,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 20,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "80d28f2cc81e4081b439d86d5d0093d3",
+          "name": "day_4",
+          "type": "panel",
+          "props": {
+            "x": 640,
+            "y": 311,
+            "width": 147,
+            "height": 159,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 20,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ad035ff288894e088e38c739bece5f67",
+          "name": "tick",
+          "type": "timer",
+          "props": {
+            "period": 500,
+            "enabled": true
+          },
+          "events": {
+            "TICK": "tick_tick"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    },
+    {
+      "id": "a98d45f20c51488398b4e75b516f6e3a",
+      "name": "settings",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "55a7dc7913bb4b65809bb83482e6cc9e",
+          "name": "settings_title",
+          "type": "label",
+          "props": {
+            "x": 20,
+            "y": 14,
+            "width": 500,
+            "height": 49,
+            "text": "Weather settings",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c1c7de6c6a564e6ba5b978a42834fb7a",
+          "name": "done_button",
+          "type": "button",
+          "props": {
+            "x": 633,
+            "y": 11,
+            "width": 153,
+            "height": 60,
+            "text": "Done",
+            "bgColor": "#2F6FDE",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 13
+          },
+          "events": {
+            "CLICKED": "done_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "768bfc6aa7034a93a97e0ef5d0cdd47a",
+          "name": "search_text",
+          "type": "textarea",
+          "props": {
+            "x": 13,
+            "y": 81,
+            "width": 263,
+            "height": 67,
+            "text": "",
+            "placeholder": "City",
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "oneLine": true,
+            "password": false,
+            "maxLength": 40,
+            "acceptedChars": ""
+          },
+          "events": {
+            "FOCUSED": "search_text_focused"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ed78f37b820540cf881e3030c900147e",
+          "name": "search_button",
+          "type": "button",
+          "props": {
+            "x": 283,
+            "y": 81,
+            "width": 110,
+            "height": 67,
+            "text": "Find",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 13
+          },
+          "events": {
+            "CLICKED": "search_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "4a225877059d4f9fba20765ccd0c9097",
+          "name": "place_list",
+          "type": "list",
+          "props": {
+            "x": 13,
+            "y": 159,
+            "width": 380,
+            "height": 311,
+            "items": "",
+            "bgColor": "#1E2633",
+            "textColor": "#E6EAF0",
+            "selectedColor": "#2F6FDE",
+            "fontSize": 24
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "afe188f394844afea43e50157157e2ba",
+          "name": "units_label",
+          "type": "label",
+          "props": {
+            "x": 413,
+            "y": 95,
+            "width": 167,
+            "height": 35,
+            "text": "Temperature",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "1e9a879ab0b148ddab4891083f3bf6ef",
+          "name": "units",
+          "type": "dropdown",
+          "props": {
+            "x": 587,
+            "y": 81,
+            "width": 200,
+            "height": 64,
+            "options": "°C\n°F",
+            "selected": 0,
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b219a292d46544558818feda416fef3a",
+          "name": "wind_label",
+          "type": "label",
+          "props": {
+            "x": 413,
+            "y": 166,
+            "width": 167,
+            "height": 35,
+            "text": "Wind",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b85c6ebc8fa94093ad2731c89d09d61b",
+          "name": "wind",
+          "type": "dropdown",
+          "props": {
+            "x": 587,
+            "y": 152,
+            "width": 200,
+            "height": 64,
+            "options": "km/h\nm/s\nmph\nkn",
+            "selected": 0,
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "088d7824fe2147088060191cd820d875",
+          "name": "refresh_label",
+          "type": "label",
+          "props": {
+            "x": 413,
+            "y": 236,
+            "width": 167,
+            "height": 35,
+            "text": "Update every",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "737a08feceaf40c69bc05139996f3464",
+          "name": "refresh",
+          "type": "dropdown",
+          "props": {
+            "x": 587,
+            "y": 222,
+            "width": 200,
+            "height": 64,
+            "options": "15 min\n30 min\n60 min",
+            "selected": 1,
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "4641bfd2d8584bcf9d340084cb7f1038",
+          "name": "night_label",
+          "type": "label",
+          "props": {
+            "x": 413,
+            "y": 307,
+            "width": 100,
+            "height": 35,
+            "text": "Dim",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "cec83067130e4333a32e90ad89afa7e8",
+          "name": "night_from",
+          "type": "dropdown",
+          "props": {
+            "x": 483,
+            "y": 293,
+            "width": 147,
+            "height": 64,
+            "options": "23:00",
+            "selected": 0,
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "00540f04e4b84015bfc4426ad62205b6",
+          "name": "night_to",
+          "type": "dropdown",
+          "props": {
+            "x": 640,
+            "y": 293,
+            "width": 147,
+            "height": 64,
+            "options": "05:30",
+            "selected": 0,
+            "bgColor": "#1E2633",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "86ed96cca9df48e2b70ee7e53cd4d246",
+          "name": "night_level_label",
+          "type": "label",
+          "props": {
+            "x": 413,
+            "y": 385,
+            "width": 167,
+            "height": 35,
+            "text": "Night 20%",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "a9c251030ab94603ae3422391946dda9",
+          "name": "night_level",
+          "type": "slider",
+          "props": {
+            "x": 587,
+            "y": 392,
+            "width": 187,
+            "height": 21,
+            "min": 5,
+            "max": 100,
+            "value": 20,
+            "bgColor": "#2A3444",
+            "indicatorColor": "#2F6FDE",
+            "knobColor": "#FFFFFF",
+            "mode": "normal",
+            "isRange": false,
+            "leftValue": 0
+          },
+          "events": {
+            "VALUE_CHANGED": "night_level_value_changed"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "a3bd29b84e56428e80359fb9fc1448a4",
+          "name": "settings_message",
+          "type": "label",
+          "props": {
+            "x": 413,
+            "y": 434,
+            "width": 373,
+            "height": 35,
+            "text": "",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_DOTS",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b1bd5aedb5ca4332921f16107894b94d",
+          "name": "keyboard",
+          "type": "keyboard",
+          "props": {
+            "x": 0,
+            "y": 247,
+            "width": 800,
+            "height": 233,
+            "mode": "text_lower",
+            "textarea": "",
+            "popover": true
+          },
+          "events": {
+            "READY": "keyboard_ready",
+            "CANCEL": "keyboard_cancel"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import weather_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "weather_app.start_main(ui)"
+      },
+      "settings_screen_loaded": {
+        "widget": "settings",
+        "event": "SCREEN_LOADED",
+        "body": "weather_app.start_settings(ui)"
+      },
+      "settings_button_clicked": {
+        "widget": "settings_button",
+        "event": "CLICKED",
+        "body": "weather_app.open_settings()"
+      },
+      "done_button_clicked": {
+        "widget": "done_button",
+        "event": "CLICKED",
+        "body": "weather_app.done()"
+      },
+      "search_button_clicked": {
+        "widget": "search_button",
+        "event": "CLICKED",
+        "body": "weather_app.search()"
+      },
+      "search_text_focused": {
+        "widget": "search_text",
+        "event": "FOCUSED",
+        "body": "weather_app.edit_search()"
+      },
+      "keyboard_ready": {
+        "widget": "keyboard",
+        "event": "READY",
+        "body": "weather_app.search()"
+      },
+      "keyboard_cancel": {
+        "widget": "keyboard",
+        "event": "CANCEL",
+        "body": "weather_app.close_keyboard()"
+      },
+      "night_level_value_changed": {
+        "widget": "night_level",
+        "event": "VALUE_CHANGED",
+        "body": "weather_app.show_night_level()"
+      },
+      "tick_tick": {
+        "widget": "tick",
+        "event": "TICK",
+        "body": "weather_app.tick()"
+      }
+    }
+  },
+  "currentPageId": "b9154134c2a54388a0d5fa12beb493a8",
+  "assets": {},
+  "variables": [],
+  "projectId": "cbceaff790744550b09950273ccad5d9",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "b99f55c2eccd409dad0ef2f67da54fb2",
+      "name": "weather_icons",
+      "source": "# SPDX-License-Identifier: MIT\n# Weather icons drawn with LVGL objects, at any size: no image files. icon() turns a WMO weather\n# code (the one Open-Meteo returns) into sun, moon, clouds, fog, drizzle, rain, snow or thunder.\n\nimport math\n\nimport lvgl as lv\n\nSUN = 0xFFC233\nMOON = 0xE8ECF4\nCLOUD = 0xC4CEDA\nRAIN = 0x58A6FF\nSNOW = 0xFFFFFF\nBOLT = 0xFFD84D\n\n\ndef _bare(parent, x, y, w, h):\n    o = lv.obj(parent)\n    o.remove_style_all()\n    o.remove_flag(lv.obj.FLAG.CLICKABLE)\n    o.remove_flag(lv.obj.FLAG.SCROLLABLE)\n    o.set_pos(x, y)\n    o.set_size(w, h)\n    return o\n\n\ndef _block(parent, x, y, w, h, radius, color):\n    o = _bare(parent, x, y, w, h)\n    o.set_style_bg_opa(255, 0)\n    o.set_style_bg_color(lv.color_hex(color), 0)\n    o.set_style_radius(radius, 0)\n    return o\n\n\ndef _disc(parent, cx, cy, d, color):\n    return _block(parent, cx - d // 2, cy - d // 2, d, d, lv.RADIUS_CIRCLE, color)\n\n\ndef _stroke(parent, points, width, color):\n    o = lv.line(parent)\n    o.set_points([{\"x\": x, \"y\": y} for x, y in points], len(points))\n    o.set_style_line_width(width, 0)\n    o.set_style_line_color(lv.color_hex(color), 0)\n    o.set_style_line_rounded(True, 0)\n    return o\n\n\ndef _sun(p, cx, cy, s):\n    for i in range(8):\n        a = i * math.pi / 4\n        c, d = math.cos(a), math.sin(a)\n        _stroke(p, ((int(cx + c * s * 0.31), int(cy + d * s * 0.31)),\n                    (int(cx + c * s * 0.44), int(cy + d * s * 0.44))), max(2, s // 28), SUN)\n    _disc(p, cx, cy, s * 44 // 100, SUN)\n\n\ndef _moon(p, cx, cy, s, back):\n    _disc(p, cx, cy, s * 60 // 100, MOON)\n    _disc(p, cx + s * 16 // 100, cy - s * 10 // 100, s * 50 // 100, back)\n\n\ndef _cloud(p, s, y=0):\n    _block(p, s * 14 // 100, y + s * 44 // 100, s * 72 // 100, s * 24 // 100, s // 8, CLOUD)\n    _disc(p, s * 36 // 100, y + s * 46 // 100, s * 34 // 100, CLOUD)\n    _disc(p, s * 60 // 100, y + s * 42 // 100, s * 44 // 100, CLOUD)\n\n\ndef icon(parent, code, x, y, s, night=False, back=0x1E2633):\n    # An s x s picture of the weather code; back is the colour behind it (for the moon's shadow).\n    p = _bare(parent, x, y, s, s)\n    if code <= 1:\n        if night:\n            _moon(p, s // 2, s // 2, s, back)\n        else:\n            _sun(p, s // 2, s // 2, s)\n    elif code == 2:\n        if night:\n            _moon(p, s * 66 // 100, s * 32 // 100, s * 3 // 4, back)\n        else:\n            _sun(p, s * 66 // 100, s * 34 // 100, s * 3 // 4)\n        _cloud(p, s, s // 10)\n    elif code == 3:\n        _cloud(p, s, s // 12)\n    elif code in (45, 48):\n        _cloud(p, s, -s // 10)\n        for i in (0, 1, 2):\n            _stroke(p, ((s * (14 + 6 * i) // 100, s * (68 + 11 * i) // 100),\n                        (s * (86 - 6 * i) // 100, s * (68 + 11 * i) // 100)), max(2, s // 18), CLOUD)\n    elif code >= 95:\n        _cloud(p, s, -s // 8)\n        _stroke(p, ((s * 56 // 100, s * 54 // 100), (s * 42 // 100, s * 74 // 100),\n                    (s * 54 // 100, s * 74 // 100), (s * 44 // 100, s * 94 // 100)), max(3, s // 16), BOLT)\n    elif 71 <= code <= 77 or code in (85, 86):\n        _cloud(p, s, -s // 8)\n        for i, dy in ((0, 0), (1, 16), (2, 0)):\n            _disc(p, s * (30 + 20 * i) // 100, s * (68 + dy) // 100, max(4, s // 9), SNOW)\n    else:  # drizzle, rain, showers\n        _cloud(p, s, -s // 8)\n        drops = 2 if code < 60 else 3\n        for i in range(drops):\n            x0 = s * (36 + 60 // drops * i) // 100\n            _stroke(p, ((x0, s * 64 // 100), (x0 - s // 10, s * 86 // 100)), max(2, s // 18), RAIN)\n    return p\n\n\ndef describe(code):\n    for top, text in ((0, \"Clear sky\"), (1, \"Mainly clear\"), (2, \"Partly cloudy\"), (3, \"Overcast\"),\n                      (48, \"Fog\"), (57, \"Drizzle\"), (67, \"Rain\"), (77, \"Snow\"), (82, \"Rain showers\"),\n                      (86, \"Snow showers\"), (99, \"Thunderstorm\")):\n        if code <= top:\n            return text\n    return \"\"\n"
+    },
+    {
+      "id": "312a2a1e99494e96b2fa2568233437b0",
+      "name": "weather_data",
+      "source": "# SPDX-License-Identifier: MIT\n# Weather data from Open-Meteo (https://open-meteo.com: no account, no key, free for\n# non-commercial use) and the app's settings in the \"weather\" section of settings.json.\n#\n# On a Linux board curl downloads in the background (mpy_wifi.Job): start a request, then call\n# poll() from a timer until it returns the data. In the Studio simulator there is no network:\n# demo data comes back at once.\n\nimport json\n\ntry:\n    import mpy_settings\n    import mpy_wifi\nexcept ImportError:\n    mpy_settings = mpy_wifi = None\n\nUNITS = ((\"C\", \"celsius\"), (\"F\", \"fahrenheit\"))\nWINDS = ((\"km/h\", \"kmh\"), (\"m/s\", \"ms\"), (\"mph\", \"mph\"), (\"kn\", \"kn\"))\nREFRESH_MINUTES = (15, 30, 60)\nDEFAULTS = {\n    \"place\": \"\", \"latitude\": None, \"longitude\": None,\n    \"units\": 0, \"wind\": 0, \"refresh\": 1,\n    # dimmed from 23:00 to 05:30, half hours counted from midnight\n    \"night_from\": 46, \"night_to\": 11, \"night_level\": 20,\n}\n_demo_settings = {}\n\n\ndef settings():\n    stored = (mpy_settings.get(\"weather\") if mpy_settings else _demo_settings.get(\"weather\")) or {}\n    values = dict(DEFAULTS)\n    values.update(stored)\n    return values\n\n\ndef save(values):\n    if mpy_settings:\n        mpy_settings.update(\"weather\", values)\n    else:\n        _demo_settings[\"weather\"] = values\n\n\ndef _quote(text):\n    out = \"\"\n    for byte in text.encode():\n        c = chr(byte)\n        out += c if (c.isalpha() and byte < 128) or c.isdigit() else \"%%%02X\" % byte\n    return out\n\n\nclass Request:\n    # A download in the background. poll(): None while it runs, then (data, error).\n    def __init__(self, url, demo):\n        self._demo = demo\n        self._job = mpy_wifi.Job([\"curl\", \"-s\", \"-f\", \"-m\", \"20\", url]) if mpy_wifi else None\n\n    def poll(self):\n        if self._job is None:\n            return self._demo, None\n        if self._job.poll() is None:\n            return None\n        if self._job.status != 0:\n            return None, \"no answer (curl %d)\" % self._job.status\n        try:\n            return json.loads(self._job.output.replace(b\"\\r\", b\"\").decode()), None\n        except ValueError:\n            return None, \"bad answer\"\n\n\ndef forecast(values):\n    url = (\"https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&timezone=auto\"\n           \"&forecast_days=5&temperature_unit=%s&wind_speed_unit=%s\"\n           \"&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,\"\n           \"wind_speed_10m,is_day\"\n           \"&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max\"\n           ) % (values[\"latitude\"], values[\"longitude\"], UNITS[values[\"units\"]][1], WINDS[values[\"wind\"]][1])\n    return Request(url, DEMO_FORECAST)\n\n\ndef geocode(name):\n    url = (\"https://geocoding-api.open-meteo.com/v1/search?count=8&language=en&format=json&name=\"\n           + _quote(name))\n    return Request(url, {\"results\": [\n        {\"name\": \"Demo City\", \"country\": \"Demo Land\", \"latitude\": 45.0, \"longitude\": 9.0},\n        {\"name\": \"Demo Town\", \"country\": \"Demo Land\", \"latitude\": 41.9, \"longitude\": 12.5}]})\n\n\nDEMO_FORECAST = {\n    \"utc_offset_seconds\": 3600,\n    \"current\": {\"time\": \"2026-11-18T10:00\", \"temperature_2m\": 14.2, \"apparent_temperature\": 12.8,\n                \"relative_humidity_2m\": 71, \"weather_code\": 2, \"wind_speed_10m\": 11.0, \"is_day\": 1},\n    \"daily\": {\"time\": [\"2026-11-18\", \"2026-11-19\", \"2026-11-20\", \"2026-11-21\", \"2026-11-22\"],\n              \"weather_code\": [2, 61, 3, 0, 95],\n              \"temperature_2m_max\": [16.1, 13.4, 14.0, 17.2, 12.5],\n              \"temperature_2m_min\": [8.3, 9.0, 7.4, 6.9, 8.8],\n              \"precipitation_probability_max\": [10, 80, 30, 0, 90]},\n}\n"
+    },
+    {
+      "id": "5e16abc0ea49495887856d413cd9c6e1",
+      "name": "weather_app",
+      "source": "# SPDX-License-Identifier: MIT\n# The weather app: now and the next five days for a place, updated in the background, with a\n# settings page (place, units, update interval, night dimming of the backlight).\n\nimport time\n\nimport lvgl as lv\n\nimport weather_data as data\nimport weather_icons as icons\n\ntry:\n    import mpy_wifi\nexcept ImportError:\n    mpy_wifi = None\ntry:\n    import display_driver\nexcept ImportError:\n    display_driver = None\n\nBACK = 0x1E2633\nDAYS = (\"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\", \"Sat\", \"Sun\")\nHALF_HOURS = [\"%02d:%02d\" % (i // 2, 30 * (i % 2)) for i in range(48)]\nRETRY_MS = 60000\nOFFLINE_RETRY_MS = 10000\nWAKE_MS = 60000\n\n_ui = None\n_values = data.settings()\n_weather = None\n_request = None\n_next_update = 0\n_place_request = None\n_places = []\n_network_job = None\n_brightness = None\n_wake_until = 0\n_started = False\n_ask_place = False\n\n\ndef _now():\n    return time.ticks_ms()\n\n\ndef _weekday(year, month, day):\n    # Monday is 0 (Sakamoto's method, which counts from Sunday)\n    t = (0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)\n    if month < 3:\n        year -= 1\n    return (year + year // 4 - year // 100 + year // 400 + t[month - 1] + day + 6) % 7\n\n\ndef _label(parent, text, size, color, x, y, width):\n    o = lv.label(parent)\n    o.set_text(text)\n    o.set_style_text_font(getattr(lv, \"font_montserrat_%d\" % size), 0)\n    o.set_style_text_color(lv.color_hex(color), 0)\n    o.set_style_text_align(lv.TEXT_ALIGN.CENTER, 0)\n    o.set_width(width)\n    o.set_pos(x, y)\n    return o\n\n\ndef _keyboard_setup(ui):\n    ui.keyboard.set_size(lv.pct(100), lv.pct(48))\n    ui.keyboard.align(lv.ALIGN.BOTTOM_MID, 0, 0)\n    ui.keyboard.add_flag(lv.obj.FLAG.HIDDEN)\n\n\n# --- main page -----------------------------------------------------------------------------------\n\ndef start_main(ui):\n    global _ui, _started, _network_job\n    _ui = ui\n    if not _started:\n        _started = True\n        lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n        ui.settings_button.get_child(0).set_text(lv.SYMBOL.SETTINGS)\n        ui.hero.add_flag(lv.obj.FLAG.CLICKABLE)\n        ui.hero.add_event_cb(lambda e: refresh_now(), lv.EVENT.CLICKED, None)\n        for i in range(5):\n            day = getattr(ui, \"day_%d\" % i)\n            day.set_style_pad_all(0, 0)\n        ui.hero.set_style_pad_all(0, 0)\n        if mpy_wifi is not None:\n            try:\n                _network_job = mpy_wifi.ensure()\n            except (OSError, ValueError) as error:\n                print(\"weather: Wi-Fi:\", error)\n    if _values[\"latitude\"] is None:\n        # No place yet: the timer opens the settings, after this page has finished loading.\n        global _ask_place\n        _ask_place = True\n        return\n    draw()\n\n\ndef refresh_now():\n    global _next_update, _wake_until\n    _wake_until = time.ticks_add(_now(), WAKE_MS)\n    _next_update = _now()\n\n\ndef open_settings():\n    _ui.load_page(_ui.PAGE_SETTINGS)\n\n\ndef _update():\n    global _request, _next_update\n    if mpy_wifi is not None and not mpy_wifi.online():\n        _ui.updated.set_text(\"No internet: set up Wi-Fi in the Settings app\")\n        _next_update = time.ticks_add(_now(), OFFLINE_RETRY_MS)\n        return\n    _request = data.forecast(_values)\n    _ui.updated.set_text(\"Updating...\")\n\n\ndef draw():\n    _ui.place.set_text(_values[\"place\"] or \"Weather\")\n    if _weather is None:\n        return\n    now, days = _weather[\"current\"], _weather[\"daily\"]\n    unit = \"°\" + data.UNITS[_values[\"units\"]][0]\n    speed = data.WINDS[_values[\"wind\"]][0]\n    _ui.updated.set_text(\"Updated at %s\" % now[\"time\"][11:16])\n    for child in range(_ui.hero.get_child_count() - 1, -1, -1):\n        item = _ui.hero.get_child(child)\n        if item not in (_ui.now_temp, _ui.now_text, _ui.now_details):\n            item.delete()\n    # Sizes follow the panels, so the same code fits 480x272 and 800x480.\n    _ui.hero.update_layout()\n    size = min(_ui.hero.get_height(), _ui.now_temp.get_x()) - 12\n    icons.icon(_ui.hero, now[\"weather_code\"], 6, 6, size, not now[\"is_day\"], BACK)\n    _ui.now_temp.set_text(\"%d%s\" % (round(now[\"temperature_2m\"]), unit))\n    _ui.now_text.set_text(icons.describe(now[\"weather_code\"]))\n    _ui.now_details.set_text(\"Feels like %d%s\\nHumidity %d%%\\nWind %d %s\\nRain today %d%%\" % (\n        round(now[\"apparent_temperature\"]), unit, now[\"relative_humidity_2m\"],\n        round(now[\"wind_speed_10m\"]), speed, days[\"precipitation_probability_max\"][0] or 0))\n    for i in range(5):\n        box = getattr(_ui, \"day_%d\" % i)\n        box.clean()\n        date = days[\"time\"][i]\n        name = \"Today\" if i == 0 else DAYS[_weekday(int(date[:4]), int(date[5:7]), int(date[8:10]))]\n        box.update_layout()\n        w, h = box.get_width(), box.get_height()\n        font = 24 if h >= 120 else 14\n        s = min(w, h) * 45 // 100\n        _label(box, name, font, 0xE6EAF0, 0, h * 4 // 90, w)\n        icons.icon(box, days[\"weather_code\"][i], (w - s) // 2, h * 22 // 90, s, False, BACK)\n        _label(box, \"%d° / %d°\" % (round(days[\"temperature_2m_max\"][i]), round(days[\"temperature_2m_min\"][i])),\n               font, 0xE6EAF0, 0, h * 66 // 90, w)\n\n\n# --- settings page -------------------------------------------------------------------------------\n\ndef start_settings(ui):\n    global _ui\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    _keyboard_setup(ui)\n    times = \"\\n\".join(HALF_HOURS)\n    ui.night_from.set_options(times)\n    ui.night_to.set_options(times)\n    ui.units.set_selected(_values[\"units\"])\n    ui.wind.set_selected(_values[\"wind\"])\n    ui.refresh.set_selected(_values[\"refresh\"])\n    ui.night_from.set_selected(_values[\"night_from\"])\n    ui.night_to.set_selected(_values[\"night_to\"])\n    ui.night_level.set_value(_values[\"night_level\"], False)\n    show_night_level()\n    ui.place_list.set_style_border_width(0, 0)\n    ui.place_list.set_style_pad_all(4, 0)\n    ui.place_list.set_style_pad_row(4, 0)\n    ui.place_list.clean()\n    if _values[\"place\"]:\n        ui.search_text.set_text(_values[\"place\"])\n        _place_row(_values[\"place\"], None, chosen=True)\n        ui.settings_message.set_text(\"\")\n    else:\n        ui.settings_message.set_text(\"Find your city to start\")\n\n\ndef show_night_level():\n    _ui.night_level_label.set_text(\"Night %d%%\" % _ui.night_level.get_value())\n\n\ndef edit_search():\n    _ui.keyboard.set_textarea(_ui.search_text)\n    _ui.keyboard.remove_flag(lv.obj.FLAG.HIDDEN)\n\n\ndef close_keyboard():\n    _ui.keyboard.add_flag(lv.obj.FLAG.HIDDEN)\n    _ui.keyboard.set_textarea(None)\n    _ui.search_text.remove_state(lv.STATE.FOCUSED)\n\n\ndef search():\n    global _place_request\n    close_keyboard()\n    name = _ui.search_text.get_text().strip()\n    if len(name) < 2:\n        _ui.settings_message.set_text(\"Type at least two letters\")\n        return\n    _place_request = data.geocode(name)\n    _ui.settings_message.set_text(\"Searching...\")\n\n\ndef _place_row(text, place, chosen=False):\n    row = lv.button(_ui.place_list)\n    row.set_width(lv.pct(100))\n    row.set_style_bg_color(lv.color_hex(0x2F6FDE if chosen else 0x2A3444), 0)\n    row.set_style_shadow_width(0, 0)\n    label = lv.label(row)\n    label.set_text(text)\n    label.set_long_mode(lv.label.LONG_MODE.DOTS)\n    label.set_width(lv.pct(100))\n    if place is not None:\n        row.add_event_cb(lambda e, p=place: choose_place(p), lv.EVENT.CLICKED, None)\n\n\ndef choose_place(place):\n    global _weather\n    _values[\"place\"] = place[\"name\"]\n    _values[\"latitude\"] = place[\"latitude\"]\n    _values[\"longitude\"] = place[\"longitude\"]\n    _weather = None\n    _ui.place_list.clean()\n    _place_row(place[\"name\"], None, chosen=True)\n    _ui.search_text.set_text(place[\"name\"])\n    _ui.settings_message.set_text(\"Chosen: %s. Press Done.\" % place[\"name\"])\n\n\ndef done():\n    global _next_update, _weather\n    close_keyboard()\n    if _values[\"latitude\"] is None:\n        _ui.settings_message.set_text(\"Choose a city first\")\n        return\n    changed = (_ui.units.get_selected() != _values[\"units\"] or _ui.wind.get_selected() != _values[\"wind\"])\n    _values[\"units\"] = _ui.units.get_selected()\n    _values[\"wind\"] = _ui.wind.get_selected()\n    _values[\"refresh\"] = _ui.refresh.get_selected()\n    _values[\"night_from\"] = _ui.night_from.get_selected()\n    _values[\"night_to\"] = _ui.night_to.get_selected()\n    _values[\"night_level\"] = _ui.night_level.get_value()\n    data.save(_values)\n    if changed or _weather is None:\n        _weather = None\n        _next_update = _now()\n    _ui.load_page(_ui.PAGE_MAIN)\n\n\n# --- timer -----------------------------------------------------------------------------------------\n\ndef _local_minutes():\n    offset = _weather.get(\"utc_offset_seconds\", 0) if _weather else 0\n    t = time.gmtime(int(time.time()) + offset)\n    return t[3] * 60 + t[4]\n\n\ndef _night():\n    start, end = _values[\"night_from\"] * 30, _values[\"night_to\"] * 30\n    if start == end:\n        return False\n    minutes = _local_minutes()\n    return start <= minutes < end if start < end else (minutes >= start or minutes < end)\n\n\ndef _apply_brightness():\n    global _brightness\n    awake = time.ticks_diff(_wake_until, _now()) > 0\n    want = _values[\"night_level\"] if _night() and not awake else 100\n    if want != _brightness and display_driver is not None:\n        _brightness = want\n        try:\n            display_driver.backlight(want)\n        except (AttributeError, OSError):\n            pass\n\n\ndef tick():\n    global _request, _weather, _next_update, _place_request, _places, _network_job, _ask_place\n    if _ui is None:\n        return\n    if _ask_place:\n        _ask_place = False\n        open_settings()\n    if _network_job is not None and _network_job.poll() is not None:\n        _network_job = None\n    if _place_request is not None:\n        answer = _place_request.poll()\n        if answer is not None:\n            _place_request = None\n            found, error = answer\n            _ui.place_list.clean()\n            _places = (found or {}).get(\"results\", [])\n            for place in _places:\n                where = \", \".join(x for x in (place.get(\"admin1\"), place.get(\"country\")) if x)\n                _place_row(\"%s\\n%s\" % (place[\"name\"], where), place)\n            _ui.settings_message.set_text(error or (\"%d places\" % len(_places) if _places else \"Nothing found\"))\n    if _request is not None:\n        answer = _request.poll()\n        if answer is not None:\n            _request = None\n            found, error = answer\n            if error:\n                _ui.updated.set_text(\"Update failed: %s\" % error)\n                _next_update = time.ticks_add(_now(), RETRY_MS)\n            else:\n                _weather = found\n                _next_update = time.ticks_add(_now(), data.REFRESH_MINUTES[_values[\"refresh\"]] * 60000)\n                draw()\n    elif _values[\"latitude\"] is not None and time.ticks_diff(_now(), _next_update) >= 0:\n        _update()\n    _apply_brightness()\n"
+    }
+  ]
+}

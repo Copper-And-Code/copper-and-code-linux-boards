@@ -177,6 +177,22 @@ The application is not added to `main.py` by default. See `examples/shell-linux/
 lookup, the `linux` override, Ctrl-C behavior, tests and current pipeline/exit-status limitations.
 Linux commands inherit the REPL service's root privileges.
 
+## Working from afar: screenshots and taps
+
+Two tools let a board be checked and driven without looking at it or touching it:
+
+```sh
+scripts/screen.sh screen.png          # what the panel shows now, turned as the user sees it
+scripts/tap.sh 400 300                # a tap at screen coordinates (x, y)
+```
+
+`mpy-screenshot` (`tools/mpy-screenshot/`, installed in `/usr/local/mpy/bin`) reads the
+framebuffer the display controller shows through DRM and writes a PNG; it does not disturb the
+program that draws it or the REPL. `mpy_tap.py` writes a press and a release into the
+touchscreen's own event device, turned back from screen to panel coordinates, so `display_driver`
+reads them as a finger. Both need root. With two boards at the same address, set `MPY_SSH_ALIAS`
+as for `scripts/deploy.sh`.
+
 ## Uninstall and recovery
 
 To return to the original OpenSTLinux configuration (original DTB and USB gadget, Weston and the

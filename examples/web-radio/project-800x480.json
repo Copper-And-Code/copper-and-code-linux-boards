@@ -1,0 +1,317 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Web Radio",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "763c0a84990f4f66aaa571f34064db55",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "005b184f45fb4497bc958b487a5ee875",
+          "name": "station_list",
+          "type": "list",
+          "props": {
+            "x": 10,
+            "y": 11,
+            "width": 333,
+            "height": 459,
+            "items": "",
+            "bgColor": "#1E2633",
+            "textColor": "#E6EAF0",
+            "selectedColor": "#E0742F",
+            "fontSize": 24
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "610d993430584bcfa770781789328299",
+          "name": "station",
+          "type": "label",
+          "props": {
+            "x": 360,
+            "y": 28,
+            "width": 430,
+            "height": 53,
+            "text": "Web Radio",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "longMode": "LV_LABEL_LONG_MODE_SCROLL_CIRCULAR",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "4e77479107964d048bd6ea1378bb5917",
+          "name": "status",
+          "type": "label",
+          "props": {
+            "x": 360,
+            "y": 99,
+            "width": 430,
+            "height": 78,
+            "text": "Choose a station",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "189e2a8f466f4d2eaacba8d643bef8ac",
+          "name": "prev_button",
+          "type": "button",
+          "props": {
+            "x": 360,
+            "y": 240,
+            "width": 133,
+            "height": 99,
+            "text": "Prev",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "radius": 17
+          },
+          "events": {
+            "CLICKED": "prev_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "9c0982b970a6428c8d3eb4dfde7ae871",
+          "name": "play_button",
+          "type": "button",
+          "props": {
+            "x": 508,
+            "y": 240,
+            "width": 133,
+            "height": 99,
+            "text": "Play",
+            "bgColor": "#E0742F",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "radius": 17
+          },
+          "events": {
+            "CLICKED": "play_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "38bc80d079544382a443bd72800ecbfa",
+          "name": "next_button",
+          "type": "button",
+          "props": {
+            "x": 657,
+            "y": 240,
+            "width": 133,
+            "height": 99,
+            "text": "Next",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "radius": 17
+          },
+          "events": {
+            "CLICKED": "next_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "4db3efe318d943bdb42901c8aebee71b",
+          "name": "volume_down",
+          "type": "button",
+          "props": {
+            "x": 360,
+            "y": 371,
+            "width": 100,
+            "height": 85,
+            "text": "-",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "radius": 17
+          },
+          "events": {
+            "CLICKED": "volume_down_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "1044bdc9d6424dc797a0887c6284f77c",
+          "name": "volume",
+          "type": "label",
+          "props": {
+            "x": 470,
+            "y": 392,
+            "width": 210,
+            "height": 42,
+            "text": "Volume 100%",
+            "textColor": "#E6EAF0",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_CENTER",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "138caff080824756a9c2ae3ab4e25a74",
+          "name": "volume_up",
+          "type": "button",
+          "props": {
+            "x": 690,
+            "y": 371,
+            "width": 100,
+            "height": 85,
+            "text": "+",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "radius": 17
+          },
+          "events": {
+            "CLICKED": "volume_up_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "82fc4aa4798947f8b4e1fe7ea792df8e",
+          "name": "tick",
+          "type": "timer",
+          "props": {
+            "period": 250,
+            "enabled": true
+          },
+          "events": {
+            "TICK": "tick_tick"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import radio_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "radio_app.start(ui)"
+      },
+      "play_button_clicked": {
+        "widget": "play_button",
+        "event": "CLICKED",
+        "body": "radio_app.toggle()"
+      },
+      "prev_button_clicked": {
+        "widget": "prev_button",
+        "event": "CLICKED",
+        "body": "radio_app.previous_station()"
+      },
+      "next_button_clicked": {
+        "widget": "next_button",
+        "event": "CLICKED",
+        "body": "radio_app.next_station()"
+      },
+      "volume_down_clicked": {
+        "widget": "volume_down",
+        "event": "CLICKED",
+        "body": "radio_app.volume_down()"
+      },
+      "volume_up_clicked": {
+        "widget": "volume_up",
+        "event": "CLICKED",
+        "body": "radio_app.volume_up()"
+      },
+      "tick_tick": {
+        "widget": "tick",
+        "event": "TICK",
+        "body": "radio_app.tick()"
+      }
+    }
+  },
+  "currentPageId": "763c0a84990f4f66aaa571f34064db55",
+  "assets": {},
+  "variables": [],
+  "projectId": "ee68ce7abe744ba99233e99884ac9f45",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "48ecb1879f644e45af021d9bfd2dc1e8",
+      "name": "player",
+      "source": "# SPDX-License-Identifier: MIT\n# A media player for LVGL apps on Linux boards: gst-play-1.0 (GStreamer) runs in the background\n# through linuxproc.Process and is driven with its keyboard keys. It plays files and http:// streams.\n# One process per track: at the end of a track the next one starts.\n#\n# In the LVGL MPY Studio simulator there is no Linux: a stand-in \"plays\" silent 30-second tracks,\n# so the GUI can be designed and tried without a board.\n\nimport time\n\ntry:\n    import linuxproc\nexcept ImportError:\n    linuxproc = None\n\n# GStreamer audio output: None for the default (ALSA, the first sound card), or for example\n# \"fakesink sync=true\" to run without a sound card. The environment variable MPY_AUDIO_SINK sets\n# it without changing the code.\ntry:\n    import os\n\n    SINK = os.getenv(\"MPY_AUDIO_SINK\")\nexcept (ImportError, AttributeError):\n    SINK = None\n\n\ndef _seconds(text):\n    # \"0:01:02.5\" -> 62.5; None for what is not a time\n    parts = text.split(\":\")\n    if len(parts) != 3:\n        return None\n    try:\n        return int(parts[0]) * 3600 + int(parts[1]) * 60 + float(parts[2])\n    except ValueError:\n        return None\n\n\nclass Player:\n    # live=True for radio streams: no duration, and the simulator stand-in plays without end.\n    def __init__(self, live=False):\n        self.live = live\n        self.uris = []\n        self.index = -1\n        self.position = 0.0\n        self.duration = None  # None for a live stream\n        self.paused = False\n        self.volume = 100\n        self.playing = False\n        self.error = None\n        self._last_error = None\n        self.process = None\n        self._pending = b\"\"\n        self._keys = []\n        self._key_at = 0\n        self._started = 0\n\n    # --- control -------------------------------------------------------------------------------\n\n    def play(self, uris, index=0):\n        self.uris = list(uris)\n        self._start(index)\n\n    def toggle_pause(self):\n        if self.playing:\n            self.paused = not self.paused\n            self._key(b\" \")\n\n    def next(self):\n        if self.uris:\n            self._start((self.index + 1) % len(self.uris))\n\n    def previous(self):\n        if self.uris:\n            # After 3 s, the first press goes back to the start of the track, as on most players.\n            self._start(self.index if self.position > 3 else (self.index - 1) % len(self.uris))\n\n    def volume_up(self):\n        self._set_volume(self.volume + 10)\n\n    def volume_down(self):\n        self._set_volume(self.volume - 10)\n\n    def stop(self):\n        if self.process:\n            self.process.close()\n            self.process = None\n        self.playing = False\n        self.paused = False\n        self.position = 0.0\n\n    # --- to call from an LVGL timer, about 5 times a second --------------------------------------\n\n    def update(self):\n        if not self.playing:\n            return\n        if self.process is None:\n            self._simulate()\n            return\n        if self._keys and time.ticks_diff(time.ticks_ms(), self._key_at) >= 150:\n            # One key per read of the player: two keys in one read are ignored as an unknown sequence.\n            self.process.write(self._keys.pop(0))\n            self._key_at = time.ticks_ms()\n        self._pending += self.process.read()\n        lines = self._pending.replace(b\"\\r\", b\"\\n\").split(b\"\\n\")\n        self._pending = lines.pop()\n        for line in lines + [self._pending]:\n            self._parse(line.strip())\n        status = self.process.poll()\n        if status is not None:\n            self.process.close()\n            self.process = None\n            self.playing = False\n            if status != 0 or self.duration is None:\n                # No sound card, a missing file, a stream that does not answer: say so and stop.\n                self.error = self._last_error or \"player stopped (%d)\" % status\n            else:\n                self.next()  # the track ended\n\n    # --- inside ------------------------------------------------------------------------------------\n\n    def _start(self, index):\n        self.stop()\n        self.index = index\n        self.position = 0.0\n        self.duration = None\n        self._pending = b\"\"\n        self._keys = []\n        self._started = time.ticks_ms()\n        self.playing = True\n        self.error = None\n        self._last_error = None\n        if linuxproc is None:\n            self.duration = None if self.live else 30.0\n            return\n        argv = [\"gst-play-1.0\", \"--volume=%.2f\" % (self.volume / 100)]\n        if SINK:\n            argv.append(\"--audiosink=\" + SINK)\n        uri = self.uris[index]\n        argv.append(uri)\n        self.process = linuxproc.Process(argv)\n\n    def _key(self, key):\n        if self.process:\n            self._keys.append(key)\n\n    def _set_volume(self, volume):\n        # gst-play changes the volume by 5% with the arrow keys (+ and - change the speed).\n        volume = max(0, min(volume, 100))\n        steps = (volume - self.volume) // 5\n        self.volume = volume\n        for _ in range(abs(steps)):\n            self._key(b\"\\x1b[A\" if steps > 0 else b\"\\x1b[B\")\n\n    def _parse(self, line):\n        if line.startswith(b\"ERROR debug information\"):\n            pass  # the source location in GStreamer, after the message that matters\n        elif line.startswith(b\"ERROR\") or line.startswith(b\"WARNING\"):\n            self._last_error = line.decode(\"utf-8\", \"ignore\")[:80]\n        elif line.startswith(b\"Volume: \") and line.endswith(b\"%\"):\n            try:\n                self.volume = int(line[8:-1])\n            except ValueError:\n                pass\n        elif b\" / \" in line and line[:1].isdigit():\n            now, _, total = line.partition(b\" / \")\n            position = _seconds(now.decode())\n            if position is not None:\n                self.position = position\n            total = total.split(b\" \")[0].decode()\n            duration = _seconds(total)\n            # Live streams report no duration, or one of 99:99:99 and more.\n            self.duration = duration if duration is not None and duration < 360000 else None\n\n    def _simulate(self):\n        if not self.paused:\n            self.position = time.ticks_diff(time.ticks_ms(), self._started) / 1000\n        else:\n            self._started = time.ticks_add(time.ticks_ms(), -int(self.position * 1000))\n        if self.duration is not None and self.position >= self.duration:\n            self.next()\n"
+    },
+    {
+      "id": "54dff828ca2542ba905532c131ed10a0",
+      "name": "radio_app",
+      "source": "# SPDX-License-Identifier: MIT\n# The web radio app: stations from stations.txt (or the built-in list), streams played by player.\n\nimport time\n\nimport lvgl as lv\n\nimport player\n\ntry:\n    import mpy_wifi  # on a Linux board; the network comes from settings.json (the Settings app)\nexcept ImportError:\n    mpy_wifi = None\n\nACCENT = lv.color_hex(0xE0742F)\nROW = lv.color_hex(0x1E2633)\n# Name and MP3 stream address. Your own list goes in stations.txt next to main.py (on a Linux board\n# /usr/local/mpy/fs/stations.txt), one station per line: Name|http://address\nSTATIONS = [\n    (\"Radio Paradise\", \"http://stream.radioparadise.com/mp3-128\"),\n    (\"Radio Swiss Jazz\", \"https://stream.srg-ssr.ch/m/rsj/mp3_128\"),\n    (\"FIP\", \"http://icecast.radiofrance.fr/fip-midfi.mp3\"),\n]\nSTATIONS_FILE = \"stations.txt\"\n\n_ui = None\n_player = player.Player(live=True)\n_stations = []\n_rows = []\n_shown = None\n_network_job = None\n_online = True\n_checked = 0\n\n\ndef _clock(seconds):\n    seconds = int(seconds)\n    return \"%d:%02d:%02d\" % (seconds // 3600, seconds // 60 % 60, seconds % 60)\n\n\ndef _row_font():\n    # List rows follow the screen: bigger letters on an 800x480 screen than on a 480x272 one.\n    height = lv.display_get_default().get_vertical_resolution()\n    return lv.font_montserrat_24 if height >= 400 else lv.font_montserrat_14\n\n\ndef _caption(button, text):\n    button.get_child(0).set_text(text)\n\n\ndef load_stations():\n    try:\n        with open(STATIONS_FILE) as source:\n            found = []\n            for line in source:\n                name, _, url = line.strip().partition(\"|\")\n                if name and url.startswith((\"http://\", \"https://\")):\n                    found.append((name.strip(), url.strip()))\n            if found:\n                return found\n    except OSError:\n        pass\n    return STATIONS\n\n\ndef start(ui):\n    global _ui, _stations, _network_job\n    _ui = ui\n    if mpy_wifi is not None:\n        try:\n            _network_job = mpy_wifi.ensure()  # connects to the Wi-Fi of settings.json if needed\n        except (OSError, ValueError) as error:\n            print(\"radio: Wi-Fi:\", error)\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    _caption(ui.prev_button, lv.SYMBOL.PREV)\n    _caption(ui.next_button, lv.SYMBOL.NEXT)\n    _caption(ui.play_button, lv.SYMBOL.PLAY)\n    _caption(ui.volume_down, lv.SYMBOL.VOLUME_MID)\n    _caption(ui.volume_up, lv.SYMBOL.VOLUME_MAX)\n    ui.station_list.set_style_border_width(0, 0)\n    ui.station_list.set_style_radius(10, 0)\n    ui.station_list.set_style_pad_all(4, 0)\n    ui.station_list.set_style_pad_row(4, 0)\n    _stations = load_stations()\n    ui.station_list.clean()\n    _rows.clear()\n    for index, (name, _url) in enumerate(_stations):\n        row = lv.button(ui.station_list)\n        row.set_width(lv.pct(100))\n        row.set_style_bg_color(ROW, 0)\n        row.set_style_shadow_width(0, 0)\n        label = lv.label(row)\n        label.set_text(lv.SYMBOL.AUDIO + \"  \" + name)\n        label.set_style_text_font(_row_font(), 0)\n        label.set_long_mode(lv.label.LONG_MODE.DOTS)\n        label.set_width(lv.pct(100))\n        row.add_event_cb(lambda e, i=index: tune(i), lv.EVENT.CLICKED, None)\n        _rows.append(row)\n    show()\n\n\ndef tune(index):\n    _player.play([url for _name, url in _stations], index)\n    show()\n\n\ndef toggle():\n    # A live stream is stopped, not paused: play starts it again from now.\n    if _player.playing:\n        _player.stop()\n    elif _stations:\n        tune(max(_player.index, 0))\n    show()\n\n\ndef next_station():\n    _player.next()\n    show()\n\n\ndef previous_station():\n    if _player.uris:\n        tune((_player.index - 1) % len(_player.uris))\n\n\ndef volume_up():\n    _player.volume_up()\n    show()\n\n\ndef volume_down():\n    _player.volume_down()\n    show()\n\n\ndef tick():\n    global _network_job, _online, _checked\n    if _network_job is not None and _network_job.poll() is not None:\n        _network_job = None\n    if mpy_wifi is not None and time.ticks_diff(time.ticks_ms(), _checked) >= 2000:\n        _checked = time.ticks_ms()\n        _online = mpy_wifi.online()\n    _player.update()\n    show()\n\n\ndef show():\n    global _shown\n    if _ui is None:\n        return\n    p = _player\n    if p.index != _shown and 0 <= p.index < len(_stations):\n        _shown = p.index\n        _ui.station.set_text(_stations[p.index][0])\n        for index, row in enumerate(_rows):\n            row.set_style_bg_color(ACCENT if index == p.index else ROW, 0)\n        _rows[p.index].scroll_to_view(True)\n    _caption(_ui.play_button, lv.SYMBOL.STOP if p.playing else lv.SYMBOL.PLAY)\n    if not _online and not p.playing:\n        _ui.status.set_text(\"No internet: connecting...\" if _network_job else \"No internet: set up Wi-Fi in Settings\")\n    elif p.error:\n        _ui.status.set_text(p.error)\n    elif p.playing and p.position > 0:\n        _ui.status.set_text(\"On air  \" + _clock(p.position))\n    elif p.playing:\n        _ui.status.set_text(\"Connecting...\")\n    elif p.index >= 0:\n        _ui.status.set_text(\"Stopped\")\n    _ui.volume.set_text(\"Volume %d%%\" % p.volume)\n"
+    }
+  ]
+}

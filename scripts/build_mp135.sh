@@ -105,6 +105,14 @@ HUB=mpy-repl-hub-$REV
 # shellcheck disable=SC2086
 $CC $CFLAGS -Wall -Wextra -Werror -o "$REPO/dist/$HUB" "$REPO/tools/mpy-repl-hub/mpy-repl-hub.c" $LDFLAGS
 (cd "$REPO/dist" && sha256sum "$HUB" > "$HUB.sha256")
+
+log "screenshot tool"
+SHOT=mpy-screenshot-$REV
+# shellcheck disable=SC2086
+$CC $CFLAGS -Wall -Wextra -Werror -I"$SDKTARGETSYSROOT/usr/include/libdrm" -o "$REPO/dist/$SHOT" \
+    "$REPO/tools/mpy-screenshot/mpy-screenshot.c" $LDFLAGS -ldrm -lz
+(cd "$REPO/dist" && sha256sum "$SHOT" > "$SHOT.sha256")
 log "done"
 echo "$REPO/dist/$OUT"
 echo "$REPO/dist/$HUB"
+echo "$REPO/dist/$SHOT"

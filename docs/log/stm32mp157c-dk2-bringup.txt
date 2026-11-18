@@ -46,3 +46,16 @@ panel, each from the left edge; a tap and "Shell" go back to the MicroPython she
 No colours at first: TERM was not set for the programs (bash's environment had none), so ls did not
 colour. mpy-repl.service now sets TERM=xterm-256color: ls colours its folders (ESC[01;34m), and by
 hand ls, printf with six colours and grep --color are all coloured on the panel.
+
+Examples at 800x480: project-800x480.json next to each project.json (new projectId, set_board
+stm32mp157c_dk2_800x480); weather icons, day columns, keyboard height and list row fonts now follow
+the widgets or the screen, the modules are the same in both projects. Simulator: both sizes
+rendered. Uploaded with the Studio's MCP tools (device_upload) and listed in settings.json home:
+Weather, Radio, MP3, Settings. The Studio could not connect while bash ran on the panel ("could not
+enter raw repl"): `exit` in bash, then it connected (the known limit of the Linux shell).
+
+Remote work: mpy-screenshot (DRM framebuffer to PNG, 0.19 s for 800x480) and mpy_tap.py (events
+written into the FT6236 event device). scripts/tap.sh 400 300 on the shell opened the app menu
+(screenshot: Weather, Radio, MP3, Settings, Shell, Linux shell, Power off); a tap on Weather started
+it in a fresh process (screenshot: its settings page, home tab at the top); a tap on the home tab
+brought the shell back.

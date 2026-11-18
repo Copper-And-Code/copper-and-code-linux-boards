@@ -21,7 +21,8 @@ on_board() { ssh "${SSH_OPTIONS[@]}" "root@$BOARD" "$@"; }
 newest() { ls -t "$REPO"/dist/$1 2>/dev/null | grep -v '\.sha256$' | head -1; }
 MICROPYTHON=${MICROPYTHON:-$(newest 'micropython-STM32MP135F_DK-lvgl-*')}
 HUB=${HUB:-$(newest 'mpy-repl-hub-*')}
-for file in "$MICROPYTHON" "$HUB"; do
+SHOT=${SHOT:-$(newest 'mpy-screenshot-*')}
+for file in "$MICROPYTHON" "$HUB" "$SHOT"; do
     [[ -n $file && -f $file ]] || { echo "deploy: build first (scripts/build_mp135.sh)" >&2; exit 1; }
 done
 
@@ -44,8 +45,9 @@ stage() { # source name
 }
 stage "$MICROPYTHON" micropython
 stage "$HUB" mpy-repl-hub
+stage "$SHOT" mpy-screenshot
 stage "$DTB" "$DTB_NAME"
-for file in mpy_launcher.py mpy-usb-composite.sh mpy-usb-composite.service mpy-repl.service \
+for file in mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.service mpy-repl.service \
     usbotg.default journald-volatile.conf install.sh uninstall.sh; do
     cp "$REPO/linux/$file" "$STAGE/$file"
 done
