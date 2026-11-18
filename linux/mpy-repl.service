@@ -12,6 +12,9 @@ NotifyAccess=main
 WatchdogSec=10
 WorkingDirectory=/usr/local/mpy/fs
 Environment=MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib
+# The terminal the Linux programs started from MicroPython see (ansiterm on the display, or a
+# terminal on the PC): without it ls, bash and vi use no colours and no full-screen features.
+Environment=TERM=xterm-256color
 # Also shown on the ready screen.
 Environment=MPY_REPL_TCP=192.168.7.1:8266
 # One MicroPython process on a pseudo-terminal, shared by the USB serial port and one TCP client

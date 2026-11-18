@@ -35,3 +35,14 @@ mpy-repl active, Weston inactive, no failed units.
 Tests on the DK2 (P=/dev/ttyACM1): test_repl.sh PASS; test_tcp_hub.py PASS (after it stopped
 expecting the STM32MP135F-DK's 480 width); t12: 2020 flushes in 10 s of 25% of the screen each,
 about 50 full 800x480 frames per second (19 Mpixel/s; the STM32MP135F-DK does 7.5).
+
+LVGL MPY Studio: studio-board/boards/stm32mp157c_dk2_800x480.json imported (import_board);
+device_info on the board: compatible (800x480, touch, MicroPython 1.29.0, LVGL 9.5.0), 817792 bytes
+of heap free.
+
+Home screen by hand (Nunzio): a tap on the shell opens "Apps" with Shell, Linux shell and Power
+off; Linux shell starts bash 5.2.21 on the panel; commands typed from the serial port show on the
+panel, each from the left edge; a tap and "Shell" go back to the MicroPython shell.
+No colours at first: TERM was not set for the programs (bash's environment had none), so ls did not
+colour. mpy-repl.service now sets TERM=xterm-256color: ls colours its folders (ESC[01;34m), and by
+hand ls, printf with six colours and grep --color are all coloured on the panel.
