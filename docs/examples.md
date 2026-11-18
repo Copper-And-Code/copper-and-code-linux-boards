@@ -112,3 +112,12 @@ what each browser did. A few lines of MicroPython, polled from the GUI's timer: 
 request. (Above: the Studio simulator.)
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/web-panel)
 
+### Data Logger
+
+![Data Logger](images/data-logger.png)
+
+The CPU's temperature (Linux), A0 and the chip's reference (the Cortex-M4), at the pace of an M4
+timer, into a CSV file dated by the network's clock, on a chart, and for a browser to download.
+Each part where it is best: the M4 keeps the pace, Linux keeps the files and the time.
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/data-logger)
+
