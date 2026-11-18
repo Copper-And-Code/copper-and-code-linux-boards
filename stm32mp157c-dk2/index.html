@@ -508,6 +508,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#timer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-the-m4-has-that-is-not-used" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -739,6 +750,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#timer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-the-m4-has-that-is-not-used" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -795,12 +817,12 @@
 
 <h1 id="stm32mp157c-dk2">STM32MP157C-DK2<a class="headerlink" href="#stm32mp157c-dk2" title="Permanent link">&para;</a></h1>
 <p>Second board of this project, and the first with a microcontroller beside Linux: its Cortex-M4
-serves <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code> and <code>UART</code> to MicroPython on the Cortex-A7.</p>
+serves <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code>, <code>UART</code> and <code>Timer</code> to MicroPython on the Cortex-A7.</p>
 <p><strong>Status:</strong> OpenSTLinux flashed; our build installed with <code>scripts/deploy.sh</code> (the same MicroPython
 binary as the STM32MP135F-DK); shell, app menu and REPL working (serial and TCP); the 480×800 panel
 turned to 800×480 in software (about 50 full frames per second); Wi-Fi, weather and the web radio
 with sound through the board's codec; <code>machine.Pin</code> on Linux GPIO lines, <code>machine.I2C</code>,
-<code>ADC</code>, <code>PWM</code>, <code>SPI</code> and <code>UART</code> on the Cortex-M4. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>.
+<code>ADC</code>, <code>PWM</code>, <code>SPI</code>, <code>UART</code> and <code>Timer</code> on the Cortex-M4. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>.
 Product page: <a href="https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html">https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html</a>. Flashing and boot:
 <a href="https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image">Populate the target and boot the image</a>
 on the ST wiki.</p>
@@ -836,7 +858,7 @@ on the ST wiki.</p>
 </tbody>
 </table>
 <h2 id="machine-on-the-cortex-m4"><code>machine</code> on the Cortex-M4<a class="headerlink" href="#machine-on-the-cortex-m4" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">PWM</span><span class="p">,</span> <span class="n">SPI</span><span class="p">,</span> <span class="n">UART</span><span class="p">,</span> <span class="n">Pin</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">PWM</span><span class="p">,</span> <span class="n">SPI</span><span class="p">,</span> <span class="n">UART</span><span class="p">,</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">Pin</span>
 
 <span class="n">i2c</span> <span class="o">=</span> <span class="n">I2C</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">400000</span><span class="p">)</span>        <span class="c1"># Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">i2c</span><span class="o">.</span><span class="n">scan</span><span class="p">())</span>
@@ -854,6 +876,8 @@ on the ST wiki.</p>
 <span class="n">gps</span> <span class="o">=</span> <span class="n">UART</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">9600</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>             <span class="c1"># RX D0, TX D1</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">gps</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
 
+<span class="n">Timer</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">"tick"</span><span class="p">))</span>
+
 <span class="n">Pin</span><span class="p">(</span><span class="s2">"PA14"</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">PULL_UP</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>   <span class="c1"># Pin stays on Linux GPIO lines, as on the STM32MP135F-DK</span>
 </code></pre></div>
 <p>How it fits together:</p>
@@ -864,15 +888,19 @@ on the ST wiki.</p>
 <li><strong>Firmware</strong> (<code>mcu/stm32mp157c-dk2/</code>, built by <code>scripts/build_m4.sh</code> with <code>arm-none-eabi-gcc</code>,
   without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our <code>main.c</code> and the
   protocol. <code>install.sh</code> puts it in <code>/lib/firmware/mpy_m4.elf</code>.</li>
-<li><strong>Start.</strong> The first use of <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code> or <code>UART</code> loads the firmware through remoteproc
+<li><strong>Start.</strong> The first use of <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code>, <code>UART</code> or <code>Timer</code> loads the firmware through remoteproc
   if the M4 is off (about 0.6 s). A new firmware installed by <code>deploy.sh</code> takes over at once.</li>
+<li><strong>Events.</strong> The M4 can also speak unasked: a frame with sequence number 0 is an event (a timer's
+  expiry). A thread of <code>mpy_m4</code> reads the port while nobody makes requests; events read during a
+  request are kept for later. Handlers run outside the port's lock, so a callback may use the M4
+  itself. Then Python acknowledges, and only then does the M4 send that timer's next event.</li>
 <li><strong>Link.</strong> One RPMsg virtual serial port (<code>/dev/ttyRPMSG*</code>; the number changes when the M4
   restarts, so <code>mpy_m4</code> looks it up). Requests and answers carry a length, a sequence number and an
   errno: the protocol is in <code>mcu/stm32mp157c-dk2/firmware/Inc/mpy_m4_protocol.h</code>. A request takes
   about 0.35 ms there and back.</li>
 <li><strong>Python.</strong> <code>mpy_m4</code> (frozen) has the classes; the frozen <code>machine</code> module takes the place of
   MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from <code>umachine</code>
-  and adds <code>I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code> and <code>UART</code> on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.</li>
+  and adds <code>I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code>, <code>UART</code> and <code>Timer</code> on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.</li>
 </ul>
 <h3 id="i2c">I2C<a class="headerlink" href="#i2c" title="Permanent link">&para;</a></h3>
 <p>Bus 5 only (<code>I2C(5)</code>, the default): SDA PA12, SCL PA11, on the Arduino connector (D14, D15) and on
@@ -1005,6 +1033,20 @@ the timeout (200 ms measured 200 ms), a break (read as 0x00 with a framing error
 the rate on the pin while sending 0x55 (a square wave at half the rate): 0.14% under nominal at
 every rate, the same offset everywhere, well inside what a serial line tolerates. Not checked yet:
 a real device on the line.</p>
+<h3 id="timer">Timer<a class="headerlink" href="#timer" title="Permanent link">&para;</a></h3>
+<p><code>Timer(id, mode=Timer.PERIODIC, period=ms, callback=f)</code> or <code>freq=Hz</code>, <code>init()</code>, <code>deinit()</code>,
+<code>Timer.ONE_SHOT</code>; 8 timers (0 to 7, or -1 for a free one), periods from 1 ms (up to 1000 Hz).</p>
+<p>The M4 counts, Linux calls: the expiries are timed by the M4's clock and none is lost, while the
+callback runs on Linux, in <code>mpy_m4</code>'s reader thread, when Linux gets to it (typically within a
+millisecond; a 10 ms timer's gaps have a median of 10.000 ms, single ones from 5 to 15 ms). Until
+Python has handled an event, the M4 sends no further one for that timer: it counts the expiries
+into the next, and the callback finds them in <code>timer.missed</code> (not in MicroPython's API, like
+<code>timer.late_us</code>, how late the M4 sent the event). So a busy Linux never piles events up.</p>
+<p>As with MicroPython's soft callbacks, the callback waits while the main thread runs Python
+without a pause: the GIL of MicroPython's unix port is not fair, and a loop that never sleeps,
+waits or does I/O keeps it (the LVGL thread waits the same way). Measured at 1 kHz for 0.5 s of
+such a loop: a few calls, the rest in <code>missed</code>, the count right. Anything that must happen at an
+exact time belongs on the M4 itself: the next step is ADC sampling at a fixed rate.</p>
 <h3 id="what-the-m4-has-that-is-not-used">What the M4 has that is not used<a class="headerlink" href="#what-the-m4-has-that-is-not-used" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1020,7 +1062,7 @@ a real device on the line.</p>
 </tr>
 <tr>
 <td>TIM2, DMA2</td>
-<td>Kept for <code>machine.Timer</code> and for ADC sampling at a fixed rate.</td>
+<td>Kept for ADC sampling at a fixed rate (<code>machine.Timer</code> uses the M4's cycle counter).</td>
 </tr>
 <tr>
 <td>HASH, CRYP, CRC, RNG</td>
@@ -1033,8 +1075,7 @@ declared to the M4 in a device tree overlay. <code>machine.WDT</code> (<code>/de
 edge events) belong on the Linux side.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>machine.Timer</code> and ADC sampling at a fixed rate (TIM2, DMA2): the M4 will need to send events
-  to Python without being asked.</li>
+<li>ADC sampling at a fixed rate (TIM2, DMA2), into a buffer Python collects.</li>
 <li>More PWM outputs on TIM4 and TIM12; <code>machine.WDT</code> and <code>Pin.irq</code> on Linux.</li>
 <li>An I2C sensor and a known voltage on A0 for the HIL tests.</li>
 <li>A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at
@@ -1063,7 +1104,7 @@ edge events) belong on the Linux side.</p>
 </tr>
 <tr>
 <td><code>tests/hil/test_m4.sh</code></td>
-<td>Tests of <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code> and <code>UART</code> on the board</td>
+<td>Tests of <code>machine.I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code>, <code>UART</code> and <code>Timer</code> on the board</td>
 </tr>
 </tbody>
 </table>

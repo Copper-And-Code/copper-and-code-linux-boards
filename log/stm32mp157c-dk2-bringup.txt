@@ -166,3 +166,20 @@ machine.UART on UART7 (2026-11-18):
   115200 in 272 ms without errors, break -> 0x00 and a framing error. read(3) at 9600 7E2 gave 2
   bytes with timeout_char 0: timeout_char now at least a character's time, as on MicroPython.
   test_m4.sh, test_repl.sh, test_tcp_hub.py pass.
+
+machine.Timer and events from the M4 (2026-11-18):
+  Facts: MicroPython with threads and GIL; LVGL in display_driver's own thread; micropython.schedule
+  present. Chosen (B): events on the same RPMsg port (sequence 0), a reader thread in mpy_m4,
+  handlers outside the port's lock. Protocol version 2.
+  M4: 8 software timers on DWT->CYCCNT extended to 64 bits, deadlines in cycles, every expiry
+  counted however late the loop is.
+  First version: 10 ms for 1 s -> 100 calls, gaps median 9993 us (5274..14956); one shot 50 ms
+  -> 50810 us; ADC requests inside callbacks while the main thread makes its own. 1 kHz with
+  the main thread in a pure Python loop: the right count, but all 1138 callbacks within 33 ms at
+  the end: the unix port's GIL is not fair, the reader thread waited, and the events piled up in
+  the tty (they would overflow its 64 KB after about 5 s).
+  Fixed with acknowledgements: after its handlers ran, Python sends OP_EVENT_ACK; until then the
+  M4 sends no further event for that timer and counts the expiries into the next (timer.missed).
+  1 kHz idle: 986 calls + 14 missed = 1000; busy 1 s: 8 calls + 872 missed, nothing piled up.
+  test_m4.sh (twice), test_repl.sh, test_tcp_hub.py pass. PWM at 100 kHz measured 29.71% once
+  for 30%: 80 samples a period, an interrupt shows; tolerance 0.5% there.
