@@ -59,3 +59,21 @@ written into the FT6236 event device). scripts/tap.sh 400 300 on the shell opene
 (screenshot: Weather, Radio, MP3, Settings, Shell, Linux shell, Power off); a tap on Weather started
 it in a fresh process (screenshot: its settings page, home tab at the top); a tap on the home tab
 brought the shell back.
+
+Wi-Fi (network name and password given by Nunzio, not recorded): saved in settings.json through
+SSH standard input, mpy_wifi.ensure() -> job status 0, online, COMPLETED; key file 0600; internet
+reachable.
+
+Clock: the board started on 2025-05-29 (no backup battery), so curl failed with exit code 60
+(certificate not yet valid); NTP corrected it once online (timedatectl: synchronized). The weather
+app now names the common curl errors (6, 7, 28, 60) instead of the number.
+
+Weather on the DK2, from afar (taps, REPL, screenshots): Rome, 18 C overcast, five days with icons,
+"Updated at 05:45" (the place's time).
+
+Audio: GStreamer's automatic sink tries PulseAudio, which runs only with the graphical session
+("Failed to connect: Connection refused"), and ALSA's default device goes to it too ("Could not open
+audio device"). "alsasink device=plughw:0,0" (the CS42L51 codec, headphone jack) plays: ALSA state
+RUNNING, S16_LE. install.sh writes it into the DK2's drop-in as MPY_AUDIO_SINK. From the menu,
+Radio, Radio Swiss Jazz: "On air 0:00:07", gst-play with that sink, ALSA RUNNING; mixer PCM 63%
+(-11.50 dB), on. Not heard: nobody was there to listen.
