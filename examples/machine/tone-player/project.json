@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Tone Player",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "681d4c669ad6498a91cc48bdc7f821e1",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "44e7c423d05241a28fcf787f98ed420e",
+          "name": "title",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 8,
+            "width": 300,
+            "height": 40,
+            "text": "Tone Player",
+            "textColor": "#FFFFFF",
+            "fontSize": 32,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "f82c90fc42f2443bb84b26d0506d3855",
+          "name": "subtitle",
+          "type": "label",
+          "props": {
+            "x": 300,
+            "y": 18,
+            "width": 484,
+            "height": 24,
+            "text": "On D6: a passive buzzer, or a small speaker through 100 ohms",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_RIGHT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "57a10e543acb468685ca1e70ceca16c5",
+          "name": "keyboard",
+          "type": "panel",
+          "props": {
+            "x": 10,
+            "y": 56,
+            "width": 780,
+            "height": 236,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "2f690ef1f9f8403fb0c5f5122f02444e",
+          "name": "melody_label",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 300,
+            "width": 300,
+            "height": 20,
+            "text": "THE CORTEX-M4 PLAYS",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "710021bcc9624fc1882acb6f659a59ea",
+          "name": "melody_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 8,
+            "y": 320,
+            "width": 530,
+            "height": 60,
+            "map": "Ode to Joy,Frere Jacques,Twinkle",
+            "bgColor": "#121820",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": false
+          },
+          "events": {
+            "VALUE_CHANGED": "melody_buttons_value_changed"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "65b466acb583478b8f838c0d474f38af",
+          "name": "tempo_label",
+          "type": "label",
+          "props": {
+            "x": 552,
+            "y": 300,
+            "width": 230,
+            "height": 20,
+            "text": "TEMPO",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "9f2302f4446d435b815b45ced84beb64",
+          "name": "tempo_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 544,
+            "y": 320,
+            "width": 248,
+            "height": 60,
+            "map": "Slow,Normal,Fast",
+            "bgColor": "#121820",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "tempo_buttons_value_changed"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "1d8aa9aa000640b5b4ee9e09e8f07dc5",
+          "name": "status",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 392,
+            "width": 768,
+            "height": 80,
+            "text": "",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "0e0a2d1beb0940ff94de961de6046809",
+          "name": "tick",
+          "type": "timer",
+          "props": {
+            "period": 50,
+            "enabled": true
+          },
+          "events": {
+            "TICK": "tick_tick"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import player_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "player_app.start(ui)"
+      },
+      "melody_buttons_value_changed": {
+        "widget": "melody_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "player_app.tune_clicked(e.get_target_obj())"
+      },
+      "tempo_buttons_value_changed": {
+        "widget": "tempo_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "player_app.tempo_changed(e.get_target_obj())"
+      },
+      "tick_tick": {
+        "widget": "tick",
+        "event": "TICK",
+        "body": "player_app.tick()"
+      }
+    }
+  },
+  "currentPageId": "681d4c669ad6498a91cc48bdc7f821e1",
+  "assets": {},
+  "variables": [],
+  "projectId": "be974dbad26345c69d82e0272a419ddb",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "9f92b8c0b42849fa9516dcc90e1bcd90",
+      "name": "music",
+      "source": "# SPDX-License-Identifier: MIT\n# Notes and tunes (traditional, public domain), and the instrument: on the board the Cortex-M4 plays\n# them on D6 (mpy_m4.play), on time, while Python only hands over the score; in the LVGL MPY Studio\n# simulator a stand-in follows the time without a sound.\n\nimport time\n\ntry:\n    import mpy_m4\n\n    HARDWARE = hasattr(mpy_m4, \"play\") and mpy_m4.available()\nexcept ImportError:\n    HARDWARE = False\n\nNAMES = [\"C\", \"C#\", \"D\", \"D#\", \"E\", \"F\", \"F#\", \"G\", \"G#\", \"A\", \"A#\", \"B\"]\n\n\ndef hz(note):\n    # \"A4\" -> 440, \"C#5\" -> 554, equal temperament; \"-\" -> 0, a rest.\n    if note == \"-\":\n        return 0\n    name, octave = note[:-1], int(note[-1])\n    semitones = NAMES.index(name) + 12 * (octave - 4) - 9\n    return round(440 * 2 ** (semitones / 12))\n\n\n# (note, beats)\nTUNES = {\n    \"Ode to Joy\": [(\"E4\", 1), (\"E4\", 1), (\"F4\", 1), (\"G4\", 1), (\"G4\", 1), (\"F4\", 1), (\"E4\", 1), (\"D4\", 1),\n                   (\"C4\", 1), (\"C4\", 1), (\"D4\", 1), (\"E4\", 1), (\"E4\", 1.5), (\"D4\", 0.5), (\"D4\", 2),\n                   (\"E4\", 1), (\"E4\", 1), (\"F4\", 1), (\"G4\", 1), (\"G4\", 1), (\"F4\", 1), (\"E4\", 1), (\"D4\", 1),\n                   (\"C4\", 1), (\"C4\", 1), (\"D4\", 1), (\"E4\", 1), (\"D4\", 1.5), (\"C4\", 0.5), (\"C4\", 2)],\n    \"Frere Jacques\": [(\"C4\", 1), (\"D4\", 1), (\"E4\", 1), (\"C4\", 1), (\"C4\", 1), (\"D4\", 1), (\"E4\", 1), (\"C4\", 1),\n                      (\"E4\", 1), (\"F4\", 1), (\"G4\", 2), (\"E4\", 1), (\"F4\", 1), (\"G4\", 2),\n                      (\"G4\", 0.5), (\"A4\", 0.5), (\"G4\", 0.5), (\"F4\", 0.5), (\"E4\", 1), (\"C4\", 1),\n                      (\"G4\", 0.5), (\"A4\", 0.5), (\"G4\", 0.5), (\"F4\", 0.5), (\"E4\", 1), (\"C4\", 1),\n                      (\"C4\", 1), (\"G3\", 1), (\"C4\", 2), (\"C4\", 1), (\"G3\", 1), (\"C4\", 2)],\n    \"Twinkle\": [(\"C4\", 1), (\"C4\", 1), (\"G4\", 1), (\"G4\", 1), (\"A4\", 1), (\"A4\", 1), (\"G4\", 2),\n                (\"F4\", 1), (\"F4\", 1), (\"E4\", 1), (\"E4\", 1), (\"D4\", 1), (\"D4\", 1), (\"C4\", 2),\n                (\"G4\", 1), (\"G4\", 1), (\"F4\", 1), (\"F4\", 1), (\"E4\", 1), (\"E4\", 1), (\"D4\", 2),\n                (\"G4\", 1), (\"G4\", 1), (\"F4\", 1), (\"F4\", 1), (\"E4\", 1), (\"E4\", 1), (\"D4\", 2)],\n}\n\n\ndef score(tune, beat_ms):\n    # (Hz, ms) pairs, each note followed by a short rest so that repeated notes are heard apart.\n    notes = []\n    for note, beats in TUNES[tune]:\n        length = int(beats * beat_ms)\n        notes.append((hz(note), length - 30))\n        notes.append((0, 30))\n    return notes\n\n\nclass Board:\n    def play(self, notes):\n        mpy_m4.play(notes)\n\n    def playing(self):\n        return mpy_m4.playing()\n\n    def measure(self):\n        return mpy_m4.measure(\"D6\", 60)\n\n\nclass Simulated:\n    def __init__(self):\n        self._notes = []\n        self._start = 0\n\n    def play(self, notes):\n        self._notes = list(notes)\n        self._start = time.ticks_ms()\n\n    def playing(self):\n        elapsed = time.ticks_diff(time.ticks_ms(), self._start)\n        for i, (frequency, ms) in enumerate(self._notes):\n            if elapsed < ms:\n                return i\n            elapsed -= ms\n        return None\n\n    def measure(self):\n        i = self.playing()\n        return (float(self._notes[i][0]), 0.5) if i is not None and self._notes[i][0] else (0.0, 0.0)\n\n\ninstrument = Board() if HARDWARE else Simulated()\n"
+    },
+    {
+      "id": "ecad8e4b1cbc45ebabf29f4ec54359a7",
+      "name": "player_app",
+      "source": "# SPDX-License-Identifier: MIT\n# Tone Player: a keyboard on the screen (a key sounds while it is held) and tunes the Cortex-M4\n# plays by itself, the key of each note lighting up as it plays.\n\nimport lvgl as lv\n\nimport music\n\nKEYS_WHITE = [\"C4\", \"D4\", \"E4\", \"F4\", \"G4\", \"A4\", \"B4\", \"C5\"]\nKEYS_BLACK = [(\"C#4\", 0), (\"D#4\", 1), (\"F#4\", 3), (\"G#4\", 4), (\"A#4\", 5)]  # after the white key n\nTEMPOS = [600, 400, 250]  # ms a beat\nTUNES = [\"Ode to Joy\", \"Frere Jacques\", \"Twinkle\"]\n\n_ui = None\n_keys = {}         # note -> (button, white)\n_lit = None\n_tempo = 400\n_tune = None\n_score = []        # (Hz, ms) of the tune playing\n_names = []        # the note of each entry of the score, or None for a rest\n_held = None\n\n\ndef _font(size):\n    return getattr(lv, \"font_montserrat_%d\" % size)\n\n\ndef _style_matrix(matrix, accent, checkable):\n    matrix.set_style_bg_opa(lv.OPA.TRANSP, 0)\n    matrix.set_style_border_width(0, 0)\n    matrix.set_style_pad_all(4, 0)\n    matrix.set_style_pad_gap(6, 0)\n    items = lv.PART.ITEMS\n    matrix.set_style_bg_color(lv.color_hex(0x2A3444), items)\n    matrix.set_style_bg_opa(lv.OPA.COVER, items)\n    matrix.set_style_radius(8, items)\n    matrix.set_style_border_width(0, items)\n    matrix.set_style_shadow_width(0, items)\n    matrix.set_style_text_color(lv.color_hex(0xFFFFFF), items)\n    matrix.set_style_text_font(_font(16), items)\n    matrix.set_style_bg_color(lv.color_hex(accent), items | lv.STATE.CHECKED)\n    matrix.set_style_bg_color(lv.color_hex(accent), items | lv.STATE.PRESSED)\n    if checkable:\n        matrix.set_button_ctrl_all(lv.buttonmatrix.CTRL.CHECKABLE)\n        matrix.set_one_checked(True)\n\n\ndef _light(note):\n    global _lit\n    if _lit == note:\n        return\n    if _lit in _keys:\n        button, white = _keys[_lit]\n        button.set_style_bg_color(lv.color_hex(0xF2F4F7 if white else 0x0B1016), 0)\n    _lit = note\n    if note in _keys:\n        _keys[note][0].set_style_bg_color(lv.color_hex(0xE0742F), 0)\n\n\ndef _press(note):\n    global _held, _tune\n    _held = note\n    _tune = None\n    _light(note)\n    try:\n        music.instrument.play([(music.hz(note), 10000)])\n        frequency, high = music.instrument.measure()\n        _ui.status.set_text(\"%s: %d Hz asked; measured on D6 by the M4: %.1f Hz, %.0f%% high\" % (\n            note, music.hz(note), frequency, high * 100))\n    except OSError as error:\n        _ui.status.set_text(\"Error: %s\" % error)\n\n\ndef _release(note):\n    global _held\n    if _held == note:\n        _held = None\n        _light(None)\n        try:\n            music.instrument.play([])\n        except OSError:\n            pass\n\n\ndef _build_keys(panel):\n    width = 96\n    for i, note in enumerate(KEYS_WHITE):\n        key = lv.button(panel)\n        key.set_pos(4 + i * width, 4)\n        key.set_size(width - 4, 226)\n        key.set_style_bg_color(lv.color_hex(0xF2F4F7), 0)\n        key.set_style_radius(6, 0)\n        key.set_style_shadow_width(0, 0)\n        label = lv.label(key)\n        label.set_text(note)\n        label.set_style_text_color(lv.color_hex(0x121820), 0)\n        label.align(lv.ALIGN.BOTTOM_MID, 0, -6)\n        _keys[note] = (key, True)\n    for note, after in KEYS_BLACK:\n        key = lv.button(panel)\n        key.set_pos(4 + (after + 1) * width - 30, 4)\n        key.set_size(56, 140)\n        key.set_style_bg_color(lv.color_hex(0x0B1016), 0)\n        key.set_style_radius(6, 0)\n        key.set_style_shadow_width(0, 0)\n        _keys[note] = (key, False)\n    for note, (key, white) in _keys.items():\n        key.set_style_bg_color(lv.color_hex(0xE0742F), lv.STATE.PRESSED)  # held: the note's colour\n        key.add_event_cb(lambda e, n=note: _press(n), lv.EVENT.PRESSED, None)\n        key.add_event_cb(lambda e, n=note: _release(n), lv.EVENT.RELEASED, None)\n\n\ndef tune_clicked(matrix):\n    global _tune, _score, _names\n    index = matrix.get_selected_button()\n    if not 0 <= index < len(TUNES):\n        return\n    _tune = TUNES[index]\n    _score = music.score(_tune, _tempo)\n    _names = []\n    for note, beats in music.TUNES[_tune]:\n        _names += [note, None]\n    try:\n        music.instrument.play(_score)\n    except OSError as error:\n        _ui.status.set_text(\"Error: %s\" % error)\n\n\ndef tempo_changed(matrix):\n    global _tempo\n    index = matrix.get_selected_button()\n    if 0 <= index < len(TEMPOS):\n        _tempo = TEMPOS[index]\n\n\ndef tick():\n    # Every 50 ms: which note the M4 is playing, to light its key.\n    global _tune\n    if _tune is None or _held:\n        return\n    try:\n        index = music.instrument.playing()\n    except OSError:\n        return\n    if index is None:\n        _light(None)\n        _ui.status.set_text(\"%s: done. Python sent %d notes at once; the M4 kept the time.\" % (_tune, len(_score)))\n        _tune = None\n        return\n    note = _names[index] if index < len(_names) else None\n    if note:\n        _light(note)\n        _ui.status.set_text(\"%s: note %d of %d, %s %d Hz, played by the Cortex-M4\" % (\n            _tune, index // 2 + 1, len(_names) // 2, note, music.hz(note)))\n\n\ndef start(ui):\n    global _ui\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    _build_keys(ui.keyboard)\n    _style_matrix(ui.melody_buttons, 0xE0742F, False)\n    _style_matrix(ui.tempo_buttons, 0x2F6FDE, True)\n    ui.tempo_buttons.set_button_ctrl(1, lv.buttonmatrix.CTRL.CHECKED)\n    ui.status.set_text(\"Hold a key, or let the Cortex-M4 play a tune.\" +\n                       (\"\" if music.HARDWARE else \"\\nSimulator: no sound.\"))\n"
+    }
+  ]
+}

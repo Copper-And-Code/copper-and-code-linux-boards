@@ -183,9 +183,13 @@ supported.
 exact rate; an SPI4 transfer or a UART7 message can start with it (fed by the sampling loop after
 the first 5%), so the board can watch its own buses: the logic analyser example.
 
+`mpy_m4.play([(hz, ms), ...])` has the M4 play up to 100 notes on D6 by itself, on time (0 Hz is a
+rest), while it answers other requests; `mpy_m4.playing()` tells which note: the tone player
+example.
+
 `mpy_m4.measure(pin, ms)` has the M4 sample a pin for a while (about 8 million samples a second)
-and returns its frequency and the share of time it was high: that is how the tests check the PWM
-without instruments. Measured on PE9: 1 kHz 25% gives 1000.00 Hz 25.00%; 50 Hz 1.5 ms gives
+and returns its frequency (whole periods between the first and the last rising edge: exact even in
+30 ms) and the share of time it was high: that is how the tests check the PWM without instruments. Measured on PE9: 1 kHz 25% gives 1000.00 Hz 25.00%; 50 Hz 1.5 ms gives
 50.00 Hz 7.50%; 100 kHz 30% gives 99,990 Hz (208.9 MHz / 2089) 29.95%; 0% and 100% are steady.
 
 ### SPI

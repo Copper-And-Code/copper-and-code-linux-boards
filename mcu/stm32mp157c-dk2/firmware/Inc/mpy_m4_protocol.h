@@ -48,6 +48,10 @@ enum {
     OP_PWM_INIT = 0x30,        // frequency u32, duty u16 -> frequency u32, period ticks u32, tick Hz u32
     OP_PWM_COMPARE = 0x31,     // ticks u32
     OP_PWM_DEINIT = 0x32,      // the pin back to analog, the timer off
+    // A melody on the same PWM: up to 100 notes, each a frequency (0: a rest) and a duration, played
+    // by the M4 on time while it answers other requests. PWM_INIT and PWM_DEINIT stop it.
+    OP_TONE_SEQUENCE = 0x33,   // notes: Hz u16, ms u16 each
+    OP_TONE_STATUS = 0x34,     // -> note playing i16 (-1: none), notes u16
 
     // SPI4: SCK PE12 (Arduino D13), MISO PE13 (D12), MOSI PE14 (D11); 8-bit frames. Chip select
     // is the caller's (PE11, D10, is free for a Linux GPIO line).
@@ -87,7 +91,8 @@ enum {
                                //   2 UART7), bytes -> core Hz u32, cycles a sample u32, late u32
     OP_PIN_MEASURE = 0x40,     // port u8, pin u8, milliseconds u16
                                //   -> samples u32, cycles high u32, rising edges u32,
-                               //      cycles u32, core Hz u32
+                               //      cycles u32, core Hz u32, first and last rising edge (cycles
+                               //      from the start) u32 u32
 };
 
 // Events (the status byte of a frame with sequence 0).

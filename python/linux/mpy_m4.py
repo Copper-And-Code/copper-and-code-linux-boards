@@ -46,6 +46,8 @@ _CAPTURE_MAX = 32768
 _PWM_INIT = 0x30
 _PWM_COMPARE = 0x31
 _PWM_DEINIT = 0x32
+_TONE_SEQUENCE = 0x33
+_TONE_STATUS = 0x34
 _PIN_MEASURE = 0x40
 _PORT_CAPTURE = 0x41
 _SPI_INIT = 0x50
@@ -448,9 +450,30 @@ def measure(pin, ms=100):
     # hundred kHz. For tests without instruments; the M4 does nothing else meanwhile.
     port, number = _port_pin(_pin_name(pin))
     answer = link.request(_PIN_MEASURE, struct.pack("<BBH", port, number, ms), ms + 1000)
-    samples, high, rising, cycles, core = struct.unpack("<5I", answer)
-    seconds = cycles / core
-    return rising / seconds, high / cycles
+    samples, high, rising, cycles, core = struct.unpack("<5I", answer[:20])
+    if len(answer) >= 28 and rising >= 2:
+        # Whole periods between the first and the last rising edge: not off by one edge.
+        first, last = struct.unpack("<II", answer[20:28])
+        if last > first:
+            return (rising - 1) * core / (last - first), high / cycles
+    return rising * core / cycles, high / cycles
+
+
+def play(notes):
+    # A melody on D6 (not in MicroPython's API): up to 100 (Hz, ms) notes, 0 Hz a rest, played by
+    # the M4 on time while Python does other things; a square wave, for a passive buzzer or a small
+    # speaker through a resistor. A new melody, PWM init or deinit stop the one playing.
+    notes = list(notes)
+    if len(notes) > 100:
+        raise ValueError("100 notes at most")
+    data = b"".join(struct.pack("<HH", int(hz), int(ms)) for hz, ms in notes)
+    link.request(_TONE_SEQUENCE, data)
+
+
+def playing():
+    # The index of the note playing, or None.
+    index, count = struct.unpack("<hH", link.request(_TONE_STATUS))
+    return None if index < 0 else index
 
 
 def logic_capture(count, freq, port="E", spi=None, uart=None):

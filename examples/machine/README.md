@@ -21,3 +21,4 @@ gives changing values so the screen can be tried without a board.
 | [logic-analyzer](logic-analyzer) | none | Port E sampled up to 4 MHz by the M4 while the board's own UART, SPI and PWM send; decoded and drawn on Linux |
 | [web-panel](web-panel) | none | A page for the phone: inputs live, LEDs, PWM, a message to the screen; QR code and PIN on the board |
 | [data-logger](data-logger) | none | Samples at the pace of an M4 timer, a dated CSV file (NTP), a chart, the file for a browser |
+| [tone-player](tone-player) | a passive buzzer on D6 (or none: the M4 measures) | A keyboard on the screen, tunes the M4 plays on time by itself, each key lit as it sounds |

@@ -430,32 +430,77 @@ static void pwm_pin(int on) {
     PERIPH_UNLOCK(GPIOE);
 }
 
+static uint32_t pwm_tick;  // timer ticks a second
+
+// TIM1 channel 1 at a frequency and a duty (65535: always high), from the first period.
+static int pwm_start(uint32_t frequency, uint32_t duty) {
+    uint32_t clock = timer_clock();
+    if (frequency == 0 || frequency > clock / 2) {
+        return 0;
+    }
+    uint32_t ticks = clock / frequency;  // at most the clock: 32 bits are enough
+    uint32_t prescaler = (ticks + 65535) / 65536;  // TIM1 counts to 65535
+    uint32_t period = (clock / prescaler + frequency / 2) / frequency;
+    __HAL_RCC_TIM1_CLK_ENABLE();
+    TIM1->CR1 = 0;
+    TIM1->PSC = prescaler - 1;
+    TIM1->ARR = period - 1;
+    TIM1->CCR1 = (uint64_t)period * duty / 65535;
+    TIM1->CCMR1 = (6U << TIM_CCMR1_OC1M_Pos) | TIM_CCMR1_OC1PE;  // PWM mode 1, preload
+    TIM1->CCER = TIM_CCER_CC1E;
+    TIM1->BDTR = TIM_BDTR_MOE;  // an advanced timer: outputs on
+    TIM1->EGR = TIM_EGR_UG;
+    TIM1->CR1 = TIM_CR1_ARPE | TIM_CR1_CEN;
+    if (!pwm_period) {
+        pwm_pin(1);
+    }
+    pwm_period = period;
+    pwm_tick = clock / prescaler;
+    return 1;
+}
+
+// ---- a melody on the PWM: notes (Hz, ms; 0 Hz a rest) played by the main loop on time
+
+#define MELODY_MAX 100
+static uint16_t melody_hz[MELODY_MAX], melody_ms[MELODY_MAX];
+static int melody_count, melody_index = -1;  // -1: nothing playing
+static uint32_t melody_end;
+
+static void melody_note(void) {
+    uint16_t hz = melody_hz[melody_index];
+    if (hz) {
+        pwm_start(hz, 32768);  // a square wave: half the period high
+    } else if (pwm_period) {
+        TIM1->CCR1 = 0;  // a rest: the output low, the timer on
+    }
+    melody_end = HAL_GetTick() + melody_ms[melody_index];
+}
+
+static void melody_poll(void) {
+    if (melody_index < 0 || (int32_t)(HAL_GetTick() - melody_end) < 0) {
+        return;
+    }
+    if (++melody_index >= melody_count) {
+        melody_index = -1;
+        if (pwm_period) {
+            TIM1->CCR1 = 0;
+        }
+        return;
+    }
+    melody_note();
+}
+
 static void handle_pwm(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
     switch (operation) {
         case OP_PWM_INIT: {
             if (size != 6) {
                 break;
             }
-            uint32_t clock = timer_clock(), frequency = get32(args), duty = get16(args + 4);
-            if (frequency == 0 || frequency > clock / 2) {
+            melody_index = -1;
+            if (!pwm_start(get32(args), get16(args + 4))) {
                 break;
             }
-            uint32_t ticks = clock / frequency;  // at most the clock: 32 bits are enough
-            uint32_t prescaler = (ticks + 65535) / 65536;  // TIM1 counts to 65535
-            uint32_t period = (clock / prescaler + frequency / 2) / frequency;
-            __HAL_RCC_TIM1_CLK_ENABLE();
-            TIM1->CR1 = 0;
-            TIM1->PSC = prescaler - 1;
-            TIM1->ARR = period - 1;
-            TIM1->CCR1 = (uint64_t)period * duty / 65535;
-            TIM1->CCMR1 = (6U << TIM_CCMR1_OC1M_Pos) | TIM_CCMR1_OC1PE;  // PWM mode 1, preload
-            TIM1->CCER = TIM_CCER_CC1E;
-            TIM1->BDTR = TIM_BDTR_MOE;  // an advanced timer: outputs on
-            TIM1->EGR = TIM_EGR_UG;
-            TIM1->CR1 = TIM_CR1_ARPE | TIM_CR1_CEN;
-            pwm_pin(1);
-            pwm_period = period;
-            uint32_t tick = clock / prescaler, actual = (tick + period / 2) / period;
+            uint32_t period = pwm_period, tick = pwm_tick, actual = (tick + period / 2) / period;
             uint8_t result[12] = {actual, actual >> 8, actual >> 16, actual >> 24, period, period >> 8,
                 period >> 16, period >> 24, tick, tick >> 8, tick >> 16, tick >> 24};
             send(sequence, 0, result, sizeof(result));
@@ -469,7 +514,31 @@ static void handle_pwm(uint8_t sequence, uint8_t operation, const uint8_t *args,
             send(sequence, 0, NULL, 0);
             return;
         }
+        case OP_TONE_SEQUENCE: {
+            if (size % 4 || size / 4 > MELODY_MAX) {
+                break;
+            }
+            melody_index = -1;
+            melody_count = size / 4;
+            for (int i = 0; i < melody_count; ++i) {
+                melody_hz[i] = get16(args + 4 * i);
+                melody_ms[i] = get16(args + 4 * i + 2);
+            }
+            if (melody_count) {
+                melody_index = 0;
+                melody_note();
+            }
+            send(sequence, 0, NULL, 0);
+            return;
+        }
+        case OP_TONE_STATUS: {
+            int16_t index = melody_index;
+            uint8_t result[4] = {index, index >> 8, melody_count, melody_count >> 8};
+            send(sequence, 0, result, 4);
+            return;
+        }
         case OP_PWM_DEINIT:
+            melody_index = -1;
             if (pwm_period) {
                 TIM1->CR1 = 0;
                 TIM1->CCER = 0;
@@ -956,7 +1025,7 @@ static void handle_measure(uint8_t sequence, const uint8_t *args, size_t size) {
     // The time between two samples counts as high when the first was high: a loop that takes
     // longer on one branch would bias a count of samples.
     uint32_t samples = 0, high = 0, rising = 0, last = gpio->IDR & mask;
-    uint32_t start = DWT->CYCCNT, before = start, now;
+    uint32_t start = DWT->CYCCNT, before = start, now, first_rise = 0, last_rise = 0;
     do {
         uint32_t level = gpio->IDR & mask;
         now = DWT->CYCCNT;
@@ -964,13 +1033,19 @@ static void handle_measure(uint8_t sequence, const uint8_t *args, size_t size) {
         if (last) {
             high += now - before;
         } else if (level) {
+            if (!rising) {
+                first_rise = now - start;
+            }
+            last_rise = now - start;
             rising++;
         }
         last = level;
         before = now;
     } while (now - start < length);
     uint32_t cycles = now - start;
-    uint32_t values[5] = {samples, high, rising, cycles, core};
+    // The frequency is best taken between the first and the last rising edge (rising - 1 whole
+    // periods): counting edges in the window is off by up to one.
+    uint32_t values[7] = {samples, high, rising, cycles, core, first_rise, last_rise};
     send(sequence, 0, (const uint8_t *)values, sizeof(values));  // the M4 is little endian too
 }
 
@@ -1281,6 +1356,8 @@ static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, siz
         case OP_PWM_INIT:
         case OP_PWM_COMPARE:
         case OP_PWM_DEINIT:
+        case OP_TONE_SEQUENCE:
+        case OP_TONE_STATUS:
             handle_pwm(sequence, operation, args, size);
             return;
         case OP_SPI_INIT:
@@ -1361,5 +1438,6 @@ int main(void) {
         handle_received(&received, CHANNEL_TTY);
         handle_received(&raw_received, CHANNEL_RAW);
         timers_poll();
+        melody_poll();
     }
 }

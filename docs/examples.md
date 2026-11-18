@@ -121,3 +121,12 @@ timer, into a CSV file dated by the network's clock, on a chart, and for a brows
 Each part where it is best: the M4 keeps the pace, Linux keeps the files and the time.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/data-logger)
 
+### Tone Player
+
+![Tone Player](images/tone-player.png)
+
+A keyboard on the screen and tunes the Cortex-M4 plays by itself, on time, on D6 (a passive
+buzzer): Python hands over the whole score and lights each key as the M4 plays it. Without a
+buzzer the M4 measures each note on the pin.
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/tone-player)
+

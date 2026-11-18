@@ -245,3 +245,14 @@ Logic analyser (2026-11-18):
   "Hello, M4!" whole at all three rates, SPI A5 3C with 84 samples of idle first.
   On the board (the example): UART decoded and drawn; SPI MOSI A5 3C 0F, MISO FF, CS low; PWM
   10000.1 Hz 30.0%. test_m4.sh (with the new check) and test_repl.sh pass.
+
+Melodies and a sharper measure (2026-11-18):
+  OP_TONE_SEQUENCE / OP_TONE_STATUS: up to 100 (Hz, ms) notes played by the M4's main loop on
+  HAL_GetTick, the PWM set up by pwm_start() (shared with PWM_INIT). A measure blocks the loop, so
+  a note measured lasts the measure longer: 4 notes of 1300 ms took 1408 ms with 3 measures.
+  mpy_m4.measure counted rising edges in the window: off by up to one edge (A4 in 60 ms read
+  433.3 Hz). The firmware now also gives the first and last rising edge: (rising - 1) periods
+  over that span: 262, 440, 1319 Hz exact and 4186.02 Hz in 30, 60 and 300 ms; 100 kHz 99989.3 Hz.
+  test_m4.sh plays 262, rest, 440, 1319 Hz and checks each (twice, pass).
+  Studio upload refused once ("display_driver, resolution") right after test_m4.sh: the REPL was
+  left in raw mode with no screen; restarting mpy-repl fixed it.

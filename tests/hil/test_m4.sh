@@ -267,6 +267,19 @@ rising = [i for i in range(1, len(samples)) if samples[i] & 0x200 and not sample
 near(rate * (len(rising) - 1) / (rising[-1] - rising[0]), 10000, 10)
 print('PASS: logic analyser: its own UART Hello, SPI A5 3C, PWM 10 kHz on port E')
 
+# A melody played by the M4 on D6, measured on the pin note by note.
+mpy_m4.play([(262, 300), (0, 100), (440, 300), (1319, 300)])
+heard = []
+while True:
+    index = mpy_m4.playing()
+    if index is None:
+        break
+    if not heard or heard[-1][0] != index:
+        heard.append((index, round(mpy_m4.measure('D6', 30)[0])))
+    time.sleep_ms(10)
+assert [hz for i, hz in heard] == [262, 0, 440, 1319], heard
+print('PASS: melody 262, rest, 440, 1319 Hz played by the M4, measured exactly in 30 ms')
+
 mpy_m4.led(True)
 time.sleep_ms(200)
 mpy_m4.led(False)
