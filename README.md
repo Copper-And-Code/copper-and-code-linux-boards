@@ -88,7 +88,7 @@ need the internet, set up once with the Settings app.
 | Board | Status |
 |---|---|
 | STM32MP135F-DK (480×272, OpenSTLinux) | Tested: build, installation, REPL, display, touch, GPIO, examples |
-| STM32MP157C-DK2 (with a Cortex-M4) | Planned: `machine` served by the Cortex-M4 over RPMsg ([plan](docs/stm32mp157c-dk2.md)) |
+| STM32MP157C-DK2 (800×480, with a Cortex-M4) | Working: the same build, examples, Wi-Fi, sound; `machine.I2C` and `machine.ADC` served by the Cortex-M4 over RPMsg ([notes](docs/stm32mp157c-dk2.md)) |
 | Other Linux boards | The Linux parts are generic; a port needs a build for its CPU (see below) |
 
 What a Linux board needs: a panel the kernel drives through DRM (RGB565 dumb buffer), a touchscreen
@@ -130,6 +130,7 @@ board then needs a unix variant in `boards/unix/` built with its toolchain, and 
        ├── display_driver ── linuxfb ──── DRM panel
        │                  └─ touch_evdev ─ touchscreen
        ├── machine.Pin ─────────────────── GPIO character device
+       ├── machine.I2C, ADC ── RPMsg ────── Cortex-M4 firmware (STM32MP157C-DK2)
        └── linuxproc ───────────────────── Linux programs (gst-play, shell, ...)
 ```
 
@@ -138,6 +139,7 @@ board then needs a unix variant in `boards/unix/` built with its toolchain, and 
 | MicroPython variant, frozen drivers | `boards/unix/`, `python/linux/` |
 | C modules | `modules/mpyrepl`, `linuxfb`, `linuxproc`, `linuxmachine` |
 | REPL hub | `tools/mpy-repl-hub/` |
+| Cortex-M4 firmware (STM32MP157C-DK2) | `mcu/stm32mp157c-dk2/` |
 | systemd units, USB gadget, install scripts | `linux/` |
 | Build and deploy | `scripts/` |
 | Tests on the board, run from the PC | `tests/hil/` |
@@ -148,24 +150,25 @@ variant, user C modules and frozen Python.
 
 ## What's next: the `machine` class, above all with an MCU on board
 
-Today `machine` offers `Pin`, on the kernel's GPIO lines. The plan is to port the rest of the
-MicroPython `machine` API (`I2C`, `SPI`, `PWM`, `ADC`, `Timer`, `WDT`) with the same names and
-behaviour as on the MCU ports, so that hardware code moves between boards unchanged.
+`machine` offers `Pin` on the kernel's GPIO lines and, on the STM32MP157C-DK2, `I2C` and `ADC`
+served by its Cortex-M4. The plan is to port the rest of the MicroPython `machine` API (`SPI`,
+`PWM`, `Timer`, `UART`, `WDT`) with the same names and behaviour as on the MCU ports, so that
+hardware code moves between boards unchanged.
 
-The most interesting case is a board that pairs Linux with a microcontroller, such as the
-STM32MP157C-DK2 with its Cortex-M4: Python and the GUI on Linux, the real-time work on the MCU.
-There `machine` will talk to firmware on the Cortex-M4 over RPMsg, so a Python app can read sensors
-and drive motors with microcontroller timing, while Linux keeps the screen, the network and the
-programs. On boards without an MCU the same classes will use the kernel's drivers.
-See the [plan for the STM32MP157C-DK2](docs/stm32mp157c-dk2.md).
+A board that pairs Linux with a microcontroller gets the best of both: Python and the GUI on
+Linux, the real-time work on the MCU. On the STM32MP157C-DK2 `machine` talks to our firmware on the
+Cortex-M4 over RPMsg (about 0.35 ms a request), so a Python app reads sensors with microcontroller
+timing while Linux keeps the screen, the network and the programs. On boards without an MCU the
+same classes will use the kernel's drivers.
+See [the STM32MP157C-DK2](docs/stm32mp157c-dk2.md).
 
 ## Limits
 
 Honestly, today:
 
-- One board tested. The parts for other Linux boards are written but not tried on one yet.
+- Two boards tested, both STM32MP1. The parts for other Linux boards are written but not tried on one yet.
 - Start-up takes about 33 s on the stock OpenSTLinux image (a smaller image is planned).
-- `machine` has `Pin` only, for now: see what's next above.
+- `machine` has `Pin`, and `I2C` and `ADC` on the STM32MP157C-DK2, for now: see what's next above.
 - No vsync: fast full-screen animations can tear.
 - The TCP REPL has no password: it listens only on the USB network.
 

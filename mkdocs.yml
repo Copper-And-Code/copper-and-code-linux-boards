@@ -55,7 +55,7 @@ nav:
   - Examples: examples.md
   - The STM32MP135F-DK: stm32mp135f-dk.md
   - The display_driver contract: display-driver.md
-  - Next board, STM32MP157C-DK2: stm32mp157c-dk2.md
+  - The STM32MP157C-DK2 and its Cortex-M4: stm32mp157c-dk2.md
   - Phase 0 reconnaissance: ricognizione.md
   - Source on GitHub: https://github.com/Copper-And-Code/lvgl-mpy-linux
   - LVGL MPY Studio: https://copper-and-code.github.io/lvgl-mpy-studio/

@@ -1,8 +1,7 @@
-# STM32MP157C-DK2 unix variant (not started)
+# STM32MP157C-DK2 unix variant (not needed)
 
-Placeholder for the second board. It will hold, as `../STM32MP135F_DK/` does, the out-of-tree unix
-variant of MicroPython for the Cortex-A7 cores: `mpconfigvariant.h`, `mpconfigvariant.mk` and
-`manifest.py`. It is not a buildable variant yet, so `scripts/build_mp135.sh` is not affected.
-
-Plan and open questions: `docs/stm32mp157c-dk2.md`. The firmware of the Cortex-M4 goes in
-`mcu/stm32mp157c-dk2/`.
+The STM32MP157C-DK2 runs the variant of `../STM32MP135F_DK/` unchanged: both boards have Cortex-A7
+cores with the same ABI, the same OpenSTLinux release and SDK, and what differs between them is
+found at run time (display, touch, USB controller) or set by `linux/install.sh` (screen rotation,
+audio output, device tree, Cortex-M4 firmware). This folder stays for a variant of its own, should
+one be needed. Board notes: `docs/stm32mp157c-dk2.md`.

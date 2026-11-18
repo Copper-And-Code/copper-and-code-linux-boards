@@ -32,21 +32,25 @@ case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
         DTB_NAME=stm32mp135f-dk.dtb  # with the USB FIFOs of the composite gadget and B1 on PA14
         ROTATION=0
         AUDIO_SINK=""                # GStreamer's default (a USB audio adapter, for example)
+        M4_FIRMWARE=""               # no Cortex-M4
         HOSTNAME_DEFAULT=mp135-mpy ;;
     *st,stm32mp157c-dk2*)
         BOARD="STM32MP157C-DK2"
-        DTB_NAME=stm32mp157c-dk2.dtb # with the USB FIFOs of the composite gadget
+        # ST's "m4-examples" device tree (the Arduino connector's ADC, I2C5 and more for the
+        # Cortex-M4) with the USB FIFOs of the composite gadget
+        DTB_NAME=stm32mp157c-dk2.dtb
         ROTATION=90                  # its 480x800 portrait panel as an 800x480 landscape screen
         # The CS42L51 codec (headphone jack) directly: ALSA's default device goes to PulseAudio,
         # which runs only with the graphical session.
         AUDIO_SINK="alsasink device=plughw:0,0"
+        M4_FIRMWARE=mpy_m4.elf       # machine.I2C and machine.ADC; mpy_m4 starts it when needed
         HOSTNAME_DEFAULT=mp157-mpy ;;
     *) die "not an STM32MP135F-DK or STM32MP157C-DK2" ;;
 esac
 HOSTNAME_WANTED=${MPY_HOSTNAME-$HOSTNAME_DEFAULT}
 say "board $BOARD"
 files="micropython mpy-repl-hub mpy-screenshot mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.service
-    mpy-repl.service usbotg.default journald-volatile.conf edit.py vi.py $DTB_NAME"
+    mpy-repl.service usbotg.default journald-volatile.conf edit.py vi.py $DTB_NAME $M4_FIRMWARE"
 for file in $files; do
     [ -f "$SOURCE/$file" ] || die "missing $SOURCE/$file"
     if [ -f "$SOURCE/$file.sha256" ]; then
@@ -78,6 +82,19 @@ put "$SOURCE/mpy_launcher.py" "$PREFIX/lib/mpy_launcher.py" 0644
 put "$SOURCE/mpy_tap.py" "$PREFIX/lib/mpy_tap.py" 0644
 put "$SOURCE/edit.py" "$PREFIX/fs/bin/edit.py" 0644
 put "$SOURCE/vi.py" "$PREFIX/fs/bin/vi.py" 0644
+if [ -n "$M4_FIRMWARE" ]; then
+    put "$SOURCE/$M4_FIRMWARE" "/lib/firmware/$M4_FIRMWARE" 0644
+    # A new firmware takes over at once if the M4 runs the old one; otherwise at first use.
+    M4=/sys/class/remoteproc/remoteproc0
+    case $changed in
+        *"/lib/firmware/$M4_FIRMWARE"*)
+            if [ "$(cat $M4/state)" = running ] && [ "$(cat $M4/firmware)" = "$M4_FIRMWARE" ]; then
+                echo stop > $M4/state
+                echo start > $M4/state
+                say "Cortex-M4 restarted with the new $M4_FIRMWARE"
+            fi ;;
+    esac
+fi
 # The shell is frozen in the firmware now: old copies in fs/ would only confuse.
 for old in shell_linux.py ansiterm.py ansifont.py; do
     [ -f "$PREFIX/fs/$old" ] && rm -f "$PREFIX/fs/$old" && say "removed the old $PREFIX/fs/$old"

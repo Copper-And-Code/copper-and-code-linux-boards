@@ -1,81 +1,112 @@
 # STM32MP157C-DK2
 
-Second board of this project. **Status:** OpenSTLinux flashed, our firmware installed with
-`scripts/deploy.sh`, the shell and the REPL working (serial and TCP), the 480x800 panel turned to
-800x480 in software (about 50 full frames per second). The Cortex-M4 and `machine` over RPMsg are
-next. Bring-up log: `docs/log/stm32mp157c-dk2-bringup.txt`. Product page:
-<https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html>.
-Flashing and boot: [Populate the target and boot the image](https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image)
+Second board of this project, and the first with a microcontroller beside Linux: its Cortex-M4
+serves `machine.I2C` and `machine.ADC` to MicroPython on the Cortex-A7.
+
+**Status:** OpenSTLinux flashed; our build installed with `scripts/deploy.sh` (the same MicroPython
+binary as the STM32MP135F-DK); shell, app menu and REPL working (serial and TCP); the 480×800 panel
+turned to 800×480 in software (about 50 full frames per second); Wi-Fi, weather and the web radio
+with sound through the board's codec; `machine.Pin` on Linux GPIO lines, `machine.I2C` and
+`machine.ADC` on the Cortex-M4. Bring-up log: `docs/log/stm32mp157c-dk2-bringup.txt`.
+Product page: <https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html>. Flashing and boot:
+[Populate the target and boot the image](https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image)
 on the ST wiki.
 
-The goal is the same as on the STM32MP135F-DK (MicroPython unix port with LVGL on the Cortex-A7,
-the MCU-style REPL, `display_driver`, LVGL MPY Studio), plus a `machine` backend served by the
-board's Cortex-M4. This document separates what was checked from what is still assumed.
+## The board
 
-## Checked
-
-- MicroPython v1.29.0 has no STM32MP157 board in `ports/stm32/boards`: a MicroPython build for the
-  Cortex-M4 would be a new port of the stm32 port, not an existing board.
-- MicroPython v1.29.0 has an `openamp` module (`extmod/modopenamp.c`,
-  `extmod/modopenamp_remoteproc.c`) with RPMsg endpoints and remoteproc, used today on MCU ports
-  (`ports/stm32/mpmetalport.c`, `mpremoteprocport.c`). It is the MCU side of the link, not the
-  Linux side.
-
-## Checked in the release's files (no board yet)
-
-The OpenSTLinux release used for the STM32MP135F-DK (`openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10`)
-covers this board too: its Starter Package has the microSD flash layouts
-(`FlashLayout_sdcard_stm32mp157c-dk2-optee.tsv` and others) and its SDK, the same one, has the device
-trees `stm32mp157c-dk2.dtb` and `stm32mp157c-dk2-m4-examples.dtb`. Both CPUs are Cortex-A7 with the
-same ABI (`cortexa7t2hf-neon-vfpv4`), so the same toolchain builds for both. From the device trees:
-
-| Topic | stm32mp157c-dk2.dtb |
+| Topic | What the build does |
 |---|---|
-| Display | DSI panel `orisetech,otm8009a` through `st,stm32-dsi` and `st,stm32-ltdc`; no separate backlight node (the panel driver controls the brightness) |
-| Touch | `focaltech,ft6236` on I2C at `0x38`, `touchscreen-size` 480 × 800: a 480×800 portrait panel |
-| USB device port | `st,stm32mp15-hsotg` (`dwc2`) at `49000000`, `dr_mode = "otg"`, `usb-role-switch`: the composite serial and network gadget of the STM32MP135F-DK should work |
-| Cortex-M4 | `st,stm32mp1-m4` under remoteproc, with reserved memory (`mcuram`, `mcuram2`, `retram`, `vdev0buffer` for RPMsg) and mailboxes `vq0`, `vq1`, `shutdown`, `detach` |
-| Peripherals given to the Cortex-M4 (`m4-examples`) | ADC `48003000`, DAC `40017000`, DMA `48001000`, I2C `40015000`, SPI `44005000`, UART `40018000`, timers `40000000` and `44000000`, CRC, CRYP, HASH, RNG |
+| Display | DSI panel 480×800 portrait, turned to 800×480 landscape by LVGL (`MPY_DISPLAY_ROTATION=90`, set by `install.sh`) |
+| Touch | FT6236 at I2C `0x38`, its range matches the panel; LVGL turns the points with the screen |
+| USB | `dwc2` OTG port (USB-C CN7): the composite serial and network gadget, with TX FIFOs set by a device tree overlay |
+| Audio | CS42L51 codec on the headphone jack, through `alsasink device=plughw:0,0` (`MPY_AUDIO_SINK`): ALSA's default device goes to PulseAudio, which runs only with the graphical session |
+| Device tree | ST's `stm32mp157c-dk2-m4-examples.dtb` with our USB overlay (`scripts/build_mp157_usb.sh`), installed as `/boot/stm32mp157c-dk2.dtb`; the original is kept as `.st-original` |
 
-The `m4-examples` device tree is a ready starting point for `machine`: it already hands the Cortex-M4
-the ADC, DAC, I2C, SPI, a UART and two timers (PWM).
+## `machine` on the Cortex-M4
 
-Consequences:
+```python
+from machine import I2C, ADC, Pin
 
-- The panel is 480×800 portrait, not 480×272: the LVGL MPY Studio examples need a new board profile
-  and a layout for it, or the display turned to 800×480 landscape in software (LVGL rotation, at a
-  CPU cost to measure).
-- `display_driver` and `touch_evdev` find the resolution, the touchscreen and the backlight by
-  themselves; the FT6236 range matches the panel, so no `MPY_TOUCH_RANGE` is expected.
+i2c = I2C(5, freq=400000)        # Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5
+print(i2c.scan())
+i2c.readfrom_mem(0x76, 0xD0, 1)  # a register, as on any MicroPython board
 
-## To verify on the board (rule 6 of the plan: device tree first)
+print(ADC("A0").read_uv())       # Arduino A0..A5, from 0 to 2.5 V
+print(ADC(ADC.CORE_VREF).read_uv())
 
-- That the release boots on the board: flash with `FlashLayout_sdcard_stm32mp157c-dk2-optee.tsv`,
-  then `uname -a`, `/etc/os-release`, the inventory of the STM32MP135F-DK's phase 1.
-- Whether `linuxfb` (DRM dumb buffer) works unchanged on the DSI panel, and how the brightness is
-  exposed (a `/sys/class/backlight` entry from the panel driver, or none).
-- USB gadget: which port is dual-role, UDC name; whether `mpy-usb-composite.sh` applies.
-- remoteproc: `/sys/class/remoteproc/remoteproc0` (`firmware`, `state`), where firmware files are
-  looked up (`/lib/firmware`), and the RPMsg devices the kernel offers (`rpmsg_tty`:
-  `/dev/ttyRPMSG*`, or `rpmsg_char`).
-- Which connector pins the peripherals given to the Cortex-M4 use (the user manual of the board),
-  and which of them `machine` will offer first.
-- Free GPIO lines and their connector pins for the HIL tests.
+Pin("PA14", Pin.IN, Pin.PULL_UP).value()   # Pin stays on Linux GPIO lines, as on the STM32MP135F-DK
+```
 
-## Design (from the portable `machine` API decision in `docs/stm32mp135f-dk.md`)
+How it fits together:
 
-- `machine.Pin` keeps the interface already implemented for the STM32MP135F-DK
-  (`modules/linuxmachine/`). A second backend sends the same operations to the Cortex-M4 over RPMsg;
-  which backend a pin uses depends on the board, not on application code.
-- First classes: `Pin` and `I2C`. `PWM`, `ADC` and `Timer` later.
-- The RPMsg protocol (requests, replies, errors, versions) is to be defined before the firmware.
-- Cortex-M4 firmware options, to be decided: written from scratch on STM32Cube or Zephyr with
-  OpenAMP; or MicroPython on the Cortex-M4, which needs the port described above.
+- **Device tree.** The `m4-examples` device tree gives the Cortex-M4 the Arduino connector's ADC,
+  DAC, I2C5, SPI4, UART7, TIM1 and TIM2, and the orange LED; Linux keeps the display, touch, Wi-Fi,
+  audio and USB. Linux only reserves those pins: the firmware sets them itself.
+- **Firmware** (`mcu/stm32mp157c-dk2/`, built by `scripts/build_m4.sh` with `arm-none-eabi-gcc`,
+  without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our `main.c` and the
+  protocol. `install.sh` puts it in `/lib/firmware/mpy_m4.elf`.
+- **Start.** The first use of `machine.I2C` or `machine.ADC` loads the firmware through remoteproc
+  if the M4 is off (about 0.6 s). A new firmware installed by `deploy.sh` takes over at once.
+- **Link.** One RPMsg virtual serial port (`/dev/ttyRPMSG*`; the number changes when the M4
+  restarts, so `mpy_m4` looks it up). Requests and answers carry a length, a sequence number and an
+  errno: the protocol is in `mcu/stm32mp157c-dk2/firmware/Inc/mpy_m4_protocol.h`. A request takes
+  about 0.35 ms there and back.
+- **Python.** `mpy_m4` (frozen) has the classes; the frozen `machine` module takes the place of
+  MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from `umachine`
+  and adds `I2C` and `ADC` on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.
+
+### I2C
+
+Bus 5 only (`I2C(5)`, the default): SDA PA12, SCL PA11, on the Arduino connector (D14, D15) and on
+the 40-pin header (pins 3 and 5, GPIO2/GPIO3). 10 kHz to 1 MHz; the default is 400 kHz. The weak
+internal pull-ups keep an empty bus high; devices bring their own.
+
+| Method | Behaviour |
+|---|---|
+| `scan()` | the addresses 0x08 to 0x77 that answer (3 ms for an empty bus at 400 kHz) |
+| `writeto`, `writevto`, `readfrom`, `readfrom_into` | as on MicroPython; `OSError(ENODEV)` when no device answers the address |
+| `readfrom_mem`, `readfrom_mem_into`, `writeto_mem` | `addrsize` 8 or 16 |
+| `writeto(addr, reg, False)` then `readfrom(addr, n)` | the register read with a repeated start, for a register address of 1 or 2 bytes |
+
+Up to 400 bytes a transfer. Not there: the primitive operations (`start`, `stop`, `readinto`,
+`write`), 10-bit addresses.
+
+### ADC
+
+16 bits against the 2.5 V reference buffer (VREFBUF), which Linux turns on for the M4: inputs from
+0 to 2.5 V, never more than 3.3 V. `read_u16()` and `read_uv()`.
+
+| Name | Pin | Converter |
+|---|---|---|
+| `A0` | ANA0 | ADC1 input 0 |
+| `A1` | ANA1 | ADC1 input 1 |
+| `A2` | PF14 | ADC2 input 6 |
+| `A3` | PF13 | ADC2 input 2 |
+| `A4` | PC3 | ADC1 input 13 |
+| `A5` | PF12 | ADC1 input 6 |
+| `ADC.CORE_VREF` | internal reference, about 1.21 V | ADC2 |
+| `ADC.CORE_TEMP` | temperature sensor (a voltage; Linux gives the chip's temperature in `/sys/class/thermal`) | ADC2 |
+
+The names follow the board's schematic (the net names of user manual UM2534); the manual's table
+of Arduino pins has some rows shifted. Pin names (`ADC("PF14")`) work too.
+
+Checked on the board (`tests/hil/test_m4.sh`, nothing wired): VREFINT reads 1.203 to 1.216 V
+(datasheet 1.18 to 1.24 V; its factory calibration in OTP says 1.209 V), the six inputs convert,
+an empty I2C bus answers `ENODEV`. Not checked yet: a real I2C device and a known voltage on an
+input.
+
+## Next
+
+- `PWM` on TIM1 channel 1 (PE9) and `SPI` on SPI4, then `Timer`, `UART` and the DAC.
+- An I2C sensor and a known voltage on A0 for the HIL tests.
+- A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at
+  first use, if the 0.6 s matter.
 
 ## Layout
 
 | Path | Content |
 |---|---|
-| `boards/unix/STM32MP157C_DK2/` | Unix variant for the Cortex-A7 (placeholder) |
-| `mcu/stm32mp157c-dk2/` | Cortex-M4 firmware (placeholder) |
-| `docs/stm32mp157c-dk2.md` | This plan |
+| `mcu/stm32mp157c-dk2/` | Cortex-M4 firmware: `Makefile`, `firmware/` (our sources) |
+| `python/linux/mpy_m4.py`, `python/linux/machine.py` | The Python side, frozen in the firmware |
+| `scripts/build_m4.sh`, `scripts/build_mp157_usb.sh` | Firmware and device tree builds |
+| `tests/hil/test_m4.sh` | Tests of `machine.I2C` and `machine.ADC` on the board |

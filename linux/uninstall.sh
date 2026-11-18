@@ -8,10 +8,23 @@ set -eu
 
 PREFIX=/usr/local/mpy
 UNITS=/etc/systemd/system
-DTB=/boot/stm32mp135f-dk.dtb
 
 say() { printf 'uninstall: %s\n' "$*"; }
 [ "$(id -u)" = 0 ] || { echo "uninstall: run as root" >&2; exit 1; }
+case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
+    *st,stm32mp157c-dk2*) DTB=/boot/stm32mp157c-dk2.dtb ;;
+    *) DTB=/boot/stm32mp135f-dk.dtb ;;
+esac
+
+# The Cortex-M4 firmware of mpy_m4 (STM32MP157C-DK2): stopped and removed.
+M4=/sys/class/remoteproc/remoteproc0
+if [ -e /lib/firmware/mpy_m4.elf ]; then
+    if [ "$(cat $M4/firmware 2>/dev/null)" = mpy_m4.elf ] && [ "$(cat $M4/state)" = running ]; then
+        echo stop > $M4/state
+    fi
+    rm -f /lib/firmware/mpy_m4.elf
+    say "removed the Cortex-M4 firmware"
+fi
 
 for unit in mpy-repl.service mpy-usb-composite.service mpy-repl-tcp.socket; do
     systemctl disable --now "$unit" >/dev/null 2>&1 || true

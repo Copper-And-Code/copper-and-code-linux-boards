@@ -7,6 +7,7 @@
 #
 # Environment:
 #   MICROPYTHON, HUB, DTB  files in dist/ (default: the newest of each; the DTB the board's)
+#   M4_ELF                 the Cortex-M4 firmware for the STM32MP157C-DK2 (scripts/build_m4.sh)
 #   MPY_SSH_ALIAS          name to check the board's SSH host key against, for boards that share
 #                          an address (both answer at 192.168.7.1), for example stm32mp157c-dk2
 #   MPY_HOSTNAME, MPY_AUTOSTART  passed to install.sh when set
@@ -29,7 +30,9 @@ done
 COMPATIBLE=$(on_board "tr '\\0' ' ' < /proc/device-tree/compatible")
 case $COMPATIBLE in
     *st,stm32mp135f-dk*) DTB_NAME=stm32mp135f-dk.dtb; DTB_BUILD=scripts/build_mp135_usb.sh ;;
-    *st,stm32mp157c-dk2*) DTB_NAME=stm32mp157c-dk2.dtb; DTB_BUILD=scripts/build_mp157_usb.sh ;;
+    *st,stm32mp157c-dk2*) DTB_NAME=stm32mp157c-dk2.dtb; DTB_BUILD=scripts/build_mp157_usb.sh
+        M4_ELF=${M4_ELF:-$(newest 'mpy_m4-*.elf')}
+        [[ -n $M4_ELF && -f $M4_ELF ]] || { echo "deploy: build the M4 firmware first (scripts/build_m4.sh)" >&2; exit 1; } ;;
     *) echo "deploy: unknown board: $COMPATIBLE" >&2; exit 1 ;;
 esac
 DTB=${DTB:-$(newest "${DTB_NAME%.dtb}-usb-composite-*.dtb")}
@@ -47,6 +50,7 @@ stage "$MICROPYTHON" micropython
 stage "$HUB" mpy-repl-hub
 stage "$SHOT" mpy-screenshot
 stage "$DTB" "$DTB_NAME"
+[[ -n ${M4_ELF:-} ]] && stage "$M4_ELF" mpy_m4.elf
 for file in mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.service mpy-repl.service \
     usbotg.default journald-volatile.conf install.sh uninstall.sh; do
     cp "$REPO/linux/$file" "$STAGE/$file"
