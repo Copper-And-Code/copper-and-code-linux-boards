@@ -102,3 +102,13 @@ it sends a UART message, an SPI transfer or the PWM, started with the capture; P
 (UART 8N1, SPI mode 0, PWM) and draws one row a pin, the bytes over their frames.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/logic-analyzer)
 
+### Web Panel
+
+![Web Panel](images/web-panel.png)
+
+The board serves a page to the phones of its network: scan the QR code, type the PIN on the screen,
+see A0 to A5 live, switch the LEDs, set the PWM, send a message to the board's screen, which shows
+what each browser did. A few lines of MicroPython, polled from the GUI's timer: about 16 ms a
+request. (Above: the Studio simulator.)
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/web-panel)
+

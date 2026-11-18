@@ -19,3 +19,4 @@ gives changing values so the screen can be tried without a board.
 | [oscilloscope](oscilloscope) | one, D6 to A0 | A0 to A5 sampled up to 100 kHz by the Cortex-M4's hardware, trigger, measurements; a test signal on D6 |
 | [timing-lab](timing-lab) | none | Every 10 ms three ways: a Python sleep, `machine.Timer` callbacks, the M4's count; load Linux and see who keeps the time |
 | [logic-analyzer](logic-analyzer) | none | Port E sampled up to 4 MHz by the M4 while the board's own UART, SPI and PWM send; decoded and drawn on Linux |
+| [web-panel](web-panel) | none | A page for the phone: inputs live, LEDs, PWM, a message to the screen; QR code and PIN on the board |
