@@ -1142,6 +1142,97 @@ static void handle_capture(uint8_t sequence, uint8_t operation, const uint8_t *a
     send(sequence, 0, (const uint8_t *)result, sizeof(result));
 }
 
+// ---- a GPIO port sampled at a fixed rate: a logic analyser
+
+#define PORT_CAPTURE_MAX_HZ 4000000
+
+static void handle_port_capture(uint8_t sequence, const uint8_t *args, size_t size) {
+    if (size < 10 || args[9] > 2 || args[0] > 10 || get32(args + 1) == 0 || get32(args + 1) > PORT_CAPTURE_MAX_HZ ||
+        get32(args + 5) == 0 || get32(args + 5) > MPY_M4_CAPTURE || capture_state == 1) {
+        send(sequence, capture_state == 1 ? E_BUSY : E_INVAL, NULL, 0);
+        return;
+    }
+    uint32_t rate = get32(args + 1), count = get32(args + 5);
+    // At most a second: the M4 answers nothing else meanwhile.
+    if ((uint64_t)count * 1000 / rate > 1000) {
+        send(sequence, E_INVAL, NULL, 0);
+        return;
+    }
+    const uint8_t *spi = args + 10;
+    size_t spi_count = args[9] == 1 ? size - 10 : 0;
+    if ((args[9] == 1 && spi_mode == 0xFF) || (args[9] == 2 && !uart_on)) {
+        send(sequence, E_INVAL, NULL, 0);  // the bus is not set up: SPI(4) or UART(7) first
+        return;
+    }
+    GPIO_TypeDef *gpio = (GPIO_TypeDef *)(GPIOA_BASE + args[0] * (GPIOB_BASE - GPIOA_BASE));
+    SET_BIT(RCC->MC_AHB4ENSETR, 1U << args[0]);
+    uint32_t period = core_hz / rate;
+    size_t sent = 0;
+    if (spi_count) {  // armed; the clock starts with the first byte written, after the lead
+        SPI4->IFCR = 0xFF8;
+        SPI4->CR2 = spi_count;
+        SPI4->CR1 = SPI_CR1_SSI | SPI_CR1_SPE;
+        SPI4->CR1 = SPI_CR1_SSI | SPI_CR1_SPE | SPI_CR1_CSTART;
+    }
+    // UART7: fed by this loop too, not by its interrupt, which would hold the sampling up.
+    const uint8_t *uart = args + 10;
+    size_t uart_count = args[9] == 2 ? size - 10 : 0, uart_sent = 0;
+    // The buses start after the first 5% of the capture, so that their idle state shows first.
+    uint32_t lead = count / 20;
+    uint32_t late = 0, next = DWT->CYCCNT + period;
+    for (uint32_t i = 0; i < count; ++i) {
+        while ((int32_t)(DWT->CYCCNT - next) < 0) {
+            if (i < lead) {
+                continue;
+            }
+            if (uart_sent < uart_count && (UART7->ISR & USART_ISR_TXE_TXFNF)) {
+                UART7->TDR = uart[uart_sent++];
+            }
+            if (spi_count) {
+                uint32_t status = SPI4->SR;
+                if (sent < spi_count && (status & SPI_SR_TXP)) {
+                    *(volatile uint8_t *)&SPI4->TXDR = spi[sent++];
+                }
+                if (status & SPI_SR_RXP) {
+                    (void)*(volatile uint8_t *)&SPI4->RXDR;
+                }
+            }
+        }
+        capture[i] = gpio->IDR;
+        if ((int32_t)(DWT->CYCCNT - next) > (int32_t)period) {
+            late++;  // an interrupt held the loop for more than a sample
+        }
+        next += period;
+    }
+    while (uart_sent < uart_count) {  // the rest, after the capture
+        if (UART7->ISR & USART_ISR_TXE_TXFNF) {
+            UART7->TDR = uart[uart_sent++];
+        }
+    }
+    if (spi_count) {
+        uint32_t wait = HAL_GetTick();
+        while (sent < spi_count && HAL_GetTick() - wait < 100) {
+            if (SPI4->SR & SPI_SR_TXP) {
+                *(volatile uint8_t *)&SPI4->TXDR = spi[sent++];
+            }
+            if (SPI4->SR & SPI_SR_RXP) {
+                (void)*(volatile uint8_t *)&SPI4->RXDR;
+            }
+        }
+        while (!(SPI4->SR & SPI_SR_EOT) && HAL_GetTick() - wait < 100) {
+            if (SPI4->SR & SPI_SR_RXP) {
+                (void)*(volatile uint8_t *)&SPI4->RXDR;
+            }
+        }
+        SPI4->IFCR = SPI_IFCR_EOTC | SPI_IFCR_TXTFC;
+        SPI4->CR1 = SPI_CR1_SSI;
+    }
+    capture_count = count;
+    capture_state = 2;  // for ADC_CAPTURE_FETCH
+    uint32_t result[3] = {core_hz, period, late};
+    send(sequence, 0, (const uint8_t *)result, sizeof(result));
+}
+
 // ---- requests
 
 static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
@@ -1209,6 +1300,10 @@ static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, siz
         case OP_TIMER_DEINIT:
         case OP_EVENT_ACK:
             handle_timer(sequence, operation, args, size);
+            return;
+        case OP_PORT_CAPTURE:
+            capture_finish();
+            handle_port_capture(sequence, args, size);
             return;
         case OP_PIN_MEASURE:
             handle_measure(sequence, args, size);

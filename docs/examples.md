@@ -93,3 +93,12 @@ while the screen is drawn), loaded to over 100 ms; the M4's count stays whole, w
 What must happen at an exact time belongs on the M4. Nothing to wire.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/timing-lab)
 
+### Logic Analyzer
+
+![Logic Analyzer](images/logic-analyzer.png)
+
+The board watches its own buses, no wires: the Cortex-M4 samples GPIO port E at up to 4 MHz while
+it sends a UART message, an SPI transfer or the PWM, started with the capture; Python decodes them
+(UART 8N1, SPI mode 0, PWM) and draws one row a pin, the bytes over their frames.
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/logic-analyzer)
+

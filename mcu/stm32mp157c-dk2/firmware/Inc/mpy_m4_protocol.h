@@ -79,6 +79,12 @@ enum {
                                //   so a busy Linux never piles events up in the serial port.
 
     // What a pin does, sampled by the M4 for a while: for tests without instruments.
+    // A whole GPIO port sampled at a fixed rate on the cycle counter, into the capture buffer
+    // (collected with ADC_CAPTURE_FETCH): a logic analyser. A stimulus can start with it, so the
+    // board can watch its own buses: bytes for SPI4 or UART7 (set up first), fed between
+    // samples.
+    OP_PORT_CAPTURE = 0x41,    // port u8, rate Hz u32, samples u32, stimulus u8 (0 none, 1 SPI4,
+                               //   2 UART7), bytes -> core Hz u32, cycles a sample u32, late u32
     OP_PIN_MEASURE = 0x40,     // port u8, pin u8, milliseconds u16
                                //   -> samples u32, cycles high u32, rising edges u32,
                                //      cycles u32, core Hz u32

@@ -234,6 +234,39 @@ for bad in (lambda: vref.read_timed(bytearray(0), 1000), lambda: vref.read_timed
         pass
 print('PASS: read_timed 1 kHz and 32768 at 100 kHz, a discharge on A2, timers meanwhile')
 
+# Logic analyser: the M4 samples port E while its own UART7 and SPI4 send (started by the capture).
+def uart_bytes(samples, bit, rate, baud):
+    mask = 1 << bit; per_bit = rate / baud; out = []; i = 1
+    while i < len(samples):
+        if not samples[i] & mask and samples[i - 1] & mask:
+            stop = int(i + per_bit * 9.5)
+            if stop >= len(samples):
+                break
+            if samples[stop] & mask:
+                out.append(sum(1 << k for k in range(8) if samples[int(i + per_bit * (1.5 + k))] & mask))
+                i = stop
+                continue
+        i += 1
+    return bytes(out)
+machine.UART(7, 115200).deinit()
+machine.UART(7, 115200)
+samples, rate, late = mpy_m4.logic_capture(2000, 1000000, uart=b'Hello, M4!')
+assert uart_bytes(samples, 8, rate, 115200) == b'Hello, M4!', uart_bytes(samples, 8, rate, 115200)
+machine.SPI(4, baudrate=250000)
+samples, rate, late = mpy_m4.logic_capture(1000, 2000000, spi=b'\xa5\x3c')
+rising = [i for i in range(1, len(samples)) if samples[i] & 0x1000 and not samples[i - 1] & 0x1000]
+assert len(rising) == 16, len(rising)
+value = 0
+for i in rising:
+    value = value << 1 | (samples[i] >> 14) & 1
+assert value == 0xA53C, hex(value)
+pwm = machine.PWM('D6', freq=10000, duty_u16=19661)
+samples, rate, late = mpy_m4.logic_capture(2000, 1000000)
+pwm.deinit()
+rising = [i for i in range(1, len(samples)) if samples[i] & 0x200 and not samples[i - 1] & 0x200]
+near(rate * (len(rising) - 1) / (rising[-1] - rising[0]), 10000, 10)
+print('PASS: logic analyser: its own UART Hello, SPI A5 3C, PWM 10 kHz on port E')
+
 mpy_m4.led(True)
 time.sleep_ms(200)
 mpy_m4.led(False)

@@ -233,3 +233,15 @@ rpmsg_char (2026-11-18):
   5.8-6.9 ms. mpy_m4 prefers /dev/rpmsgN, falls back on the tty (checked by forcing it).
   Cold start of the M4 from mpy_m4: 378-515 ms, raw channel each time. test_m4.sh twice (over
   rpmsg_char), test_repl.sh, test_tcp_hub.py pass.
+
+Logic analyser (2026-11-18):
+  OP_PORT_CAPTURE: GPIOx->IDR sampled on DWT->CYCCNT deadlines (period = core / rate, integer: 1 MHz
+  asked gives 1.0042 MHz), into the capture buffer; up to 4 MHz, a second at most.
+  UART "Hello" written before the capture: gone before the capture began (a request takes 0.3 ms).
+  Started by the capture through the ring and the UART interrupt: first characters garbled, 3 late
+  samples (the interrupt filling the FIFO at time zero). Fed by the sampling loop instead: still
+  garbled the same way at 9600, 115200 and 1 Mbaud: the line had no idle before the first start
+  bit, the decoder locked on a data edge. The buses now start after the first 5% of the capture:
+  "Hello, M4!" whole at all three rates, SPI A5 3C with 84 samples of idle first.
+  On the board (the example): UART decoded and drawn; SPI MOSI A5 3C 0F, MISO FF, CS low; PWM
+  10000.1 Hz 30.0%. test_m4.sh (with the new check) and test_repl.sh pass.

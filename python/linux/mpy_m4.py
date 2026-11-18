@@ -47,6 +47,7 @@ _PWM_INIT = 0x30
 _PWM_COMPARE = 0x31
 _PWM_DEINIT = 0x32
 _PIN_MEASURE = 0x40
+_PORT_CAPTURE = 0x41
 _SPI_INIT = 0x50
 _SPI_TRANSFER = 0x51
 _SPI_DEINIT = 0x52
@@ -450,6 +451,37 @@ def measure(pin, ms=100):
     samples, high, rising, cycles, core = struct.unpack("<5I", answer)
     seconds = cycles / core
     return rising / seconds, high / cycles
+
+
+def logic_capture(count, freq, port="E", spi=None, uart=None):
+    # A logic analyser (not in MicroPython's API): the M4 samples all 16 pins of a GPIO port
+    # count times (up to 32768) at freq Hz (up to 4 MHz), timed by its cycle counter; returns
+    # (array of 16-bit port values, exact rate, samples an interrupt delayed past their time). Bit n is pin Pn: on port E, D0 is bit 7 (PE7),
+    # D1 bit 8, D6 bit 9, D13 bit 12, D12 bit 13, D11 bit 14, D10 bit 11. With spi or uart
+    # (bytes), an SPI4 transfer or a UART7 message (SPI(4) or UART(7) set up first) starts with
+    # the capture, so the board can watch its own buses from their first bit.
+    # The M4 does nothing else meanwhile (at most a second); a UART's sending and a PWM go on.
+    import array
+
+    if not 0 < count <= _CAPTURE_MAX:
+        raise ValueError("1 to %d samples" % _CAPTURE_MAX)
+    if not 1 <= freq <= 4000000 or count * 1000 // freq > 1000:
+        raise ValueError("freq up to 4 MHz, a second at most")
+    letter = port.upper()
+    if not "A" <= letter <= "K":
+        raise ValueError("port A to K")
+    stimulus, data = (1, spi) if spi else (2, uart) if uart else (0, b"")
+    arguments = struct.pack("<BIIB", ord(letter) - ord("A"), int(freq), count, stimulus) + bytes(data)
+    answer = link.request(_PORT_CAPTURE, arguments, 2000 + count * 1000 // freq)
+    core, period, late = struct.unpack("<III", answer)
+    samples = array.array("H", bytes(2 * count))
+    import uctypes
+
+    target = uctypes.bytearray_at(uctypes.addressof(samples), 2 * count)
+    for first in range(0, count, 200):
+        part = link.request(_ADC_CAPTURE_FETCH, struct.pack("<IH", first, min(200, count - first)))
+        target[2 * first : 2 * first + len(part)] = part
+    return samples, core / period, late
 
 
 class PWM:

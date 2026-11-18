@@ -18,3 +18,4 @@ gives changing values so the screen can be tried without a board.
 | [board-explorer](board-explorer) | none | The Arduino connector: each pin as an input, an output, an ADC or the PWM, live; the Cortex-M4 reads back what Linux drives and measures its own PWM; LEDs from Linux's LED class, `machine.Pin` and the M4 |
 | [oscilloscope](oscilloscope) | one, D6 to A0 | A0 to A5 sampled up to 100 kHz by the Cortex-M4's hardware, trigger, measurements; a test signal on D6 |
 | [timing-lab](timing-lab) | none | Every 10 ms three ways: a Python sleep, `machine.Timer` callbacks, the M4's count; load Linux and see who keeps the time |
+| [logic-analyzer](logic-analyzer) | none | Port E sampled up to 4 MHz by the M4 while the board's own UART, SPI and PWM send; decoded and drawn on Linux |

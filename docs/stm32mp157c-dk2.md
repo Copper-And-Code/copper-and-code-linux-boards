@@ -178,6 +178,11 @@ takes effect at the next period, without a glitch. From 1 Hz up; the timer count
 the duty has 16 bits of resolution up to 3.2 kHz (about 11 bits at 100 kHz). `invert` is not
 supported.
 
+`mpy_m4.logic_capture(count, freq, port="E", spi=None, uart=None)` samples a whole GPIO port
+(16 pins) up to 4 MHz on the M4's cycle counter, up to 32768 samples, and returns them with the
+exact rate; an SPI4 transfer or a UART7 message can start with it (fed by the sampling loop after
+the first 5%), so the board can watch its own buses: the logic analyser example.
+
 `mpy_m4.measure(pin, ms)` has the M4 sample a pin for a while (about 8 million samples a second)
 and returns its frequency and the share of time it was high: that is how the tests check the PWM
 without instruments. Measured on PE9: 1 kHz 25% gives 1000.00 Hz 25.00%; 50 Hz 1.5 ms gives

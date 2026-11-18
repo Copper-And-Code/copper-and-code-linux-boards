@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Logic Analyzer",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "9557b4bb9db5490f89a436000f2c033b",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "5e7a15c35f92417b82aea77e628bad08",
+          "name": "title",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 8,
+            "width": 300,
+            "height": 40,
+            "text": "Logic Analyzer",
+            "textColor": "#FFFFFF",
+            "fontSize": 32,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "6f06495cb08340bdaf9649a3b690c48a",
+          "name": "status",
+          "type": "label",
+          "props": {
+            "x": 320,
+            "y": 18,
+            "width": 290,
+            "height": 24,
+            "text": "",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_RIGHT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c5a1b44bc3cf4bafb2d54d3b15654d2e",
+          "name": "traces",
+          "type": "panel",
+          "props": {
+            "x": 10,
+            "y": 52,
+            "width": 600,
+            "height": 336,
+            "bgColor": "#0B1016",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ba6ca3da7063491399f895ca80b8e373",
+          "name": "decoded",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 394,
+            "width": 596,
+            "height": 80,
+            "text": "",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "6cf096a2a0b748d8b9aa7bad80d84c87",
+          "name": "controls",
+          "type": "panel",
+          "props": {
+            "x": 620,
+            "y": 52,
+            "width": 170,
+            "height": 420,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c256ea099d9041d590178b4f6ed725c0",
+          "name": "signal_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 6,
+            "width": 150,
+            "height": 20,
+            "text": "THE BOARD SENDS",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "6cf096a2a0b748d8b9aa7bad80d84c87",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ef67c161de2c435e816a8e85d31c5b2a",
+          "name": "signal_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 2,
+            "y": 26,
+            "width": 166,
+            "height": 196,
+            "map": "UART Hello\nSPI A5 3C 0F\nPWM 10 kHz\nNothing",
+            "bgColor": "#1E2633",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "signal_buttons_value_changed"
+          },
+          "parentId": "6cf096a2a0b748d8b9aa7bad80d84c87",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "90ee9bc9ac304003ba4c17d6b7fad3fb",
+          "name": "zoom_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 228,
+            "width": 150,
+            "height": 20,
+            "text": "ZOOM",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "6cf096a2a0b748d8b9aa7bad80d84c87",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "57bd7b0cd75a4ab395f4cde69edcc7fa",
+          "name": "zoom_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 2,
+            "y": 248,
+            "width": 166,
+            "height": 50,
+            "map": "All,4x,16x",
+            "bgColor": "#1E2633",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "zoom_buttons_value_changed"
+          },
+          "parentId": "6cf096a2a0b748d8b9aa7bad80d84c87",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ce244ae00a6544e1b16c0fed369ed028",
+          "name": "rate_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 304,
+            "width": 150,
+            "height": 44,
+            "text": "",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "6cf096a2a0b748d8b9aa7bad80d84c87",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "1d09ba53c975427e8132c1ca42b46333",
+          "name": "capture_button",
+          "type": "button",
+          "props": {
+            "x": 8,
+            "y": 354,
+            "width": 154,
+            "height": 56,
+            "text": "Capture",
+            "bgColor": "#E0742F",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 12
+          },
+          "events": {
+            "CLICKED": "capture_button_clicked"
+          },
+          "parentId": "6cf096a2a0b748d8b9aa7bad80d84c87",
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import la_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "la_app.start(ui)"
+      },
+      "signal_buttons_value_changed": {
+        "widget": "signal_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "la_app.signal_changed(e.get_target_obj())"
+      },
+      "zoom_buttons_value_changed": {
+        "widget": "zoom_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "la_app.zoom_changed(e.get_target_obj())"
+      },
+      "capture_button_clicked": {
+        "widget": "capture_button",
+        "event": "CLICKED",
+        "body": "la_app.capture()"
+      }
+    }
+  },
+  "currentPageId": "9557b4bb9db5490f89a436000f2c033b",
+  "assets": {},
+  "variables": [],
+  "projectId": "f0faf40427664407ba87b0d8127a257b",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "f4d63047dfae407ca573cb15f52cd9ee",
+      "name": "decoders",
+      "source": "# SPDX-License-Identifier: MIT\n# Decoders for a logic analyser's samples: 16-bit port values taken at a fixed rate, one pin a bit.\n# Plain Python: the same on a board, in the simulator or on a PC.\n\n\ndef bit(samples, index, number):\n    return (samples[index] >> number) & 1\n\n\ndef edges(samples, number, first=0, last=None):\n    # Indices where the pin changes, between first and last.\n    last = len(samples) if last is None else last\n    mask = 1 << number\n    found = []\n    level = samples[first] & mask\n    for i in range(first + 1, last):\n        if (samples[i] & mask) != level:\n            found.append(i)\n            level = samples[i] & mask\n    return found\n\n\ndef uart(samples, number, rate, baud):\n    # 8N1, least significant bit first: [(index of the start bit, byte)]. A start without its stop\n    # bit is a false start (the capture began inside a character): try again a sample later.\n    per_bit = rate / baud\n    mask = 1 << number\n    found = []\n    i = 1\n    while i < len(samples):\n        if not samples[i] & mask and samples[i - 1] & mask:\n            stop = int(i + per_bit * 9.5)\n            if stop >= len(samples):\n                break\n            if samples[stop] & mask:\n                value = 0\n                for k in range(8):\n                    if samples[int(i + per_bit * (1.5 + k))] & mask:\n                        value |= 1 << k\n                found.append((i, value))\n                i = stop\n                continue\n        i += 1\n    return found\n\n\ndef spi(samples, clock, data, idle_low=True, bits=8):\n    # Mode 0 (or 2 with idle_low False): data sampled on the clock's leading edge, most significant\n    # bit first: [(index of the byte's first edge, byte)].\n    mask = 1 << clock\n    leading = []\n    for i in range(1, len(samples)):\n        now, before = samples[i] & mask, samples[i - 1] & mask\n        if now != before and (bool(now) == idle_low):\n            leading.append(i)\n    found = []\n    for start in range(0, len(leading) - bits + 1, bits):\n        value = 0\n        for i in leading[start : start + bits]:\n            value = value << 1 | bit(samples, i, data)\n        found.append((leading[start], value))\n    return found\n\n\ndef pwm(samples, number, rate):\n    # (frequency, share of the time high), from the rising edges; None without two of them.\n    rising = [i for i in edges(samples, number) if bit(samples, i, number)]\n    if len(rising) < 2:\n        return None\n    period = (rising[-1] - rising[0]) / (len(rising) - 1)\n    high = sum(bit(samples, i, number) for i in range(rising[0], rising[-1]))\n    return rate / period, high / (rising[-1] - rising[0])\n"
+    },
+    {
+      "id": "8ea24a3ef3894a418cbd13e642ac9568",
+      "name": "analyzer",
+      "source": "# SPDX-License-Identifier: MIT\n# The logic analyser's hardware: the Cortex-M4 samples GPIO port E (16 pins) at a fixed rate\n# (mpy_m4.logic_capture), while the board's own buses send something to watch: UART7, SPI4 (both\n# started by the capture, so their first bit is caught) or the PWM. Port E carries D0, D1 (UART7),\n# D6 (PWM), D10 (chip select, a Linux GPIO line) and D11 to D13 (SPI4). In the LVGL MPY Studio\n# simulator the same signals are made up.\n\nimport array\n\ntry:\n    import machine\n    import mpy_m4\n\n    HARDWARE = hasattr(mpy_m4, \"logic_capture\") and mpy_m4.available()\nexcept ImportError:\n    HARDWARE = False\n\n# Rows on the screen: name, pin, bit of port E.\nCHANNELS = [\n    (\"D1 TX\", \"PE8\", 8),\n    (\"D6 PWM\", \"PE9\", 9),\n    (\"D13 SCK\", \"PE12\", 12),\n    (\"D11 MOSI\", \"PE14\", 14),\n    (\"D12 MISO\", \"PE13\", 13),\n    (\"D10 CS\", \"PE11\", 11),\n]\nUART_BAUD = 115200\nUART_TEXT = b\"Hello, M4!\"\nSPI_BAUD = 250000\nSPI_BYTES = b\"\\xa5\\x3c\\x0f\"\nPWM_HZ = 10000\n\n# signal -> samples, rate\nPLANS = {\n    \"UART\": (2000, 1000000),\n    \"SPI\": (1000, 2000000),\n    \"PWM\": (2000, 1000000),\n    \"Nothing\": (2000, 1000000),\n}\n\n\nclass Board:\n    def __init__(self):\n        self._pwm = None\n        self._cs = None\n\n    def _quiet(self):\n        if self._pwm is not None:\n            self._pwm.deinit()\n            self._pwm = None\n\n    def capture(self, signal):\n        count, rate = PLANS[signal]\n        self._quiet()\n        if signal == \"UART\":\n            machine.UART(7, UART_BAUD)\n            samples, rate, late = mpy_m4.logic_capture(count, rate, uart=UART_TEXT)\n        elif signal == \"SPI\":\n            machine.SPI(4, baudrate=SPI_BAUD, _miso_pull=1)\n            if self._cs is None:\n                self._cs = machine.Pin(\"PE11\", machine.Pin.OUT, value=1)\n            self._cs(0)  # chip select by Linux, around the transfer the M4 makes\n            try:\n                samples, rate, late = mpy_m4.logic_capture(count, rate, spi=SPI_BYTES)\n            finally:\n                self._cs(1)\n        else:\n            if signal == \"PWM\":\n                self._pwm = machine.PWM(\"D6\", freq=PWM_HZ, duty_u16=19661)  # 30%\n            samples, rate, late = mpy_m4.logic_capture(count, rate)\n        return samples, rate, late\n\n\ndef _uart_frames(text, baud, rate, start):\n    # (index, level) changes of an 8N1 line sending text from sample start.\n    per_bit = rate / baud\n    changes = []\n    t = start\n    for value in text:\n        levels = [0] + [(value >> k) & 1 for k in range(8)] + [1]\n        for level in levels:\n            changes.append((int(t), level))\n            t += per_bit\n    return changes\n\n\nclass Simulated:\n    def capture(self, signal):\n        count, rate = PLANS[signal]\n        idle = (1 << 8) | (1 << 13) | (1 << 11)  # TX idle high, MISO pulled up, CS high\n        samples = array.array(\"H\", [idle] * count)\n        lead = count // 20\n        if signal == \"UART\":\n            level = 1\n            changes = _uart_frames(UART_TEXT, UART_BAUD, rate, lead)\n            index = 0\n            for i in range(count):\n                while index < len(changes) and changes[index][0] <= i:\n                    level = changes[index][1]\n                    index += 1\n                samples[i] = (samples[i] & ~(1 << 8)) | (level << 8)\n        elif signal == \"SPI\":\n            half = rate // SPI_BAUD // 2\n            for i in range(lead - 10, count):\n                samples[i] &= ~(1 << 11)  # CS low\n            t = lead\n            for value in SPI_BYTES:\n                for k in range(7, -1, -1):\n                    for j in range(2 * half):\n                        if t + j < count:\n                            sck = 1 if j >= half else 0\n                            mosi = (value >> k) & 1\n                            samples[t + j] = (samples[t + j] & ~((1 << 12) | (1 << 14))) | (sck << 12) | (mosi << 14)\n                    t += 2 * half\n        elif signal == \"PWM\":\n            period = rate // PWM_HZ\n            for i in range(count):\n                if i % period < period * 3 // 10:\n                    samples[i] |= 1 << 9\n        return samples, float(rate), 0\n\n\nhardware = Board() if HARDWARE else Simulated()\n"
+    },
+    {
+      "id": "47cf33ec0c844679a386326ea3f743f0",
+      "name": "la_app",
+      "source": "# SPDX-License-Identifier: MIT\n# Logic Analyzer: the board's own buses on the screen. The Cortex-M4 samples port E while UART7,\n# SPI4 or the PWM send something; Python on Linux decodes it and draws one row a pin.\n\nimport lvgl as lv\n\nimport analyzer\nimport decoders\n\nROW = 54           # height of a channel's row in the traces panel\nLEFT = 86          # where the traces begin, after the names\nWIDTH = 500        # the traces' width\nSIGNALS = [\"UART\", \"SPI\", \"PWM\", \"Nothing\"]\nZOOMS = [1, 4, 16]\nCOLORS = [0xE0742F, 0x8A5CF6, 0x4C8DFF, 0x4CC38A, 0xE5C04C, 0xE5484D]\n\n_ui = None\n_lines = []\n_points = []       # the lines' points, kept alive\n_marks = []        # labels of decoded bytes\n_signal = \"UART\"\n_zoom = 1\n_samples = None\n_rate = 1.0\n\n\ndef _font(size):\n    return getattr(lv, \"font_montserrat_%d\" % size)\n\n\ndef _style_matrix(matrix, accent):\n    matrix.set_style_bg_opa(lv.OPA.TRANSP, 0)\n    matrix.set_style_border_width(0, 0)\n    matrix.set_style_pad_all(4, 0)\n    matrix.set_style_pad_gap(6, 0)\n    items = lv.PART.ITEMS\n    matrix.set_style_bg_color(lv.color_hex(0x2A3444), items)\n    matrix.set_style_bg_opa(lv.OPA.COVER, items)\n    matrix.set_style_radius(8, items)\n    matrix.set_style_border_width(0, items)\n    matrix.set_style_shadow_width(0, items)\n    matrix.set_style_text_color(lv.color_hex(0xFFFFFF), items)\n    matrix.set_style_text_font(_font(16), items)\n    matrix.set_style_bg_color(lv.color_hex(accent), items | lv.STATE.CHECKED)\n    matrix.set_button_ctrl_all(lv.buttonmatrix.CTRL.CHECKABLE)\n    matrix.set_one_checked(True)\n\n\ndef _window():\n    # The samples shown: all, or a quarter or a sixteenth from just before the first activity.\n    count = len(_samples)\n    size = count // _zoom\n    if _zoom == 1:\n        return 0, count\n    first = count\n    for name, pin, number in analyzer.CHANNELS:\n        found = decoders.edges(_samples, number)\n        if found:\n            first = min(first, found[0])\n    start = 0 if first == count else max(0, first - size // 10)\n    return start, min(count, start + size)\n\n\ndef _x(index, start, stop):\n    return LEFT + (index - start) * WIDTH // max(1, stop - start)\n\n\ndef _mark(text, x, row, color):\n    label = lv.label(_ui.traces)\n    label.set_text(text)\n    label.set_style_text_color(lv.color_hex(color), 0)\n    label.set_style_text_font(_font(14), 0)\n    label.set_pos(x, row * ROW + 2)\n    _marks.append(label)\n\n\ndef _draw():\n    global _points\n    for label in _marks:\n        label.delete()\n    _marks.clear()\n    start, stop = _window()\n    _points = []\n    for row, (name, pin, number) in enumerate(analyzer.CHANNELS):\n        high, low = row * ROW + 20, row * ROW + 46\n        level = decoders.bit(_samples, start, number)\n        points = [lv.point_precise_t({\"x\": LEFT, \"y\": high if level else low})]\n        for i in decoders.edges(_samples, number, start, stop):\n            x = _x(i, start, stop)\n            points.append(lv.point_precise_t({\"x\": x, \"y\": high if level else low}))\n            level ^= 1\n            points.append(lv.point_precise_t({\"x\": x, \"y\": high if level else low}))\n            if len(points) > 600:\n                break\n        points.append(lv.point_precise_t({\"x\": LEFT + WIDTH, \"y\": high if level else low}))\n        _lines[row].set_points(points, len(points))\n        _points.append(points)\n    # What the decoders found, over the rows where it is\n    report = []\n    rate = _rate\n    if _signal == \"UART\":\n        found = decoders.uart(_samples, 8, rate, analyzer.UART_BAUD)\n        for index, value in found:\n            if start <= index < stop:\n                text = chr(value) if 32 <= value < 127 else \"%02X\" % value\n                _mark(text, _x(index, start, stop) + 4, 0, COLORS[0])\n        text = bytes(v for i, v in found)\n        report.append(\"UART %d 8N1 on D1: %r, %d bytes\" % (analyzer.UART_BAUD, text, len(found)))\n    elif _signal == \"SPI\":\n        mosi = decoders.spi(_samples, 12, 14)\n        miso = decoders.spi(_samples, 12, 13)\n        for row, found in ((3, mosi), (4, miso)):\n            for index, value in found:\n                if start <= index < stop:\n                    _mark(\"%02X\" % value, _x(index, start, stop) + 4, row, COLORS[row])\n        report.append(\"SPI mode 0, %d kHz: MOSI %s\" % (analyzer.SPI_BAUD // 1000,\n                                                       \" \".join(\"%02X\" % v for i, v in mosi)))\n        report.append(\"MISO %s (nothing wired: its pull-up)   CS low by Linux\" %\n                      \" \".join(\"%02X\" % v for i, v in miso))\n    elif _signal == \"PWM\":\n        measured = decoders.pwm(_samples, 9, rate)\n        if measured:\n            report.append(\"PWM on D6: %.1f Hz, %.1f%% high\" % (measured[0], 100 * measured[1]))\n    else:\n        report.append(\"Nothing sent: the pins as they are (wire something to D0 to D13).\")\n    _ui.decoded.set_text(\"\\n\".join(report))\n    shown = (stop - start) / rate * 1000\n    _ui.rate_label.set_text(\"%.0f kHz sampling\\n%.2f ms shown\" % (rate / 1000, shown))\n\n\ndef capture():\n    global _samples, _rate\n    _ui.status.set_text(\"capturing...\")\n    try:\n        _samples, _rate, late = analyzer.hardware.capture(_signal)\n    except OSError as error:\n        _ui.status.set_text(\"Error: %s\" % error)\n        return\n    _ui.status.set_text(\"%d samples%s\" % (len(_samples), \", %d late\" % late if late else \"\"))\n    _draw()\n\n\ndef signal_changed(matrix):\n    global _signal\n    index = matrix.get_selected_button()\n    if 0 <= index < len(SIGNALS):\n        _signal = SIGNALS[index]\n        capture()\n\n\ndef zoom_changed(matrix):\n    global _zoom\n    index = matrix.get_selected_button()\n    if 0 <= index < len(ZOOMS) and _samples is not None:\n        _zoom = ZOOMS[index]\n        _draw()\n\n\ndef start(ui):\n    global _ui\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    _style_matrix(ui.signal_buttons, 0xE0742F)\n    _style_matrix(ui.zoom_buttons, 0x2F6FDE)\n    ui.signal_buttons.set_button_ctrl(0, lv.buttonmatrix.CTRL.CHECKED)\n    ui.zoom_buttons.set_button_ctrl(0, lv.buttonmatrix.CTRL.CHECKED)\n    for row, (name, pin, number) in enumerate(analyzer.CHANNELS):\n        label = lv.label(ui.traces)\n        label.set_text(\"%s\\n%s\" % (name, pin))\n        label.set_style_text_color(lv.color_hex(COLORS[row]), 0)\n        label.set_style_text_font(_font(14), 0)\n        label.set_pos(8, row * ROW + 12)\n        line = lv.line(ui.traces)\n        line.set_style_line_width(2, 0)\n        line.set_style_line_color(lv.color_hex(COLORS[row]), 0)\n        _lines.append(line)\n    capture()\n"
+    }
+  ]
+}
