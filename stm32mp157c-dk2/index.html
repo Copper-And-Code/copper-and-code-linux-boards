@@ -441,6 +441,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#checked-in-the-releases-files-no-board-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checked in the release's files (no board yet)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#to-verify-on-the-board-rule-6-of-the-plan-device-tree-first" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -600,6 +611,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#checked-in-the-releases-files-no-board-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checked in the release's files (no board yet)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#to-verify-on-the-board-rule-6-of-the-plan-device-tree-first" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -664,17 +686,64 @@ board's Cortex-M4. This document separates what was checked from what is still a
   (<code>ports/stm32/mpmetalport.c</code>, <code>mpremoteprocport.c</code>). It is the MCU side of the link, not the
   Linux side.</li>
 </ul>
+<h2 id="checked-in-the-releases-files-no-board-yet">Checked in the release's files (no board yet)<a class="headerlink" href="#checked-in-the-releases-files-no-board-yet" title="Permanent link">&para;</a></h2>
+<p>The OpenSTLinux release used for the STM32MP135F-DK (<code>openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10</code>)
+covers this board too: its Starter Package has the microSD flash layouts
+(<code>FlashLayout_sdcard_stm32mp157c-dk2-optee.tsv</code> and others) and its SDK, the same one, has the device
+trees <code>stm32mp157c-dk2.dtb</code> and <code>stm32mp157c-dk2-m4-examples.dtb</code>. Both CPUs are Cortex-A7 with the
+same ABI (<code>cortexa7t2hf-neon-vfpv4</code>), so the same toolchain builds for both. From the device trees:</p>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>stm32mp157c-dk2.dtb</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Display</td>
+<td>DSI panel <code>orisetech,otm8009a</code> through <code>st,stm32-dsi</code> and <code>st,stm32-ltdc</code>; no separate backlight node (the panel driver controls the brightness)</td>
+</tr>
+<tr>
+<td>Touch</td>
+<td><code>focaltech,ft6236</code> on I2C at <code>0x38</code>, <code>touchscreen-size</code> 480 × 800: a 480×800 portrait panel</td>
+</tr>
+<tr>
+<td>USB device port</td>
+<td><code>st,stm32mp15-hsotg</code> (<code>dwc2</code>) at <code>49000000</code>, <code>dr_mode = "otg"</code>, <code>usb-role-switch</code>: the composite serial and network gadget of the STM32MP135F-DK should work</td>
+</tr>
+<tr>
+<td>Cortex-M4</td>
+<td><code>st,stm32mp1-m4</code> under remoteproc, with reserved memory (<code>mcuram</code>, <code>mcuram2</code>, <code>retram</code>, <code>vdev0buffer</code> for RPMsg) and mailboxes <code>vq0</code>, <code>vq1</code>, <code>shutdown</code>, <code>detach</code></td>
+</tr>
+<tr>
+<td>Peripherals given to the Cortex-M4 (<code>m4-examples</code>)</td>
+<td>ADC <code>48003000</code>, DAC <code>40017000</code>, DMA <code>48001000</code>, I2C <code>40015000</code>, SPI <code>44005000</code>, UART <code>40018000</code>, timers <code>40000000</code> and <code>44000000</code>, CRC, CRYP, HASH, RNG</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>m4-examples</code> device tree is a ready starting point for <code>machine</code>: it already hands the Cortex-M4
+the ADC, DAC, I2C, SPI, a UART and two timers (PWM).</p>
+<p>Consequences:</p>
+<ul>
+<li>The panel is 480×800 portrait, not 480×272: the LVGL MPY Studio examples need a new board profile
+  and a layout for it, or the display turned to 800×480 landscape in software (LVGL rotation, at a
+  CPU cost to measure).</li>
+<li><code>display_driver</code> and <code>touch_evdev</code> find the resolution, the touchscreen and the backlight by
+  themselves; the FT6236 range matches the panel, so no <code>MPY_TOUCH_RANGE</code> is expected.</li>
+</ul>
 <h2 id="to-verify-on-the-board-rule-6-of-the-plan-device-tree-first">To verify on the board (rule 6 of the plan: device tree first)<a class="headerlink" href="#to-verify-on-the-board-rule-6-of-the-plan-device-tree-first" title="Permanent link">&para;</a></h2>
 <ul>
-<li>OpenSTLinux release and kernel for STM32MP15 in the release chosen for the STM32MP135F-DK.</li>
-<li>Display: panel, interface, resolution and touch controller, from the device tree of
-  <code>stm32mp157c-dk2</code> and the user manual. Whether <code>linuxfb</code> (DRM dumb buffer) works unchanged.</li>
+<li>That the release boots on the board: flash with <code>FlashLayout_sdcard_stm32mp157c-dk2-optee.tsv</code>,
+  then <code>uname -a</code>, <code>/etc/os-release</code>, the inventory of the STM32MP135F-DK's phase 1.</li>
+<li>Whether <code>linuxfb</code> (DRM dumb buffer) works unchanged on the DSI panel, and how the brightness is
+  exposed (a <code>/sys/class/backlight</code> entry from the panel driver, or none).</li>
 <li>USB gadget: which port is dual-role, UDC name; whether <code>mpy-usb-composite.sh</code> applies.</li>
 <li>remoteproc: <code>/sys/class/remoteproc/remoteproc0</code> (<code>firmware</code>, <code>state</code>), where firmware files are
   looked up (<code>/lib/firmware</code>), and the RPMsg devices the kernel offers (<code>rpmsg_tty</code>:
   <code>/dev/ttyRPMSG*</code>, or <code>rpmsg_char</code>).</li>
-<li>Which pins and peripherals (GPIO, I2C, SPI, PWM, ADC, timers) are assigned to the Cortex-M4 in the
-  device tree (resource manager), and which the connectors expose.</li>
+<li>Which connector pins the peripherals given to the Cortex-M4 use (the user manual of the board),
+  and which of them <code>machine</code> will offer first.</li>
 <li>Free GPIO lines and their connector pins for the HIL tests.</li>
 </ul>
 <h2 id="design-from-the-portable-machine-api-decision-in-docsstm32mp135f-dkmd">Design (from the portable <code>machine</code> API decision in <code>docs/stm32mp135f-dk.md</code>)<a class="headerlink" href="#design-from-the-portable-machine-api-decision-in-docsstm32mp135f-dkmd" title="Permanent link">&para;</a></h2>
