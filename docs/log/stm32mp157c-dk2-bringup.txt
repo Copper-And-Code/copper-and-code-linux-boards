@@ -77,3 +77,14 @@ audio device"). "alsasink device=plughw:0,0" (the CS42L51 codec, headphone jack)
 RUNNING, S16_LE. install.sh writes it into the DK2's drop-in as MPY_AUDIO_SINK. From the menu,
 Radio, Radio Swiss Jazz: "On air 0:00:07", gst-play with that sink, ALSA RUNNING; mixer PCM 63%
 (-11.50 dB), on. Not heard: nobody was there to listen.
+
+Cortex-M4, first link (2026-11-18):
+  board: remoteproc0 "m4" offline, firmware name rproc-m4-fw, kernel modules rpmsg_tty and
+  rpmsg_char present; no M4 firmware in the Weston image.
+  STM32CubeMP1 1.7.0 (GitHub, shallow) in work/; ST's OpenAMP_TTY_echo for the DK2 built with
+  arm-none-eabi-gcc 13.2.1 by mcu/stm32mp157c-dk2/Makefile (no STM32CubeIDE): text 23028, data 288,
+  bss 5412, no warnings.
+  /lib/firmware/openamp_tty_echo.elf, remoteproc start: "remote processor m4 is now up", channels
+  rpmsg-tty 0x400 and 0x401 -> /dev/ttyRPMSG0 and /dev/ttyRPMSG1.
+  From MicroPython (open, termios.setraw, poll): echo b'hello M4'; 200 round trips of 7 bytes:
+  min 207 us, median 242 us, p95 286 us, max 432 us; 400 bytes in 443 us, identical.
