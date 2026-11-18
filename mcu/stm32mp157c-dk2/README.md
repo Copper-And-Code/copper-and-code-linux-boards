@@ -12,7 +12,7 @@ make -C mcu/stm32mp157c-dk2 APP=<STM32CubeMP1>/Projects/STM32MP157C-DK2/Applicat
 
 | Path | Content |
 |---|---|
-| `firmware/Src/main.c` | Requests: I2C5, ADC1/ADC2, PWM on TIM1, SPI4, UART7 (under interrupt), timers and their events, pin measurement, the orange LED |
+| `firmware/Src/main.c` | Requests: I2C5, ADC1/ADC2 (also sampling at a fixed rate on TIM2), PWM on TIM1, SPI4, UART7 (under interrupt), timers and their events, pin measurement, the orange LED |
 | `firmware/Inc/mpy_m4_protocol.h` | The protocol, shared with `python/linux/mpy_m4.py` |
 | `firmware/Inc/stm32mp1xx_hal_conf.h` | The HAL modules beyond those of ST's echo example |
 

@@ -25,6 +25,7 @@ on the ST wiki.
 ## `machine` on the Cortex-M4
 
 ```python
+import array
 from machine import I2C, ADC, PWM, SPI, UART, Timer, Pin
 
 i2c = I2C(5, freq=400000)        # Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5
@@ -33,6 +34,8 @@ i2c.readfrom_mem(0x76, 0xD0, 1)  # a register, as on any MicroPython board
 
 print(ADC("A0").read_uv())       # Arduino A0..A5, from 0 to 2.5 V
 print(ADC(ADC.CORE_VREF).read_uv())
+samples = array.array("H", bytes(2 * 1000))
+ADC("A0").read_timed(samples, 10000)           # 1000 samples at exactly 10 kHz, by the M4
 
 servo = PWM("D6", freq=50, duty_ns=1500000)   # TIM1 channel 1 on PE9, Arduino D6
 
@@ -105,6 +108,24 @@ Up to 400 bytes a transfer. Not there: the primitive operations (`start`, `stop`
 The names follow the board's schematic (the net names of user manual UM2534); the manual's table
 of Arduino pins has some rows shifted. Pin names (`ADC("PF14")`) work too.
 
+**Sampling at a fixed rate.** `adc.read_timed(buf, freq)`, as on the Pyboard but with the rate
+instead of a timer: up to 32768 samples at 1 Hz to 100 kHz. The M4's TIM2 (32 bits at 208.9 MHz)
+triggers each conversion in hardware and an interrupt stores it in the M4's memory, so the samples
+are evenly spaced whatever Linux does; Python sleeps meanwhile (the GUI and the timers go on) and
+then collects them, 200 at a time. `array('H')` gets 16-bit values, a `bytearray` their top 8
+bits; afterwards `adc.freq` is the exact rate (TIM2's clock over its period) and `adc.overruns`
+the conversions lost (none so far). The sampling time is the longest that fits the rate (810.5
+ADC cycles up to 10 kHz, 64.5 at 100 kHz).
+
+Measured: VREFINT at 1 kHz, 10 kHz and 100 kHz averages 1.206 V; the times between the first and
+the last conversion give 1000.00 Hz, 9999.90 Hz and 99,989.4 Hz (TIM2's 208.9 MHz over 2089);
+32768 samples at 100 kHz take 0.41 s with their collection (0.33 s of sampling); no overruns.
+A real signal without wires: Linux charges A2 (PF14) as a GPIO output, the capture turns the pin
+analog and samples it: 1.87 V, then a falling curve, about 12% less at each conversion, the same
+from 10 to 100 kHz: the ADC's own sampling capacitor takes the charge. (A pin the ADC reads must be
+analog: driven by Linux as an output, the M4 sees it toggle digitally, at 50.00 Hz, but the ADC
+does not.)
+
 Checked on the board (`tests/hil/test_m4.sh`, nothing wired): VREFINT reads 1.203 to 1.216 V
 (datasheet 1.18 to 1.24 V; its factory calibration in OTP says 1.209 V), the six inputs convert,
 an empty I2C bus answers `ENODEV`. Not checked yet: a real I2C device and a known voltage on an
@@ -176,14 +197,14 @@ As with MicroPython's soft callbacks, the callback waits while the main thread r
 without a pause: the GIL of MicroPython's unix port is not fair, and a loop that never sleeps,
 waits or does I/O keeps it (the LVGL thread waits the same way). Measured at 1 kHz for 0.5 s of
 such a loop: a few calls, the rest in `missed`, the count right. Anything that must happen at an
-exact time belongs on the M4 itself: the next step is ADC sampling at a fixed rate.
+exact time belongs on the M4 itself, as the ADC's sampling at a fixed rate does.
 
 ### What the M4 has that is not used
 
 | Peripheral | Why not |
 |---|---|
 | DAC | Its outputs PA4 and PA5 are the CC lines of the USB-C power connector (CN6), which tell the board what powers it; they do not reach the connectors. Left alone. |
-| TIM2, DMA2 | Kept for ADC sampling at a fixed rate (`machine.Timer` uses the M4's cycle counter). |
+| DMA2 | Not needed so far: an interrupt stores the samples up to 100 kHz. (TIM2 paces `read_timed`; `machine.Timer` uses the M4's cycle counter.) |
 | HASH, CRYP, CRC, RNG | MicroPython on Linux has `hashlib` and `os.urandom`, the board `/dev/hwrng`. |
 
 Linux keeps every timer off, so TIM4 (D3, D5) and TIM12 (D9) could give more PWM outputs, once
@@ -192,7 +213,8 @@ edge events) belong on the Linux side.
 
 ## Next
 
-- ADC sampling at a fixed rate (TIM2, DMA2), into a buffer Python collects.
+- Captures that do not block Python (start, then collect), several channels in turn, DMA above
+  100 kHz: for an oscilloscope app.
 - More PWM outputs on TIM4 and TIM12; `machine.WDT` and `Pin.irq` on Linux.
 - An I2C sensor and a known voltage on A0 for the HIL tests.
 - A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at

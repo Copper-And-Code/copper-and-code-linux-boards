@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# machine.I2C, ADC, PWM, SPI, UART and Timer served by the Cortex-M4 of the STM32MP157C-DK2, with
+# machine.I2C, ADC (also at a fixed rate), PWM, SPI, UART and Timer served by the Cortex-M4 of the STM32MP157C-DK2, with
 # nothing wired to the connectors: the bus is empty, the internal reference is known, the M4 measures the
 # PWM and the UART and watches the SPI on its own pins, the UART loops back on a single wire.
 #
@@ -195,6 +195,43 @@ for bad in (lambda: machine.Timer(8), lambda: machine.Timer(0, period=0), lambda
     except ValueError:
         pass
 print('PASS: Timer 10 ms (median gap %d us), one shot 50 ms, requests in callbacks, 1 kHz under a busy main thread' % gaps[len(gaps) // 2])
+
+# ADC sampling at a fixed rate: TIM2 triggers the conversions, the M4 keeps the samples.
+import array
+vref = machine.ADC(machine.ADC.CORE_VREF)
+for count, rate in ((1000, 1000), (32768, 100000)):
+    samples = array.array('H', bytes(2 * count))
+    start = time.ticks_ms()
+    vref.read_timed(samples, rate)
+    near(vref.freq, rate, rate * 0.0002)
+    assert vref.overruns == 0
+    assert all(1150000 < v * 2500000 // 65535 < 1270000 for v in samples), (min(samples), max(samples))
+    elapsed = time.ticks_diff(time.ticks_ms(), start)
+    assert elapsed < count * 1000 // rate + 1000, (count, rate, elapsed)  # a hang, not speed
+ticks = []
+t = machine.Timer(0, period=10, callback=lambda t: ticks.append(1))
+vref.read_timed(array.array('H', bytes(2 * 5000)), 10000)
+t.deinit()
+assert len(ticks) >= 40, len(ticks)  # the rest of Python goes on during a capture
+# A real signal: Linux charges A2 (PF14) as an output, the capture lets it go; each conversion
+# takes a share of the charge: a falling curve, sample by sample.
+pin = machine.Pin('PF14', machine.Pin.OUT, value=1)
+time.sleep_ms(5)
+curve = array.array('H', bytes(16))
+machine.ADC('A2').read_timed(curve, 50000)
+pin.deinit()
+assert curve[0] > 40000 and all(a > b for a, b in zip(curve, curve[1:])), list(curve)
+eight = bytearray(10)
+vref.read_timed(eight, 1000)
+assert all(115 < v < 131 for v in eight), eight
+assert 1150000 < vref.read_uv() < 1270000  # single reads after a capture
+for bad in (lambda: vref.read_timed(bytearray(0), 1000), lambda: vref.read_timed(bytearray(10), 200000)):
+    try:
+        bad()
+        raise AssertionError('no ValueError')
+    except ValueError:
+        pass
+print('PASS: read_timed 1 kHz and 32768 at 100 kHz, a discharge on A2, timers meanwhile')
 
 mpy_m4.led(True)
 time.sleep_ms(200)

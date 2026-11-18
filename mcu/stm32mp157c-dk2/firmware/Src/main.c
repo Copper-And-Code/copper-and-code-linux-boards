@@ -951,6 +951,174 @@ static void handle_measure(uint8_t sequence, const uint8_t *args, size_t size) {
     send(sequence, 0, (const uint8_t *)values, sizeof(values));  // the M4 is little endian too
 }
 
+// ---- ADC sampling at a fixed rate: TIM2 -> ADC trigger, end of conversion -> buffer
+
+static uint16_t capture[MPY_M4_CAPTURE];
+static volatile uint32_t capture_count, capture_wanted, capture_overruns;
+static volatile uint32_t capture_first, capture_last;  // DWT cycles of the first and last sample
+static volatile uint8_t capture_state;                  // 0 idle, 1 running, 2 done
+static ADC_TypeDef *capture_adc;
+
+static void capture_end(void) {
+    TIM2->CR1 = 0;
+    LL_ADC_DisableIT_EOC(capture_adc);
+    LL_ADC_DisableIT_OVR(capture_adc);
+    if (LL_ADC_REG_IsConversionOngoing(capture_adc)) {
+        LL_ADC_REG_StopConversion(capture_adc);
+    }
+}
+
+static void capture_irq(void) {
+    if (LL_ADC_IsActiveFlag_OVR(capture_adc)) {
+        LL_ADC_ClearFlag_OVR(capture_adc);
+        capture_overruns++;
+    }
+    if (LL_ADC_IsActiveFlag_EOC(capture_adc)) {
+        uint32_t now = DWT->CYCCNT;
+        uint16_t value = LL_ADC_REG_ReadConversionData32(capture_adc);  // clears EOC
+        if (capture_state == 1 && capture_count < capture_wanted) {
+            if (capture_count == 0) {
+                capture_first = now;
+            }
+            capture_last = now;
+            capture[capture_count++] = value;
+            if (capture_count == capture_wanted) {
+                capture_end();
+                capture_state = 2;
+            }
+        }
+    }
+}
+
+void ADC1_IRQHandler(void) {
+    if (capture_adc == ADC1) {
+        capture_irq();
+    }
+}
+
+void ADC2_IRQHandler(void) {
+    if (capture_adc == ADC2) {
+        capture_irq();
+    }
+}
+
+static void capture_finish(void) {
+    // Back to software starts for ADC.read_u16() (needs no conversion going on).
+    if (capture_adc && capture_state != 1) {
+        HAL_NVIC_DisableIRQ(capture_adc == ADC1 ? ADC1_IRQn : ADC2_IRQn);
+        while (LL_ADC_REG_IsStopConversionOngoing(capture_adc)) {
+        }
+        LL_ADC_REG_SetTriggerSource(capture_adc, LL_ADC_REG_TRIG_SOFTWARE);
+        HAL_ADC_Stop(&adc[capture_adc == ADC1 ? 0 : 1]);
+        capture_adc = NULL;
+    }
+}
+
+static void handle_capture(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
+    if (operation == OP_ADC_CAPTURE_STATUS) {
+        uint32_t cycles = capture_count > 1 ? capture_last - capture_first : 0;
+        uint32_t values[3] = {capture_count, cycles, capture_overruns};
+        uint8_t result[13];
+        result[0] = capture_state;
+        memcpy(result + 1, values, sizeof(values));
+        send(sequence, 0, result, sizeof(result));
+        return;
+    }
+    if (operation == OP_ADC_CAPTURE_FETCH) {
+        uint32_t first = size == 6 ? get32(args) : 0;
+        uint32_t count = size == 6 ? get16(args + 4) : 0;
+        if (size != 6 || count > 200 || first + count > capture_count) {
+            send(sequence, E_INVAL, NULL, 0);
+            return;
+        }
+        send(sequence, 0, (const uint8_t *)(capture + first), 2 * count);  // little endian
+        return;
+    }
+    // OP_ADC_CAPTURE
+    int internal = args[0] == 2 && (args[1] == ADC_CHANNEL_CODE_VREFINT || args[1] == ADC_CHANNEL_CODE_TEMPSENSOR);
+    if (size != 12 || (args[0] != 1 && args[0] != 2) || (args[1] >= 20 && !internal) || get32(args + 4) == 0 ||
+        get32(args + 4) > MPY_M4_CAPTURE || get32(args + 8) == 0 || get32(args + 8) > MPY_M4_CAPTURE_MAX_HZ ||
+        (args[2] != ADC_NO_PIN && (args[2] > 10 || args[3] > 15)) || capture_state == 1) {
+        send(sequence, capture_state == 1 ? E_BUSY : E_INVAL, NULL, 0);
+        return;
+    }
+    int number = args[0];
+    uint32_t rate = get32(args + 8);
+    if (args[2] != ADC_NO_PIN) {
+        analog_pin(args[2], args[3]);
+    }
+    int error = adc_ready_for(number);
+    if (error) {
+        send(sequence, error, NULL, 0);
+        return;
+    }
+    ADC_HandleTypeDef *h = &adc[number - 1];
+    // The longest sampling time that leaves the conversion (8.5 more cycles at 16 bits) within
+    // 70% of the period, at the 12 MHz ADC clock.
+    static const uint32_t times[] = {ADC_SAMPLETIME_810CYCLES_5, ADC_SAMPLETIME_387CYCLES_5,
+        ADC_SAMPLETIME_64CYCLES_5, ADC_SAMPLETIME_32CYCLES_5, ADC_SAMPLETIME_16CYCLES_5,
+        ADC_SAMPLETIME_8CYCLES_5};
+    static const uint32_t tenths[] = {8105, 3875, 645, 325, 165, 85};
+    uint32_t budget = 12000000UL * 7 / 10 / rate * 10;  // ADC cycles x10 within 70% of a period
+    int choice = 0;
+    while (choice < 5 && tenths[choice] + 85 > budget) {
+        choice++;
+    }
+    ADC_ChannelConfTypeDef config = {0};
+    static const uint32_t inputs[20] = {ADC_CHANNEL_0, ADC_CHANNEL_1, ADC_CHANNEL_2, ADC_CHANNEL_3,
+        ADC_CHANNEL_4, ADC_CHANNEL_5, ADC_CHANNEL_6, ADC_CHANNEL_7, ADC_CHANNEL_8, ADC_CHANNEL_9,
+        ADC_CHANNEL_10, ADC_CHANNEL_11, ADC_CHANNEL_12, ADC_CHANNEL_13, ADC_CHANNEL_14, ADC_CHANNEL_15,
+        ADC_CHANNEL_16, ADC_CHANNEL_17, ADC_CHANNEL_18, ADC_CHANNEL_19};
+    config.Channel = internal ? (args[1] == ADC_CHANNEL_CODE_VREFINT ? ADC_CHANNEL_VREFINT : ADC_CHANNEL_TEMPSENSOR)
+                              : inputs[args[1]];
+    config.Rank = ADC_REGULAR_RANK_1;
+    config.SamplingTime = times[choice];
+    config.SingleDiff = ADC_SINGLE_ENDED;
+    config.OffsetNumber = ADC_OFFSET_NONE;
+    if (HAL_ADC_ConfigChannel(h, &config) != HAL_OK) {
+        send(sequence, E_IO, NULL, 0);
+        return;
+    }
+    // TIM2: 32 bits at its kernel clock, an update every period, the update as TRGO.
+    uint32_t clock = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_TIMG1);
+    if (!clock) {
+        clock = 208877930;
+    }
+    uint32_t period = (clock + rate / 2) / rate;
+    __HAL_RCC_TIM2_CLK_ENABLE();
+    TIM2->CR1 = 0;
+    TIM2->PSC = 0;
+    TIM2->ARR = period - 1;
+    TIM2->CR2 = 2U << TIM_CR2_MMS_Pos;  // TRGO on update
+    TIM2->EGR = TIM_EGR_UG;
+    TIM2->SR = 0;
+
+    capture_adc = h->Instance;
+    capture_count = 0;
+    capture_overruns = 0;
+    capture_wanted = get32(args + 4);
+    capture_state = 1;
+    LL_ADC_REG_SetTriggerSource(capture_adc, LL_ADC_REG_TRIG_EXT_TIM2_TRGO);
+    LL_ADC_REG_SetTriggerEdge(capture_adc, LL_ADC_REG_TRIG_EXT_RISING);
+    LL_ADC_ClearFlag_EOC(capture_adc);
+    LL_ADC_ClearFlag_OVR(capture_adc);
+    LL_ADC_EnableIT_EOC(capture_adc);
+    LL_ADC_EnableIT_OVR(capture_adc);
+    IRQn_Type irq = number == 1 ? ADC1_IRQn : ADC2_IRQn;
+    HAL_NVIC_ClearPendingIRQ(irq);
+    HAL_NVIC_SetPriority(irq, 0, 0);  // above the IPCC: a sample is never late
+    HAL_NVIC_EnableIRQ(irq);
+    if (!LL_ADC_IsEnabled(capture_adc)) {
+        LL_ADC_Enable(capture_adc);
+        while (!LL_ADC_IsActiveFlag_ADRDY(capture_adc)) {
+        }
+    }
+    LL_ADC_REG_StartConversion(capture_adc);  // waits for TIM2's triggers
+    TIM2->CR1 = TIM_CR1_CEN;
+    uint32_t result[3] = {clock, period, tenths[choice]};  // the rate is clock / period
+    send(sequence, 0, (const uint8_t *)result, sizeof(result));
+}
+
 // ---- requests
 
 static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
@@ -981,7 +1149,20 @@ static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, siz
             handle_i2c(sequence, operation, args, size);
             return;
         case OP_ADC_READ:
+            capture_finish();
+            if (capture_state == 1) {
+                send(sequence, E_BUSY, NULL, 0);
+                return;
+            }
             handle_adc(sequence, args, size);
+            return;
+        case OP_ADC_CAPTURE:
+            capture_finish();
+            handle_capture(sequence, operation, args, size);
+            return;
+        case OP_ADC_CAPTURE_STATUS:
+        case OP_ADC_CAPTURE_FETCH:
+            handle_capture(sequence, operation, args, size);
             return;
         case OP_PWM_INIT:
         case OP_PWM_COMPARE:

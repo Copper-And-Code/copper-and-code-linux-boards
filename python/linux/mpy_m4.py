@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: MIT
-# machine.I2C, ADC, PWM, SPI, UART and Timer served by the Cortex-M4 of an STM32MP15 board, as on a
+# machine.I2C, ADC (also at a fixed rate), PWM, SPI, UART and Timer served by the Cortex-M4 of an STM32MP15 board, as on a
 # microcontroller: the same MicroPython code runs on both.
 #
 #   from machine import I2C, ADC
 #   i2c = I2C(5, freq=400000)        # I2C5: Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5
 #   i2c.scan()
 #   ADC("A0").read_uv()              # Arduino A0..A5, pin names ("PF14") or ADC.CORE_VREF
+#   ADC("A0").read_timed(array.array("H", bytes(2000)), 10000)   # 1000 samples at 10 kHz, by the M4
 #   PWM("D6", freq=1000, duty_u16=16384)   # TIM1 channel 1 on PE9 (Arduino D6)
 #   SPI(4, baudrate=1000000)         # SCK D13, MISO D12, MOSI D11; chip select: Pin("PE11") (D10)
 #   UART(7, 9600)                    # RX D0, TX D1
@@ -38,6 +39,10 @@ _I2C_READ = 0x13
 _I2C_MEM_READ = 0x14
 _I2C_MEM_WRITE = 0x15
 _ADC_READ = 0x20
+_ADC_CAPTURE = 0x21
+_ADC_CAPTURE_STATUS = 0x22
+_ADC_CAPTURE_FETCH = 0x23
+_CAPTURE_MAX = 32768
 _PWM_INIT = 0x30
 _PWM_COMPARE = 0x31
 _PWM_DEINIT = 0x32
@@ -490,6 +495,43 @@ class ADC:
 
     def read_uv(self):
         return self.read_u16() * ADC.VREF_UV // 65535
+
+    def read_timed(self, buf, freq):
+        # As on the Pyboard, with the rate instead of a timer: fills buf with samples taken at freq
+        # Hz (1 to 100000), up to 32768 at a time. The M4's TIM2 triggers each conversion in
+        # hardware, so the samples are evenly spaced whatever Linux does; Python waits meanwhile
+        # (sleeping: the GUI goes on) and collects them. array('H'): 16-bit values; bytearray:
+        # their top 8 bits. Afterwards: self.freq, the exact rate; self.overruns (0 normally).
+        count = len(buf)
+        if not 0 < count <= _CAPTURE_MAX:
+            raise ValueError("1 to %d samples at a time" % _CAPTURE_MAX)
+        if not 1 <= freq <= 100000:
+            raise ValueError("freq 1 to 100000 Hz")
+        answer = link.request(_ADC_CAPTURE, self._args + struct.pack("<II", count, int(freq)))
+        clock, period, _ = struct.unpack("<III", answer)
+        self.freq = clock / period
+        time.sleep_ms(count * 1000 * period // clock)
+        deadline = time.ticks_add(time.ticks_ms(), 1000)
+        while True:
+            state, taken, cycles, overruns = struct.unpack("<BIII", link.request(_ADC_CAPTURE_STATUS))
+            if state == 2:
+                break
+            if time.ticks_diff(deadline, time.ticks_ms()) < 0:
+                raise OSError(_ETIMEDOUT, "the capture did not finish")
+            time.sleep_ms(2)
+        self.overruns = overruns
+        wide = not isinstance(buf, (bytearray, bytes))
+        if wide:
+            import uctypes
+
+            target = uctypes.bytearray_at(uctypes.addressof(buf), 2 * count)
+        for first in range(0, count, 200):
+            part = link.request(_ADC_CAPTURE_FETCH, struct.pack("<IH", first, min(200, count - first)))
+            if wide:
+                target[2 * first : 2 * first + len(part)] = part
+            else:
+                for i in range(len(part) // 2):
+                    buf[first + i] = part[2 * i + 1]
 
 
 class SPI:

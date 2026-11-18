@@ -17,6 +17,8 @@
 #define MPY_M4_PROTOCOL_VERSION 2  // 2: events (timers), acknowledged
 #define MPY_M4_MAX_FRAME 480  // what one RPMsg buffer carries (496 bytes, less the header)
 #define MPY_M4_MAX_DATA 400   // bytes of one I2C transfer
+#define MPY_M4_CAPTURE 32768  // samples of one ADC capture (64 KB of the M4's 128 KB of data RAM)
+#define MPY_M4_CAPTURE_MAX_HZ 100000
 
 enum {
     OP_INFO = 0x01,            // -> version u8, text
@@ -30,6 +32,14 @@ enum {
     OP_I2C_MEM_WRITE = 0x15,   // address u8, memory address size u8, memory u16, data
 
     OP_ADC_READ = 0x20,        // ADC u8 (1, 2), channel u8, port u8, pin u8 -> value u16
+    // Sampling at a fixed rate: TIM2 triggers the conversions in hardware, an interrupt stores
+    // them in the M4's buffer (MPY_M4_CAPTURE samples); Linux collects them afterwards.
+    OP_ADC_CAPTURE = 0x21,     // ADC u8, channel u8, port u8, pin u8, samples u32, rate Hz u32
+                               //   -> TIM2 clock Hz u32, period u32 (rate = clock / period),
+                               //      sampling time in ADC cycles x10 u32
+    OP_ADC_CAPTURE_STATUS = 0x22, // -> state u8 (0 idle, 1 running, 2 done), samples taken u32,
+                               //    cycles from the first sample to the last u32, overruns u32
+    OP_ADC_CAPTURE_FETCH = 0x23,  // first u32, count u16 (<= 200) -> samples u16 each
 
     // TIM1 channel 1 on PE9 (Arduino D6). PWM_INIT sets the frequency and the duty (65535:
     // always high) from the first period; PWM_COMPARE sets the high time in timer ticks (period
@@ -86,6 +96,7 @@ enum {
 // Status values: Linux's errno numbers (the firmware's C library numbers some differently).
 #define E_IO 5
 #define E_NODEV 19
+#define E_BUSY 16
 #define E_INVAL 22
 #define E_OPNOTSUPP 95
 #define E_TIMEDOUT 110
