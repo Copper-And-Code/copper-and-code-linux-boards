@@ -858,7 +858,8 @@ on the ST wiki.</p>
 </tbody>
 </table>
 <h2 id="machine-on-the-cortex-m4"><code>machine</code> on the Cortex-M4<a class="headerlink" href="#machine-on-the-cortex-m4" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">PWM</span><span class="p">,</span> <span class="n">SPI</span><span class="p">,</span> <span class="n">UART</span><span class="p">,</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">Pin</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">PWM</span><span class="p">,</span> <span class="n">SPI</span><span class="p">,</span> <span class="n">UART</span><span class="p">,</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">Pin</span>
 
 <span class="n">i2c</span> <span class="o">=</span> <span class="n">I2C</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">400000</span><span class="p">)</span>        <span class="c1"># Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">i2c</span><span class="o">.</span><span class="n">scan</span><span class="p">())</span>
@@ -866,6 +867,8 @@ on the ST wiki.</p>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">ADC</span><span class="p">(</span><span class="s2">"A0"</span><span class="p">)</span><span class="o">.</span><span class="n">read_uv</span><span class="p">())</span>       <span class="c1"># Arduino A0..A5, from 0 to 2.5 V</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">ADC</span><span class="p">(</span><span class="n">ADC</span><span class="o">.</span><span class="n">CORE_VREF</span><span class="p">)</span><span class="o">.</span><span class="n">read_uv</span><span class="p">())</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">"H"</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
+<span class="n">ADC</span><span class="p">(</span><span class="s2">"A0"</span><span class="p">)</span><span class="o">.</span><span class="n">read_timed</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>           <span class="c1"># 1000 samples at exactly 10 kHz, by the M4</span>
 
 <span class="n">servo</span> <span class="o">=</span> <span class="n">PWM</span><span class="p">(</span><span class="s2">"D6"</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">duty_ns</span><span class="o">=</span><span class="mi">1500000</span><span class="p">)</span>   <span class="c1"># TIM1 channel 1 on PE9, Arduino D6</span>
 
@@ -990,6 +993,22 @@ internal pull-ups keep an empty bus high; devices bring their own.</p>
 </table>
 <p>The names follow the board's schematic (the net names of user manual UM2534); the manual's table
 of Arduino pins has some rows shifted. Pin names (<code>ADC("PF14")</code>) work too.</p>
+<p><strong>Sampling at a fixed rate.</strong> <code>adc.read_timed(buf, freq)</code>, as on the Pyboard but with the rate
+instead of a timer: up to 32768 samples at 1 Hz to 100 kHz. The M4's TIM2 (32 bits at 208.9 MHz)
+triggers each conversion in hardware and an interrupt stores it in the M4's memory, so the samples
+are evenly spaced whatever Linux does; Python sleeps meanwhile (the GUI and the timers go on) and
+then collects them, 200 at a time. <code>array('H')</code> gets 16-bit values, a <code>bytearray</code> their top 8
+bits; afterwards <code>adc.freq</code> is the exact rate (TIM2's clock over its period) and <code>adc.overruns</code>
+the conversions lost (none so far). The sampling time is the longest that fits the rate (810.5
+ADC cycles up to 10 kHz, 64.5 at 100 kHz).</p>
+<p>Measured: VREFINT at 1 kHz, 10 kHz and 100 kHz averages 1.206 V; the times between the first and
+the last conversion give 1000.00 Hz, 9999.90 Hz and 99,989.4 Hz (TIM2's 208.9 MHz over 2089);
+32768 samples at 100 kHz take 0.41 s with their collection (0.33 s of sampling); no overruns.
+A real signal without wires: Linux charges A2 (PF14) as a GPIO output, the capture turns the pin
+analog and samples it: 1.87 V, then a falling curve, about 12% less at each conversion, the same
+from 10 to 100 kHz: the ADC's own sampling capacitor takes the charge. (A pin the ADC reads must be
+analog: driven by Linux as an output, the M4 sees it toggle digitally, at 50.00 Hz, but the ADC
+does not.)</p>
 <p>Checked on the board (<code>tests/hil/test_m4.sh</code>, nothing wired): VREFINT reads 1.203 to 1.216 V
 (datasheet 1.18 to 1.24 V; its factory calibration in OTP says 1.209 V), the six inputs convert,
 an empty I2C bus answers <code>ENODEV</code>. Not checked yet: a real I2C device and a known voltage on an
@@ -1046,7 +1065,7 @@ into the next, and the callback finds them in <code>timer.missed</code> (not in 
 without a pause: the GIL of MicroPython's unix port is not fair, and a loop that never sleeps,
 waits or does I/O keeps it (the LVGL thread waits the same way). Measured at 1 kHz for 0.5 s of
 such a loop: a few calls, the rest in <code>missed</code>, the count right. Anything that must happen at an
-exact time belongs on the M4 itself: the next step is ADC sampling at a fixed rate.</p>
+exact time belongs on the M4 itself, as the ADC's sampling at a fixed rate does.</p>
 <h3 id="what-the-m4-has-that-is-not-used">What the M4 has that is not used<a class="headerlink" href="#what-the-m4-has-that-is-not-used" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1061,8 +1080,8 @@ exact time belongs on the M4 itself: the next step is ADC sampling at a fixed ra
 <td>Its outputs PA4 and PA5 are the CC lines of the USB-C power connector (CN6), which tell the board what powers it; they do not reach the connectors. Left alone.</td>
 </tr>
 <tr>
-<td>TIM2, DMA2</td>
-<td>Kept for ADC sampling at a fixed rate (<code>machine.Timer</code> uses the M4's cycle counter).</td>
+<td>DMA2</td>
+<td>Not needed so far: an interrupt stores the samples up to 100 kHz. (TIM2 paces <code>read_timed</code>; <code>machine.Timer</code> uses the M4's cycle counter.)</td>
 </tr>
 <tr>
 <td>HASH, CRYP, CRC, RNG</td>
@@ -1075,7 +1094,8 @@ declared to the M4 in a device tree overlay. <code>machine.WDT</code> (<code>/de
 edge events) belong on the Linux side.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
-<li>ADC sampling at a fixed rate (TIM2, DMA2), into a buffer Python collects.</li>
+<li>Captures that do not block Python (start, then collect), several channels in turn, DMA above
+  100 kHz: for an oscilloscope app.</li>
 <li>More PWM outputs on TIM4 and TIM12; <code>machine.WDT</code> and <code>Pin.irq</code> on Linux.</li>
 <li>An I2C sensor and a known voltage on A0 for the HIL tests.</li>
 <li>A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at

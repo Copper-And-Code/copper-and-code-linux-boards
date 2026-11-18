@@ -183,3 +183,19 @@ machine.Timer and events from the M4 (2026-11-18):
   1 kHz idle: 986 calls + 14 missed = 1000; busy 1 s: 8 calls + 872 missed, nothing piled up.
   test_m4.sh (twice), test_repl.sh, test_tcp_hub.py pass. PWM at 100 kHz measured 29.71% once
   for 30%: 80 samples a period, an interrupt shows; tolerance 0.5% there.
+
+ADC.read_timed: sampling at a fixed rate on the M4 (2026-11-18):
+  TIM2 (tim2_k 208877930 Hz, 32 bits, TRGO on update) triggers the ADC (EXTSEL TIM2_TRGO); the
+  end-of-conversion interrupt (priority 0) stores into a 32768-sample buffer (64 KB of the M4's
+  128 KB m_data; 20 KB used before). Sampling time: the longest within 70% of the period.
+  VREFINT, 2000 samples: 1 kHz -> 1000.00 Hz, 10 kHz -> 9999.90 Hz, 100 kHz -> 99989.58 Hz
+  (first-to-last conversion on DWT), mean 1.2063 V, no overruns; 32768 at 100 kHz: no overruns.
+  Signal: Linux drove PF14 (A2) as a GPIO output while the M4 sampled it: the ADC saw nothing
+  (0.05 V), while mpy_m4.measure saw 50.00 Hz 49.9% digitally: the ADC needs the pin analog.
+  Instead Linux charges the pin (output high), the capture makes it analog: 1.85..1.89 V then
+  x0.87 a sample, the same at 10, 50 and 100 kHz (charge taken by the sampling capacitor), faster
+  at 1 kHz (leakage over 1 ms adds).
+  machine.ADC.read_timed: 32768 at 100 kHz in 408 ms with the collection (742 ms once inside the
+  test, after the other tests: collection is Python-bound); a 10 ms timer kept running (106 calls
+  in a 1 s capture); bytearray gives the top 8 bits (123 for 1.206 V). test_m4.sh twice,
+  test_repl.sh, test_tcp_hub.py pass.
