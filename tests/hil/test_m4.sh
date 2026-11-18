@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# machine.I2C, ADC, PWM and SPI served by the Cortex-M4 of the STM32MP157C-DK2, with nothing wired
-# to the connectors: the bus is empty, the internal reference is known, the M4 measures the PWM and
-# watches the SPI on its own pins.
+# machine.I2C, ADC, PWM, SPI and UART served by the Cortex-M4 of the STM32MP157C-DK2, with nothing
+# wired to the connectors: the bus is empty, the internal reference is known, the M4 measures the
+# PWM and the UART and watches the SPI on its own pins, the UART loops back on a single wire.
 #
 #   P=/dev/ttyACM1 tests/hil/test_m4.sh
 set -euo pipefail
@@ -128,6 +128,37 @@ for bad in (lambda: machine.SPI(1), lambda: machine.SPI(4, bits=16), lambda: mac
     except ValueError:
         pass
 print('PASS: SPI4 in the 8 modes seen on the pins, MISO pull-up and pull-down, 32 MHz, CS on Linux')
+
+# UART7 in single-wire mode: TX (PE8, D1) also receives what it sends; the M4 measures the baud
+# rate on the pin (0x55 at 8N1 is a square wave at half the baud rate).
+for baud, bits, parity, stop in ((9600, 8, None, 1), (9600, 7, 0, 2), (19200, 8, 1, 1), (1000000, 8, None, 1)):
+    u = machine.UART(7, baud, bits=bits, parity=parity, stop=stop, timeout=200, _single_wire=True)
+    u.write(b'machine.UART')
+    assert u.read(12) == b'machine.UART', (baud, bits, parity, stop)
+    assert u.errors() == (0, 0, 0), u.errors()
+u = machine.UART(7, 115200, timeout=200, _single_wire=True)
+u.write(b'one\ntwo\n')
+assert u.readline() == b'one\n' and u.readline() == b'two\n'
+start = time.ticks_ms()
+assert u.read(1) is None
+near(time.ticks_diff(time.ticks_ms(), start), 200, 30)
+data = bytes(range(256)) * 12  # more than the M4's 2 KB to send
+assert u.write(data) == len(data)
+assert u.read(len(data)) == data
+u.flush()
+assert u.txdone()
+u = machine.UART(7, 9600)
+u.write(b'U' * 400)
+f, d = mpy_m4.measure('D1', 300)
+near(2 * f, 9600, 9600 * 0.005)
+u.deinit()
+for bad in (lambda: machine.UART(1), lambda: machine.UART(7, bits=9, parity=0), lambda: machine.UART(7, tx='PA1')):
+    try:
+        bad()
+        raise AssertionError('no ValueError')
+    except ValueError:
+        pass
+print('PASS: UART7 8N1, 7E2, 8O1 and 1 Mbaud looped back, readline, timeout, 3 KB, 9600 baud on the pin')
 
 mpy_m4.led(True)
 time.sleep_ms(200)

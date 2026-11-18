@@ -1,13 +1,13 @@
 # STM32MP157C-DK2
 
 Second board of this project, and the first with a microcontroller beside Linux: its Cortex-M4
-serves `machine.I2C`, `ADC`, `PWM` and `SPI` to MicroPython on the Cortex-A7.
+serves `machine.I2C`, `ADC`, `PWM`, `SPI` and `UART` to MicroPython on the Cortex-A7.
 
 **Status:** OpenSTLinux flashed; our build installed with `scripts/deploy.sh` (the same MicroPython
 binary as the STM32MP135F-DK); shell, app menu and REPL working (serial and TCP); the 480×800 panel
 turned to 800×480 in software (about 50 full frames per second); Wi-Fi, weather and the web radio
 with sound through the board's codec; `machine.Pin` on Linux GPIO lines, `machine.I2C`,
-`ADC`, `PWM` and `SPI` on the Cortex-M4. Bring-up log: `docs/log/stm32mp157c-dk2-bringup.txt`.
+`ADC`, `PWM`, `SPI` and `UART` on the Cortex-M4. Bring-up log: `docs/log/stm32mp157c-dk2-bringup.txt`.
 Product page: <https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html>. Flashing and boot:
 [Populate the target and boot the image](https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image)
 on the ST wiki.
@@ -25,7 +25,7 @@ on the ST wiki.
 ## `machine` on the Cortex-M4
 
 ```python
-from machine import I2C, ADC, PWM, SPI, Pin
+from machine import I2C, ADC, PWM, SPI, UART, Pin
 
 i2c = I2C(5, freq=400000)        # Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5
 print(i2c.scan())
@@ -40,6 +40,9 @@ spi = SPI(4, baudrate=8000000)                 # SCK D13, MISO D12, MOSI D11
 cs = Pin("PE11", Pin.OUT, value=1)             # D10: a Linux GPIO line as chip select
 cs(0); spi.read(3, 0x9F); cs(1)
 
+gps = UART(7, 9600, timeout=1000)             # RX D0, TX D1
+print(gps.readline())
+
 Pin("PA14", Pin.IN, Pin.PULL_UP).value()   # Pin stays on Linux GPIO lines, as on the STM32MP135F-DK
 ```
 
@@ -51,7 +54,7 @@ How it fits together:
 - **Firmware** (`mcu/stm32mp157c-dk2/`, built by `scripts/build_m4.sh` with `arm-none-eabi-gcc`,
   without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our `main.c` and the
   protocol. `install.sh` puts it in `/lib/firmware/mpy_m4.elf`.
-- **Start.** The first use of `machine.I2C`, `ADC`, `PWM` or `SPI` loads the firmware through remoteproc
+- **Start.** The first use of `machine.I2C`, `ADC`, `PWM`, `SPI` or `UART` loads the firmware through remoteproc
   if the M4 is off (about 0.6 s). A new firmware installed by `deploy.sh` takes over at once.
 - **Link.** One RPMsg virtual serial port (`/dev/ttyRPMSG*`; the number changes when the M4
   restarts, so `mpy_m4` looks it up). Requests and answers carry a length, a sequence number and an
@@ -59,7 +62,7 @@ How it fits together:
   about 0.35 ms there and back.
 - **Python.** `mpy_m4` (frozen) has the classes; the frozen `machine` module takes the place of
   MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from `umachine`
-  and adds `I2C`, `ADC`, `PWM` and `SPI` on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.
+  and adds `I2C`, `ADC`, `PWM`, `SPI` and `UART` on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.
 
 ### I2C
 
@@ -132,10 +135,42 @@ the bytes sent, with 2 edges a bit (the sampling keeps up to about 1 MHz). MISO 
 its internal pull-up and 0x00 with the pull-down. 1024 bytes at 32 MHz take 1.4 ms (732 kB/s); a
 short transfer about 0.36 ms there and back. Not checked yet: a real SPI device.
 
+### UART
+
+UART7: RX PE7 (Arduino D0), TX PE8 (D1). `UART(7, baudrate)` with the MicroPython API: `init()`,
+`deinit()`, `any()`, `read()`, `readinto()`, `readline()`, `write()`, `flush()`, `txdone()`,
+`sendbreak()`, `timeout` and `timeout_char` (at least a character's time, as on MicroPython).
+300 baud to 4 Mbaud; 7, 8 or 9 data bits (with parity 7 or 8), parity `None`, 0 (even) or 1
+(odd), 1 or 2 stop bits. `errors()` (not in MicroPython) counts overruns, framing and parity errors.
+
+The M4 receives and sends under interrupt, with a 4 KB buffer for what arrives and a 2 KB one for
+what goes out: bytes are not lost between two calls from Python, and `write()` returns while the M4
+sends.
+
+Checked without wires: in single-wire mode the TX pin also receives what it sends. 8N1, 7E2, 8O1
+from 300 baud to 4 Mbaud come back intact; 3 KB (more than the 2 KB to send) too; `readline()`,
+the timeout (200 ms measured 200 ms), a break (read as 0x00 with a framing error). The M4 measures
+the rate on the pin while sending 0x55 (a square wave at half the rate): 0.14% under nominal at
+every rate, the same offset everywhere, well inside what a serial line tolerates. Not checked yet:
+a real device on the line.
+
+### What the M4 has that is not used
+
+| Peripheral | Why not |
+|---|---|
+| DAC | Its outputs PA4 and PA5 are the CC lines of the USB-C power connector (CN6), which tell the board what powers it; they do not reach the connectors. Left alone. |
+| TIM2, DMA2 | Kept for `machine.Timer` and for ADC sampling at a fixed rate. |
+| HASH, CRYP, CRC, RNG | MicroPython on Linux has `hashlib` and `os.urandom`, the board `/dev/hwrng`. |
+
+Linux keeps every timer off, so TIM4 (D3, D5) and TIM12 (D9) could give more PWM outputs, once
+declared to the M4 in a device tree overlay. `machine.WDT` (`/dev/watchdog`) and `Pin.irq` (GPIO
+edge events) belong on the Linux side.
+
 ## Next
 
-- `Timer`, `UART` (UART7 on D0/D1) and the DAC; more PWM channels (TIM1 channels 2 and 4 share
-  pins with SPI4).
+- `machine.Timer` and ADC sampling at a fixed rate (TIM2, DMA2): the M4 will need to send events
+  to Python without being asked.
+- More PWM outputs on TIM4 and TIM12; `machine.WDT` and `Pin.irq` on Linux.
 - An I2C sensor and a known voltage on A0 for the HIL tests.
 - A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at
   first use, if the 0.6 s matter.
@@ -147,4 +182,4 @@ short transfer about 0.36 ms there and back. Not checked yet: a real SPI device.
 | `mcu/stm32mp157c-dk2/` | Cortex-M4 firmware: `Makefile`, `firmware/` (our sources) |
 | `python/linux/mpy_m4.py`, `python/linux/machine.py` | The Python side, frozen in the firmware |
 | `scripts/build_m4.sh`, `scripts/build_mp157_usb.sh` | Firmware and device tree builds |
-| `tests/hil/test_m4.sh` | Tests of `machine.I2C`, `ADC`, `PWM` and `SPI` on the board |
+| `tests/hil/test_m4.sh` | Tests of `machine.I2C`, `ADC`, `PWM`, `SPI` and `UART` on the board |

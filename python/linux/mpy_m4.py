@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# machine.I2C, ADC, PWM and SPI served by the Cortex-M4 of an STM32MP15 board, as on a
+# machine.I2C, ADC, PWM, SPI and UART served by the Cortex-M4 of an STM32MP15 board, as on a
 # microcontroller: the same MicroPython code runs on both.
 #
 #   from machine import I2C, ADC
@@ -8,6 +8,7 @@
 #   ADC("A0").read_uv()              # Arduino A0..A5, pin names ("PF14") or ADC.CORE_VREF
 #   PWM("D6", freq=1000, duty_u16=16384)   # TIM1 channel 1 on PE9 (Arduino D6)
 #   SPI(4, baudrate=1000000)         # SCK D13, MISO D12, MOSI D11; chip select: Pin("PE11") (D10)
+#   UART(7, 9600)                    # RX D0, TX D1
 #
 # The firmware (mcu/stm32mp157c-dk2, mpy_m4.elf) runs on the M4, loaded by Linux through
 # remoteproc; the two talk over an RPMsg virtual serial port with the protocol of
@@ -40,6 +41,12 @@ _PIN_MEASURE = 0x40
 _SPI_INIT = 0x50
 _SPI_TRANSFER = 0x51
 _SPI_DEINIT = 0x52
+_UART_INIT = 0x60
+_UART_WRITE = 0x61
+_UART_READ = 0x62
+_UART_STATUS = 0x63
+_UART_BREAK = 0x64
+_UART_DEINIT = 0x65
 
 _MAX_DATA = 400
 _EOPNOTSUPP = 95
@@ -238,7 +245,7 @@ class I2C:
 
 
 # Arduino digital pins the M4 uses (connector CN14/CN13, from the board's schematic).
-_DIGITAL = {"D6": "PE9", "D10": "PE11", "D11": "PE14", "D12": "PE13", "D13": "PE12", "D14": "PA12", "D15": "PA11"}
+_DIGITAL = {"D0": "PE7", "D1": "PE8", "D6": "PE9", "D10": "PE11", "D11": "PE14", "D12": "PE13", "D13": "PE12", "D14": "PA12", "D15": "PA11"}
 
 
 def _pin_name(pin):
@@ -481,4 +488,140 @@ class SPI:
         data = bytes(buf)
         answer = link.request(_SPI_TRANSFER, bytes([2]) + data, 1000 + len(data))
         return answer[: len(data)], struct.unpack("<I", answer[len(data) :])[0]
+
+
+class UART:
+    # machine.UART on the M4's UART7: RX PE7 (Arduino D0), TX PE8 (D1). The M4 keeps received
+    # bytes in a 4 KB buffer and sends from a 2 KB one, both under interrupt, so nothing is lost
+    # between two calls. 300 baud to 4 Mbaud; 7, 8 or 9 data bits (with parity: 7 or 8);
+    # parity None, 0 (even) or 1 (odd); 1 or 2 stop bits. timeout and timeout_char in ms, as on
+    # MicroPython: how long read() waits for the first byte and for each next one.
+
+    def __init__(self, id=7, baudrate=9600, bits=8, parity=None, stop=1, *, tx=None, rx=None, timeout=0,
+                 timeout_char=0, _single_wire=False, **ignored):
+        if id != 7:
+            raise ValueError("UART(%r) doesn't exist: the Cortex-M4 has UART7" % (id,))
+        for pin, name in ((tx, "PE8"), (rx, "PE7")):
+            if pin is not None and _pin_name(pin) != name:
+                raise ValueError("UART7 uses RX PE7 (D0) and TX PE8 (D1)")
+        self._settings = {"baudrate": baudrate, "bits": bits, "parity": parity, "stop": stop,
+                          "timeout": timeout, "timeout_char": timeout_char}
+        self._single_wire = _single_wire  # for tests without wires: TX also receives what it sends
+        self._buffer = b""
+        self.init()
+
+    def init(self, baudrate=None, bits=None, parity=-1, stop=None, *, timeout=None, timeout_char=None, **ignored):
+        for key, value in (("baudrate", baudrate), ("bits", bits), ("stop", stop), ("timeout", timeout),
+                           ("timeout_char", timeout_char)):
+            if value is not None:
+                self._settings[key] = value
+        if parity != -1:
+            self._settings["parity"] = parity
+        s = self._settings
+        if s["parity"] not in (None, 0, 1):
+            raise ValueError("parity is None, 0 (even) or 1 (odd)")
+        if s["bits"] not in (7, 8, 9) or (s["bits"] == 9 and s["parity"] is not None) or s["stop"] not in (1, 2):
+            raise ValueError("bits 7, 8 or 9 (9 without parity), stop 1 or 2")
+        if not 300 <= s["baudrate"] <= 4000000:
+            raise ValueError("baudrate 300 to 4000000")
+        code = 0 if s["parity"] is None else (2 if s["parity"] == 0 else 1)
+        answer = link.request(_UART_INIT, struct.pack("<IBBBB", s["baudrate"], s["bits"], code, s["stop"],
+                                                       1 if self._single_wire else 0))
+        self.baudrate = struct.unpack("<I", answer)[0]
+        # As on MicroPython, timeout_char is at least a character's time (start, data, parity, stop),
+        # plus the round trip to the M4.
+        frame = 1 + s["bits"] + (0 if s["parity"] is None else 1) + s["stop"]
+        self._char_ms = max(s["timeout_char"], (frame * 1000 + self.baudrate - 1) // self.baudrate + 1)
+        self._buffer = b""
+        self._on = True
+
+    def __repr__(self):
+        s = self._settings
+        return "UART(7, baudrate=%d, bits=%d, parity=%s, stop=%d, tx=PE8, rx=PE7, timeout=%d, timeout_char=%d)" % (
+            self.baudrate, s["bits"], s["parity"], s["stop"], s["timeout"], s["timeout_char"])
+
+    def deinit(self):
+        link.request(_UART_DEINIT)
+        self._on = False
+
+    def _status(self):
+        return struct.unpack("<HHBHHH", link.request(_UART_STATUS))
+
+    def errors(self):
+        # Not in machine.UART: (overruns, framing errors, parity errors) since init().
+        return self._status()[3:]
+
+    def _fetch(self):
+        data = link.request(_UART_READ, struct.pack("<H", _MAX_DATA))
+        self._buffer += data
+        return len(data)
+
+    def any(self):
+        return len(self._buffer) + self._status()[0]
+
+    def _wait_for(self, count):
+        # Fetch until count bytes are here, or the timeouts run out.
+        limit = self._settings["timeout"]
+        start = time.ticks_ms()
+        while len(self._buffer) < count:
+            if self._fetch():
+                limit = self._char_ms
+                start = time.ticks_ms()
+            elif time.ticks_diff(time.ticks_ms(), start) >= limit:
+                break
+            else:
+                time.sleep_ms(1)
+
+    def read(self, nbytes=None):
+        if nbytes is None:
+            self._wait_for(1)
+            while self._fetch():
+                pass
+            nbytes = len(self._buffer)
+        else:
+            self._wait_for(nbytes)
+        data, self._buffer = self._buffer[:nbytes], self._buffer[nbytes:]
+        return data or None
+
+    def readinto(self, buf, nbytes=None):
+        data = self.read(len(buf) if nbytes is None else nbytes)
+        if data is None:
+            return None
+        buf[: len(data)] = data
+        return len(data)
+
+    def readline(self):
+        limit = self._settings["timeout"]
+        start = time.ticks_ms()
+        while b"\n" not in self._buffer:
+            if self._fetch():
+                limit = self._char_ms
+                start = time.ticks_ms()
+            elif time.ticks_diff(time.ticks_ms(), start) >= limit:
+                break
+            else:
+                time.sleep_ms(1)
+        end = self._buffer.find(b"\n") + 1 or len(self._buffer)
+        data, self._buffer = self._buffer[:end], self._buffer[end:]
+        return data or None
+
+    def write(self, buf):
+        data = bytes(buf)
+        sent = 0
+        while sent < len(data):
+            taken = struct.unpack("<H", link.request(_UART_WRITE, data[sent : sent + _MAX_DATA]))[0]
+            sent += taken
+            if not taken:
+                time.sleep_ms(1)  # the M4's 2 KB are full: wait for the line
+        return sent
+
+    def txdone(self):
+        return bool(self._status()[2])
+
+    def flush(self):
+        while not self.txdone():
+            time.sleep_ms(1)
+
+    def sendbreak(self):
+        link.request(_UART_BREAK)
 

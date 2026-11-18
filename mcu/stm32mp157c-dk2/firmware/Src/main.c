@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Cortex-M4 firmware of lvgl-mpy-linux for the STM32MP157C-DK2: it serves machine.I2C,
-// machine.ADC, machine.PWM and machine.SPI to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
+// machine.ADC, machine.PWM, machine.SPI and machine.UART to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
 // virtual serial port (/dev/ttyRPMSG0 on Linux).
 //
 // Linux loads it through remoteproc and, from the "m4-examples" device tree, gives it its
@@ -613,6 +613,219 @@ static void handle_spi(uint8_t sequence, uint8_t operation, const uint8_t *args,
     }
 }
 
+// ---- UART7 on the registers, under interrupt
+
+#define UART_RX_SIZE 4096
+#define UART_TX_SIZE 2048
+static volatile uint16_t uart_rx[UART_RX_SIZE];  // 16 bits: 9-bit frames
+static volatile uint32_t uart_rx_in, uart_rx_out;
+static volatile uint16_t uart_tx[UART_TX_SIZE];
+static volatile uint32_t uart_tx_in, uart_tx_out;
+static volatile uint16_t uart_overruns, uart_framing, uart_parity;
+static uint16_t uart_mask;  // the data bits of a frame, without the parity bit
+static uint8_t uart_on, uart_wide;  // wide: 9 data bits, two bytes a character on the wire
+
+void UART7_IRQHandler(void) {
+    uint32_t status = UART7->ISR;
+    if (status & (USART_ISR_ORE | USART_ISR_FE | USART_ISR_PE | USART_ISR_NE)) {
+        if (status & USART_ISR_ORE) {
+            uart_overruns++;
+        }
+        if (status & USART_ISR_FE) {
+            uart_framing++;
+        }
+        if (status & USART_ISR_PE) {
+            uart_parity++;
+        }
+        UART7->ICR = USART_ICR_ORECF | USART_ICR_FECF | USART_ICR_PECF | USART_ICR_NECF;
+    }
+    while (UART7->ISR & USART_ISR_RXNE_RXFNE) {
+        uint16_t value = UART7->RDR & uart_mask;
+        uint32_t next = (uart_rx_in + 1) % UART_RX_SIZE;
+        if (next == uart_rx_out) {
+            uart_overruns++;  // the buffer is full: the newest byte is lost, as on an MCU
+        } else {
+            uart_rx[uart_rx_in] = value;
+            uart_rx_in = next;
+        }
+    }
+    if (UART7->CR1 & USART_CR1_TXEIE_TXFNFIE) {
+        while ((UART7->ISR & USART_ISR_TXE_TXFNF) && uart_tx_out != uart_tx_in) {
+            UART7->TDR = uart_tx[uart_tx_out];
+            uart_tx_out = (uart_tx_out + 1) % UART_TX_SIZE;
+        }
+        if (uart_tx_out == uart_tx_in) {
+            UART7->CR1 &= ~USART_CR1_TXEIE_TXFNFIE;
+        }
+    }
+}
+
+static void uart_pins(int on) {
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    GPIO_InitTypeDef pins = {
+        .Pin = GPIO_PIN_7 | GPIO_PIN_8,
+        .Mode = on ? GPIO_MODE_AF_PP : GPIO_MODE_ANALOG,
+        .Pull = on ? GPIO_PULLUP : GPIO_NOPULL,
+        .Speed = GPIO_SPEED_FREQ_LOW,
+        .Alternate = on ? GPIO_AF7_UART7 : 0,
+    };
+    PERIPH_LOCK(GPIOE);
+    HAL_GPIO_Init(GPIOE, &pins);
+    PERIPH_UNLOCK(GPIOE);
+}
+
+static void uart_off(void) {
+    if (uart_on) {
+        HAL_NVIC_DisableIRQ(UART7_IRQn);
+        UART7->CR1 = 0;
+        uart_pins(0);
+        __HAL_RCC_UART7_CLK_DISABLE();
+        uart_on = 0;
+    }
+}
+
+static void handle_uart_init(uint8_t sequence, const uint8_t *args, size_t size) {
+    if (size != 8) {
+        send(sequence, E_INVAL, NULL, 0);
+        return;
+    }
+    uint32_t baud = get32(args);
+    uint8_t bits = args[4], parity = args[5], stop = args[6], flags = args[7];
+    // The frame length M counts the parity bit: 7, 8 or 9 bits in all.
+    uint32_t frame = bits + (parity ? 1 : 0);
+    if (baud == 0 || bits < 7 || frame > 9 || parity > 2 || (stop != 1 && stop != 2) || flags > 1) {
+        send(sequence, E_INVAL, NULL, 0);
+        return;
+    }
+    uint32_t clock = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_UART78);
+    if (!clock) {
+        clock = 64000000;
+    }
+    // Oversampling by 16: BRR = clock / baud, 16 to 65535; a prescaler for slow rates.
+    static const uint16_t prescalers[12] = {1, 2, 4, 6, 8, 10, 12, 16, 32, 64, 128, 256};
+    uint32_t index = 0, divider;
+    while ((divider = (clock / prescalers[index] + baud / 2) / baud) > 65535 && index < 11) {
+        index++;
+    }
+    if (divider < 16 || divider > 65535) {
+        send(sequence, E_INVAL, NULL, 0);
+        return;
+    }
+    uart_off();
+    __HAL_RCC_UART7_CLK_ENABLE();
+    UART7->CR1 = 0;
+    UART7->PRESC = index;
+    UART7->BRR = divider;
+    UART7->CR2 = stop == 2 ? USART_CR2_STOP_1 : 0;
+    UART7->CR3 = USART_CR3_EIE | ((flags & 1) ? USART_CR3_HDSEL : 0);
+    uart_mask = (1U << bits) - 1;
+    uart_wide = bits == 9;
+    uart_rx_in = uart_rx_out = uart_tx_in = uart_tx_out = 0;
+    uart_overruns = uart_framing = uart_parity = 0;
+    uint32_t cr1 = USART_CR1_FIFOEN | USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE_RXFNEIE | USART_CR1_PEIE;
+    if (frame == 9) {
+        cr1 |= USART_CR1_M0;
+    } else if (frame == 7) {
+        cr1 |= USART_CR1_M1;
+    }
+    if (parity) {
+        cr1 |= USART_CR1_PCE | (parity == 1 ? USART_CR1_PS : 0);
+    }
+    // Pins first, then the UART; what the change of the lines looked like to the receiver is
+    // thrown away once the line has been idle for a character.
+    uart_pins(1);
+    UART7->CR1 = cr1;
+    UART7->CR1 = cr1 | USART_CR1_UE;
+    uint32_t settle = HAL_GetTick();
+    while (HAL_GetTick() - settle < 2 + 12000 / baud) {
+    }
+    UART7->RQR = USART_RQR_RXFRQ;
+    UART7->ICR = USART_ICR_ORECF | USART_ICR_FECF | USART_ICR_PECF | USART_ICR_NECF;
+    uart_rx_in = uart_rx_out = 0;
+    uart_overruns = uart_framing = uart_parity = 0;
+    HAL_NVIC_ClearPendingIRQ(UART7_IRQn);
+    HAL_NVIC_SetPriority(UART7_IRQn, DEFAULT_IRQ_PRIO, 0);
+    HAL_NVIC_EnableIRQ(UART7_IRQn);
+    uart_on = 1;
+    uint32_t actual = clock / prescalers[index] / divider;
+    uint8_t result[4] = {actual, actual >> 8, actual >> 16, actual >> 24};
+    send(sequence, 0, result, 4);
+}
+
+static void handle_uart(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
+    static uint8_t data[MPY_M4_MAX_DATA];
+    if (operation == OP_UART_INIT) {
+        handle_uart_init(sequence, args, size);
+        return;
+    }
+    if (operation == OP_UART_DEINIT) {
+        uart_off();
+        send(sequence, 0, NULL, 0);
+        return;
+    }
+    if (!uart_on) {
+        send(sequence, E_INVAL, NULL, 0);
+        return;
+    }
+    switch (operation) {
+        case OP_UART_WRITE: {
+            // A 9-bit character comes as two bytes, low byte first.
+            size_t step = uart_wide ? 2 : 1, taken = 0;
+            while (taken + step <= size) {
+                uint32_t next = (uart_tx_in + 1) % UART_TX_SIZE;
+                if (next == uart_tx_out) {
+                    break;
+                }
+                uart_tx[uart_tx_in] = uart_wide ? get16(args + taken) & 0x1FF : args[taken];
+                uart_tx_in = next;
+                taken += step;
+            }
+            UART7->CR1 |= USART_CR1_TXEIE_TXFNFIE;
+            uint8_t result[2] = {taken, taken >> 8};
+            send(sequence, 0, result, 2);
+            return;
+        }
+        case OP_UART_READ: {
+            if (size != 2) {
+                break;
+            }
+            size_t wanted = get16(args), length = 0;
+            if (wanted > MPY_M4_MAX_DATA) {
+                wanted = MPY_M4_MAX_DATA;
+            }
+            while (length < wanted && uart_rx_out != uart_rx_in) {
+                uint16_t value = uart_rx[uart_rx_out];
+                if (uart_wide) {
+                    if (length + 2 > wanted) {
+                        break;
+                    }
+                    data[length++] = value;
+                    data[length++] = value >> 8;
+                } else {
+                    data[length++] = value;
+                }
+                uart_rx_out = (uart_rx_out + 1) % UART_RX_SIZE;
+            }
+            send(sequence, 0, data, length);
+            return;
+        }
+        case OP_UART_STATUS: {
+            uint32_t waiting = (uart_rx_in + UART_RX_SIZE - uart_rx_out) % UART_RX_SIZE;
+            uint32_t pending = (uart_tx_in + UART_TX_SIZE - uart_tx_out) % UART_TX_SIZE;
+            uint8_t done = pending == 0 && (UART7->ISR & USART_ISR_TC) ? 1 : 0;
+            uint8_t result[11] = {waiting, waiting >> 8, pending, pending >> 8, done, uart_overruns,
+                uart_overruns >> 8, uart_framing, uart_framing >> 8, uart_parity, uart_parity >> 8};
+            send(sequence, 0, result, sizeof(result));
+            return;
+        }
+        case OP_UART_BREAK:
+            UART7->RQR = USART_RQR_SBKRQ;
+            send(sequence, 0, NULL, 0);
+            return;
+    }
+    send(sequence, E_INVAL, NULL, 0);
+}
+
 // ---- a pin sampled for a while, timed by the cycle counter
 
 static void handle_measure(uint8_t sequence, const uint8_t *args, size_t size) {
@@ -689,6 +902,14 @@ static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, siz
         case OP_SPI_TRANSFER:
         case OP_SPI_DEINIT:
             handle_spi(sequence, operation, args, size);
+            return;
+        case OP_UART_INIT:
+        case OP_UART_WRITE:
+        case OP_UART_READ:
+        case OP_UART_STATUS:
+        case OP_UART_BREAK:
+        case OP_UART_DEINIT:
+            handle_uart(sequence, operation, args, size);
             return;
         case OP_PIN_MEASURE:
             handle_measure(sequence, args, size);

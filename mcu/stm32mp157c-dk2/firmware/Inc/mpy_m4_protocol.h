@@ -45,6 +45,18 @@ enum {
                                //      at the sampling edges of SCK, and the SCK edges u32
     OP_SPI_DEINIT = 0x52,      // the pins back to analog, SPI4 off
 
+    // UART7: RX PE7 (Arduino D0), TX PE8 (D1). Received bytes wait in a 4 KB buffer of the M4,
+    // bytes to send in a 2 KB one; both move under interrupt.
+    OP_UART_INIT = 0x60,       // baud rate u32, data bits u8 (7, 8, 9), parity u8 (0 none, 1 odd,
+                               //   2 even), stop bits u8 (1, 2), flags u8 (bit 0: single wire on
+                               //   TX, which also receives what it sends) -> baud rate u32
+    OP_UART_WRITE = 0x61,      // data -> bytes taken u16 (fewer when the buffer is full)
+    OP_UART_READ = 0x62,       // count u16 -> up to count bytes
+    OP_UART_STATUS = 0x63,     // -> bytes waiting u16, bytes to send u16, all sent u8,
+                               //    overruns u16, framing errors u16, parity errors u16
+    OP_UART_BREAK = 0x64,
+    OP_UART_DEINIT = 0x65,     // the pins back to analog, UART7 off
+
     // What a pin does, sampled by the M4 for a while: for tests without instruments.
     OP_PIN_MEASURE = 0x40,     // port u8, pin u8, milliseconds u16
                                //   -> samples u32, cycles high u32, rising edges u32,

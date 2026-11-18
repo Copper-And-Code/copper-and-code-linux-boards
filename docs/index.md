@@ -134,7 +134,7 @@ user C modules and frozen Python.
 | Board | Status |
 |---|---|
 | STM32MP135F-DK (480×272, OpenSTLinux) | Tested: build, installation, REPL, display, touch, GPIO, Wi-Fi, examples |
-| STM32MP157C-DK2 (800×480, with a Cortex-M4) | Working: the same build, examples, Wi-Fi, sound; `machine.I2C`, `ADC`, `PWM` and `SPI` served by the Cortex-M4 over RPMsg ([notes](stm32mp157c-dk2.md)) |
+| STM32MP157C-DK2 (800×480, with a Cortex-M4) | Working: the same build, examples, Wi-Fi, sound; `machine.I2C`, `ADC`, `PWM`, `SPI` and `UART` served by the Cortex-M4 over RPMsg ([notes](stm32mp157c-dk2.md)) |
 | Other Linux boards | The Linux parts are generic; a port needs a build for its CPU |
 
 What a Linux board needs: a panel the kernel drives through DRM, a touchscreen through evdev, and a
@@ -143,8 +143,8 @@ USB device port for the serial REPL (or only the network for the TCP REPL).
 ## What's next: the `machine` class, above all with an MCU on board
 
 `machine` offers `Pin` on the kernel's GPIO lines and, on the STM32MP157C-DK2, `I2C`, `ADC`,
-`PWM` and `SPI` served by its Cortex-M4. The plan is to port the rest of the MicroPython `machine`
-API (`Timer`, `UART`, `WDT`) with the same names and behaviour as on the MCU ports, so that
+`PWM`, `SPI` and `UART` served by its Cortex-M4. The plan is to port the rest of the MicroPython
+`machine` API (`Timer`, `WDT`, `Pin.irq`) with the same names and behaviour as on the MCU ports, so that
 hardware code moves between boards unchanged.
 
 A board that pairs Linux with a microcontroller gets the best of both: Python and the GUI on
@@ -160,7 +160,7 @@ Honestly, today:
 
 - Two boards tested, both STM32MP1. The parts for other Linux boards are written but not tried on one yet.
 - Start-up takes about 33 s on the stock OpenSTLinux image.
-- `machine` has `Pin`, and `I2C`, `ADC`, `PWM` and `SPI` on the STM32MP157C-DK2, for now: see what's next above.
+- `machine` has `Pin`, and `I2C`, `ADC`, `PWM`, `SPI` and `UART` on the STM32MP157C-DK2, for now: see what's next above.
 - No vsync: fast full-screen animations can tear.
 - The TCP REPL has no password: it listens only on the USB network.
 

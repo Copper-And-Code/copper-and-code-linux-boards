@@ -146,3 +146,23 @@ machine.SPI on SPI4 (2026-11-18):
   4 MHz and above it does not (22, 6, 2 edges seen). MISO: ffffffff with the pull-up, 00000000
   with the pull-down. 250 kHz..32 MHz (asked 100 MHz -> 32 MHz). 1024 bytes at 32 MHz in 1399 us
   (732 kB/s); 2-byte write 363 us. test_m4.sh, test_repl.sh, test_tcp_hub.py pass.
+
+Survey of the other M4 resources (2026-11-18):
+  UART7 PE7/PE8 (D0/D1) reserved for the M4, uart7_k 64 MHz. DAC: outputs PA4/PA5 are USB_PWR_CC1/2
+  of the power connector CN6 (UM2534 7.2.1): not used. TIM2 (no pins), DMA2, HASH, CRYP, CRC, RNG:
+  no use yet. button resource: EXTI 14 = PA14, USER1 (B3), on the same pin as the green LED LD4.
+  Linux: every timer@ node disabled; D2 PE1, D3 PD14, D4 PE10, D5 PD15, D7 PD1, D8 PG3, D9 PH6,
+  D10 PE11 UNCLAIMED. Linux uses I2C1 (40012000), USART2, UART4 (console), SPI2/I2S2 (audio).
+
+machine.UART on UART7 (2026-11-18):
+  Registers, FIFO, receive and send under interrupt (UART7_IRQHandler), 4 KB / 2 KB buffers.
+  Test without wires: single-wire mode (HDSEL), TX receives what it sends.
+  First run: a stray 0xFE before the data at 1 Mbaud after a re-init (the pins changed while the
+  UART was on). Fixed: pins first, then the UART, then the receive FIFO flushed after an idle
+  character. Then 9600..4 Mbaud, three runs each, intact.
+  Baud on the pin (0x55 at 8N1 = square wave at baud/2, M4 sampling): 9599 -> 9587 (-0.13%),
+  115107 -> 114934 (-0.15%), 1000000 -> 998649 (-0.14%): the same offset at every rate.
+  machine.UART: readline, read(n), read(), readinto, timeout 100 ms -> 100 ms, 3072 bytes at
+  115200 in 272 ms without errors, break -> 0x00 and a framing error. read(3) at 9600 7E2 gave 2
+  bytes with timeout_char 0: timeout_char now at least a character's time, as on MicroPython.
+  test_m4.sh, test_repl.sh, test_tcp_hub.py pass.
