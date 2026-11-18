@@ -62,6 +62,8 @@ _EVENT_ACK = 0x72
 _EVENT_TIMER = 1
 
 _MAX_DATA = 400
+_VTIME = 5  # indices in termios' cc on Linux
+_VMIN = 6
 _EIO = 5
 _EOPNOTSUPP = 95
 _ETIMEDOUT = 110
@@ -105,6 +107,7 @@ class _Link:
     def __init__(self):
         self._file = None
         self._sequence = 0
+        self._received = b""  # bytes read past the last frame
         self._io = _thread.allocate_lock()
         self._events = []
         self.handlers = {}  # event kind -> function(data)
@@ -124,12 +127,19 @@ class _Link:
             raise OSError(19, "the Cortex-M4 firmware does not answer (no /dev/ttyRPMSG*)")
         self._file = open(port, "r+b", buffering=0)
         termios.setraw(self._file.fileno())
+        # VMIN 0: a read returns what has arrived instead of waiting for all it asked for
+        # (MicroPython's read(n) waits for n bytes until the driver returns 0). poll() waits.
+        attributes = termios.tcgetattr(self._file.fileno())
+        attributes[6][_VMIN] = 0
+        attributes[6][_VTIME] = 0
+        termios.tcsetattr(self._file.fileno(), termios.TCSANOW, attributes)
         self._poll = select.poll()
         self._poll.register(self._file.fileno(), select.POLLIN)
         self._watch = select.poll()  # the reader thread's own
         self._watch.register(self._file.fileno(), select.POLLIN)
         while self._poll.poll(0):  # leftovers of an earlier session
             self._file.read(256)
+        self._received = b""
         info = self._exchange(_INFO, b"", 1000)
         if info[0] != PROTOCOL:
             self.close()
@@ -142,31 +152,38 @@ class _Link:
         if self._file:
             self._file.close()
             self._file = None
-
-    def _read(self, count, timeout_ms):
-        data = b""
-        while len(data) < count:
-            if not self._poll.poll(timeout_ms):
-                raise OSError(_ETIMEDOUT, "the Cortex-M4 did not answer")
-            data += self._file.read(count - len(data))
-        return data
+        self._received = b""
 
     def _frame(self, timeout_ms):
-        length = struct.unpack("<H", self._read(2, timeout_ms))[0]
-        if not 2 <= length <= 600:
-            raise OSError(_EIO, "out of step with the Cortex-M4")
-        return self._read(length, timeout_ms)
+        # The next frame. In raw mode with VMIN 0 a read returns at once with whatever has
+        # arrived, so a whole answer usually takes one poll and one read. Written flat: on this
+        # CPU each Python call costs microseconds, next to a round trip of about 250.
+        received = self._received
+        poll = self._poll.poll
+        read = self._file.read
+        while True:
+            if len(received) >= 2:
+                length = received[0] | received[1] << 8
+                if not 2 <= length <= 600:
+                    raise OSError(_EIO, "out of step with the Cortex-M4")
+                if len(received) >= 2 + length:
+                    self._received = received[2 + length :]
+                    return received[2 : 2 + length]
+            if not poll(timeout_ms):
+                self._received = received
+                raise OSError(_ETIMEDOUT, "the Cortex-M4 did not answer")
+            received += read(1024)
 
     def _exchange(self, operation, arguments, timeout_ms):
-        self._sequence = self._sequence % 255 + 1
+        sequence = self._sequence = self._sequence % 255 + 1
         try:
-            self._file.write(struct.pack("<HBB", 2 + len(arguments), self._sequence, operation) + arguments)
-            while True:
-                answer = self._frame(timeout_ms)
+            self._file.write(struct.pack("<HBB", 2 + len(arguments), sequence, operation) + arguments)
+            answer = self._frame(timeout_ms)
+            while answer[0] != sequence:
                 if answer[0] == 0:
                     self._events.append(answer[1:])
-                elif answer[0] == self._sequence:
-                    break  # anything else answers a request given up on
+                # else: the answer to a request given up on
+                answer = self._frame(timeout_ms)
         except OSError:
             self.close()  # out of step: open again at the next request
             raise
@@ -220,7 +237,7 @@ class _Link:
                 continue
             with self._io:
                 try:
-                    while self._file and self._poll.poll(0):
+                    while self._file and (self._received or self._poll.poll(0)):
                         frame = self._frame(200)
                         if frame[0] == 0:
                             self._events.append(frame[1:])

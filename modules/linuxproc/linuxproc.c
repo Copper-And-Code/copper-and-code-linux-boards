@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <poll.h>
+#include <sched.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -19,6 +20,12 @@
 #include "py/mperrno.h"
 #include "py/mphal.h"
 #include "py/runtime.h"
+
+// MicroPython may run at real-time priority (mpy-repl.service): the programs it starts do not.
+static void linuxproc_normal_priority(void) {
+    struct sched_param normal = {.sched_priority = 0};
+    sched_setscheduler(0, SCHED_OTHER, &normal);
+}
 
 static void linuxproc_track(pid_t pid, bool add);
 
@@ -74,6 +81,7 @@ static mp_obj_t linuxproc_run(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         mp_raise_OSError(error);
     }
     if (child == 0) {
+        linuxproc_normal_priority();
         close(master);
         if (setsid() < 0) {
             const char *message = "linuxproc: setsid failed\n";
@@ -322,6 +330,7 @@ static mp_obj_t linuxproc_process_make_new(const mp_obj_type_t *type, size_t n_a
         mp_raise_OSError(error);
     }
     if (child == 0) {
+        linuxproc_normal_priority();
         sigset_t none;
         sigemptyset(&none);
         sigprocmask(SIG_SETMASK, &none, NULL);

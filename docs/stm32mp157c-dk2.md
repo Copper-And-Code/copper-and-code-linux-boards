@@ -76,6 +76,29 @@ How it fits together:
   MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from `umachine`
   and adds `I2C`, `ADC`, `PWM`, `SPI`, `UART` and `Timer` on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.
 
+### Latency
+
+What a request to the M4 costs, there and back (2000 requests each, `mpy_m4` and the service as
+installed):
+
+| | idle: median / 99% / max | two busy Linux processes: median / 99% / max |
+|---|---|---|
+| the RPMsg serial port alone | 193 / 291 us / 2.8 ms | 194 / 382 us / 10.4 ms |
+| `ADC.read_u16()` | 312 / 411 us / 2.0 ms | 312 to 346 / 589 us / 13 ms |
+| a Linux GPIO line, `Pin.value()`, for comparison | 8 us | 8 us |
+
+About 3000 requests a second: plenty to command and read, 40 times a GPIO line, so the fast loops
+stay on the M4 (`read_timed`, `mpy_m4.measure`, a whole I2C scan in one request). The M4's own work
+is small (the slowest ADC conversion, 810.5 cycles, about 70 us); the rest is Linux: the tty driver
+hands each answer to a kernel worker thread before Python wakes up.
+
+Two things brought these numbers down: `mpy_m4` reads a whole answer in one `poll()` and one
+`read()` (the port in raw mode with VMIN 0; MicroPython's `read(n)` otherwise waits for all n
+bytes), about 10%; and `mpy-repl.service` runs MicroPython at real-time priority (`SCHED_FIFO` 10;
+the programs it starts through `linuxproc` at normal priority): under load the slowest 1% went from
+8 ms to under 0.6 ms. The rare 10 ms left under load is the tty's worker thread, at normal priority:
+going around the tty (`rpmsg_char`) is the next step to measure.
+
 ### I2C
 
 Bus 5 only (`I2C(5)`, the default): SDA PA12, SCL PA11, on the Arduino connector (D14, D15) and on
