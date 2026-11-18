@@ -470,6 +470,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#data-logger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Logger
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -793,6 +804,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#data-logger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Logger
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -894,6 +916,12 @@ see A0 to A5 live, switch the LEDs, set the PWM, send a message to the board's s
 what each browser did. A few lines of MicroPython, polled from the GUI's timer: about 16 ms a
 request. (Above: the Studio simulator.)
 <a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/web-panel">Source</a></p>
+<h3 id="data-logger">Data Logger<a class="headerlink" href="#data-logger" title="Permanent link">&para;</a></h3>
+<p><img alt="Data Logger" src="../images/data-logger.png" /></p>
+<p>The CPU's temperature (Linux), A0 and the chip's reference (the Cortex-M4), at the pace of an M4
+timer, into a CSV file dated by the network's clock, on a chart, and for a browser to download.
+Each part where it is best: the M4 keeps the pace, Linux keeps the files and the time.
+<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/data-logger">Source</a></p>
 
 
 
