@@ -453,6 +453,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#latency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Latency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#i2c" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -695,6 +706,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#latency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Latency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#i2c" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -908,6 +930,45 @@ on the ST wiki.</p>
   MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from <code>umachine</code>
   and adds <code>I2C</code>, <code>ADC</code>, <code>PWM</code>, <code>SPI</code>, <code>UART</code> and <code>Timer</code> on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.</li>
 </ul>
+<h3 id="latency">Latency<a class="headerlink" href="#latency" title="Permanent link">&para;</a></h3>
+<p>What a request to the M4 costs, there and back (2000 requests each, <code>mpy_m4</code> and the service as
+installed):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>idle: median / 99% / max</th>
+<th>two busy Linux processes: median / 99% / max</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the RPMsg serial port alone</td>
+<td>193 / 291 us / 2.8 ms</td>
+<td>194 / 382 us / 10.4 ms</td>
+</tr>
+<tr>
+<td><code>ADC.read_u16()</code></td>
+<td>312 / 411 us / 2.0 ms</td>
+<td>312 to 346 / 589 us / 13 ms</td>
+</tr>
+<tr>
+<td>a Linux GPIO line, <code>Pin.value()</code>, for comparison</td>
+<td>8 us</td>
+<td>8 us</td>
+</tr>
+</tbody>
+</table>
+<p>About 3000 requests a second: plenty to command and read, 40 times a GPIO line, so the fast loops
+stay on the M4 (<code>read_timed</code>, <code>mpy_m4.measure</code>, a whole I2C scan in one request). The M4's own work
+is small (the slowest ADC conversion, 810.5 cycles, about 70 us); the rest is Linux: the tty driver
+hands each answer to a kernel worker thread before Python wakes up.</p>
+<p>Two things brought these numbers down: <code>mpy_m4</code> reads a whole answer in one <code>poll()</code> and one
+<code>read()</code> (the port in raw mode with VMIN 0; MicroPython's <code>read(n)</code> otherwise waits for all n
+bytes), about 10%; and <code>mpy-repl.service</code> runs MicroPython at real-time priority (<code>SCHED_FIFO</code> 10;
+the programs it starts through <code>linuxproc</code> at normal priority): under load the slowest 1% went from
+8 ms to under 0.6 ms. The rare 10 ms left under load is the tty's worker thread, at normal priority:
+going around the tty (<code>rpmsg_char</code>) is the next step to measure.</p>
 <h3 id="i2c">I2C<a class="headerlink" href="#i2c" title="Permanent link">&para;</a></h3>
 <p>Bus 5 only (<code>I2C(5)</code>, the default): SDA PA12, SCL PA11, on the Arduino connector (D14, D15) and on
 the 40-pin header (pins 3 and 5, GPIO2/GPIO3). 10 kHz to 1 MHz; the default is 400 kHz. The weak

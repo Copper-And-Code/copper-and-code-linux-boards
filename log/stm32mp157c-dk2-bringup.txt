@@ -199,3 +199,21 @@ ADC.read_timed: sampling at a fixed rate on the M4 (2026-11-18):
   test, after the other tests: collection is Python-bound); a 10 ms timer kept running (106 calls
   in a 1 s capture); bytearray gives the top 8 bits (123 for 1.206 V). test_m4.sh twice,
   test_repl.sh, test_tcp_hub.py pass.
+
+Latency to the M4 (2026-11-18), 2000 requests each, median / p99 / max:
+  Before: raw tty INFO 254/386 us/2.1 ms idle, 201 us/7.0 ms/11.5 ms with two busy processes;
+  mpy_m4 INFO 441/674 us; ADC read 360/498 us idle, 340 us/8.6 ms/13 ms loaded; Linux GPIO 8 us.
+  poll() waiting for the answer: 135 us of a raw round trip (write 23 us, read 33 us).
+  CPU fixed at 650 MHz (governor ondemand, one frequency): the faster median under load is likely
+  the idle states' wake-up, not checked.
+  1. mpy_m4: one poll and one read a frame (VMIN 0: MicroPython's read(n) waits for n bytes until
+     the driver returns 0; the first try hung for that), flat _frame/_exchange: ADC 360 -> 333 us.
+     lock.acquire() always releases the GIL (py/modthread.c): kept, about 20 us, for requests
+     from several threads.
+  2. SCHED_FIFO 10 for mpy-repl.service (hub and MicroPython, all threads); linuxproc's children
+     back to SCHED_OTHER (gst-play checked). sched_rt_runtime_us 950000 keeps 5% for others.
+     Note: after a soft reset the MicroPython process is called "exe" (execve of /proc/self/exe).
+  After both: raw 193/291 us idle, 194/382 us/10.4 ms loaded; ADC 312/411 us idle,
+  312..346/589 us/13 ms loaded. The remaining max: the tty's kworker (flush_to_ldisc), at normal
+  priority. rpmsg_char (/dev/rpmsg_ctrl0, module loaded; its alias is rpmsg_chrdev only) would go
+  around it. test_m4.sh, test_repl.sh, test_tcp_hub.py pass; the radio plays.
