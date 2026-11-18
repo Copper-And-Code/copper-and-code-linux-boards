@@ -882,12 +882,15 @@ on the ST wiki.</p>
 <span class="n">Timer</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">"tick"</span><span class="p">))</span>
 
 <span class="n">Pin</span><span class="p">(</span><span class="s2">"PA14"</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">PULL_UP</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>   <span class="c1"># Pin stays on Linux GPIO lines, as on the STM32MP135F-DK</span>
+                                           <span class="c1"># (PA14 is the USER1 button: as an input only, see below)</span>
 </code></pre></div>
 <p>How it fits together:</p>
 <ul>
 <li><strong>Device tree.</strong> The <code>m4-examples</code> device tree gives the Cortex-M4 the Arduino connector's ADC,
   DAC, I2C5, SPI4, UART7, TIM1 and TIM2, and the orange LED; Linux keeps the display, touch, Wi-Fi,
-  audio and USB. Linux only reserves those pins: the firmware sets them itself.</li>
+  audio and USB. Linux only reserves those pins: the firmware sets them itself. It also gives the
+  M4 the USER1 button's interrupt (PA14, shared with the green LED): Linux may read PA14 but not
+  drive it (<code>EIO</code>).</li>
 <li><strong>Firmware</strong> (<code>mcu/stm32mp157c-dk2/</code>, built by <code>scripts/build_m4.sh</code> with <code>arm-none-eabi-gcc</code>,
   without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our <code>main.c</code> and the
   protocol. <code>install.sh</code> puts it in <code>/lib/firmware/mpy_m4.elf</code>.</li>
