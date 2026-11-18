@@ -22,3 +22,4 @@ gives changing values so the screen can be tried without a board.
 | [web-panel](web-panel) | none | A page for the phone: inputs live, LEDs, PWM, a message to the screen; QR code and PIN on the board |
 | [data-logger](data-logger) | none | Samples at the pace of an M4 timer, a dated CSV file (NTP), a chart, the file for a browser |
 | [tone-player](tone-player) | a passive buzzer on D6 (or none: the M4 measures) | A keyboard on the screen, tunes the M4 plays on time by itself, each key lit as it sounds |
+| [system-monitor](system-monitor) | none | Linux's cores, memory, temperature and network, and the M4's state and request time, live |

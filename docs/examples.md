@@ -130,3 +130,11 @@ buzzer): Python hands over the whole score and lights each key as the M4 plays i
 buzzer the M4 measures each note on the pin.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/tone-player)
 
+### System Monitor
+
+![System Monitor](images/system-monitor.png)
+
+The board's two halves live: Linux's cores, memory, temperature and network from its own files,
+and the Cortex-M4's state, firmware, channel and the time of a request there and back.
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/system-monitor)
+
