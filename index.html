@@ -900,7 +900,7 @@ user C modules and frozen Python.</p>
 </tr>
 <tr>
 <td>STM32MP157C-DK2 (800×480, with a Cortex-M4)</td>
-<td>Working: the same build, examples, Wi-Fi, sound; <code>machine.I2C</code> and <code>machine.ADC</code> served by the Cortex-M4 over RPMsg (<a href="stm32mp157c-dk2/">notes</a>)</td>
+<td>Working: the same build, examples, Wi-Fi, sound; <code>machine.I2C</code>, <code>ADC</code> and <code>PWM</code> served by the Cortex-M4 over RPMsg (<a href="stm32mp157c-dk2/">notes</a>)</td>
 </tr>
 <tr>
 <td>Other Linux boards</td>
@@ -911,9 +911,9 @@ user C modules and frozen Python.</p>
 <p>What a Linux board needs: a panel the kernel drives through DRM, a touchscreen through evdev, and a
 USB device port for the serial REPL (or only the network for the TCP REPL).</p>
 <h2 id="whats-next-the-machine-class-above-all-with-an-mcu-on-board">What's next: the <code>machine</code> class, above all with an MCU on board<a class="headerlink" href="#whats-next-the-machine-class-above-all-with-an-mcu-on-board" title="Permanent link">&para;</a></h2>
-<p><code>machine</code> offers <code>Pin</code> on the kernel's GPIO lines and, on the STM32MP157C-DK2, <code>I2C</code> and <code>ADC</code>
-served by its Cortex-M4. The plan is to port the rest of the MicroPython <code>machine</code> API (<code>SPI</code>,
-<code>PWM</code>, <code>Timer</code>, <code>UART</code>, <code>WDT</code>) with the same names and behaviour as on the MCU ports, so that
+<p><code>machine</code> offers <code>Pin</code> on the kernel's GPIO lines and, on the STM32MP157C-DK2, <code>I2C</code>, <code>ADC</code> and
+<code>PWM</code> served by its Cortex-M4. The plan is to port the rest of the MicroPython <code>machine</code> API
+(<code>SPI</code>, <code>Timer</code>, <code>UART</code>, <code>WDT</code>) with the same names and behaviour as on the MCU ports, so that
 hardware code moves between boards unchanged.</p>
 <p>A board that pairs Linux with a microcontroller gets the best of both: Python and the GUI on
 Linux, the real-time work on the MCU. On the STM32MP157C-DK2 <code>machine</code> talks to our firmware on the
@@ -926,7 +926,7 @@ See <a href="stm32mp157c-dk2/">the STM32MP157C-DK2</a>.</p>
 <ul>
 <li>Two boards tested, both STM32MP1. The parts for other Linux boards are written but not tried on one yet.</li>
 <li>Start-up takes about 33 s on the stock OpenSTLinux image.</li>
-<li><code>machine</code> has <code>Pin</code>, and <code>I2C</code> and <code>ADC</code> on the STM32MP157C-DK2, for now: see what's next above.</li>
+<li><code>machine</code> has <code>Pin</code>, and <code>I2C</code>, <code>ADC</code> and <code>PWM</code> on the STM32MP157C-DK2, for now: see what's next above.</li>
 <li>No vsync: fast full-screen animations can tear.</li>
 <li>The TCP REPL has no password: it listens only on the USB network.</li>
 </ul>

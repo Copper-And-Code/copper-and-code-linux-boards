@@ -474,6 +474,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pwm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PWM
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -661,6 +672,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pwm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PWM
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -707,12 +729,12 @@
 
 <h1 id="stm32mp157c-dk2">STM32MP157C-DK2<a class="headerlink" href="#stm32mp157c-dk2" title="Permanent link">&para;</a></h1>
 <p>Second board of this project, and the first with a microcontroller beside Linux: its Cortex-M4
-serves <code>machine.I2C</code> and <code>machine.ADC</code> to MicroPython on the Cortex-A7.</p>
+serves <code>machine.I2C</code>, <code>machine.ADC</code> and <code>machine.PWM</code> to MicroPython on the Cortex-A7.</p>
 <p><strong>Status:</strong> OpenSTLinux flashed; our build installed with <code>scripts/deploy.sh</code> (the same MicroPython
 binary as the STM32MP135F-DK); shell, app menu and REPL working (serial and TCP); the 480×800 panel
 turned to 800×480 in software (about 50 full frames per second); Wi-Fi, weather and the web radio
-with sound through the board's codec; <code>machine.Pin</code> on Linux GPIO lines, <code>machine.I2C</code> and
-<code>machine.ADC</code> on the Cortex-M4. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>.
+with sound through the board's codec; <code>machine.Pin</code> on Linux GPIO lines, <code>machine.I2C</code>,
+<code>machine.ADC</code> and <code>machine.PWM</code> on the Cortex-M4. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>.
 Product page: <a href="https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html">https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html</a>. Flashing and boot:
 <a href="https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image">Populate the target and boot the image</a>
 on the ST wiki.</p>
@@ -748,7 +770,7 @@ on the ST wiki.</p>
 </tbody>
 </table>
 <h2 id="machine-on-the-cortex-m4"><code>machine</code> on the Cortex-M4<a class="headerlink" href="#machine-on-the-cortex-m4" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">Pin</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">PWM</span><span class="p">,</span> <span class="n">Pin</span>
 
 <span class="n">i2c</span> <span class="o">=</span> <span class="n">I2C</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">400000</span><span class="p">)</span>        <span class="c1"># Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">i2c</span><span class="o">.</span><span class="n">scan</span><span class="p">())</span>
@@ -756,6 +778,8 @@ on the ST wiki.</p>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">ADC</span><span class="p">(</span><span class="s2">"A0"</span><span class="p">)</span><span class="o">.</span><span class="n">read_uv</span><span class="p">())</span>       <span class="c1"># Arduino A0..A5, from 0 to 2.5 V</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">ADC</span><span class="p">(</span><span class="n">ADC</span><span class="o">.</span><span class="n">CORE_VREF</span><span class="p">)</span><span class="o">.</span><span class="n">read_uv</span><span class="p">())</span>
+
+<span class="n">servo</span> <span class="o">=</span> <span class="n">PWM</span><span class="p">(</span><span class="s2">"D6"</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">duty_ns</span><span class="o">=</span><span class="mi">1500000</span><span class="p">)</span>   <span class="c1"># TIM1 channel 1 on PE9, Arduino D6</span>
 
 <span class="n">Pin</span><span class="p">(</span><span class="s2">"PA14"</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">PULL_UP</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>   <span class="c1"># Pin stays on Linux GPIO lines, as on the STM32MP135F-DK</span>
 </code></pre></div>
@@ -767,7 +791,7 @@ on the ST wiki.</p>
 <li><strong>Firmware</strong> (<code>mcu/stm32mp157c-dk2/</code>, built by <code>scripts/build_m4.sh</code> with <code>arm-none-eabi-gcc</code>,
   without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our <code>main.c</code> and the
   protocol. <code>install.sh</code> puts it in <code>/lib/firmware/mpy_m4.elf</code>.</li>
-<li><strong>Start.</strong> The first use of <code>machine.I2C</code> or <code>machine.ADC</code> loads the firmware through remoteproc
+<li><strong>Start.</strong> The first use of <code>machine.I2C</code>, <code>machine.ADC</code> or <code>machine.PWM</code> loads the firmware through remoteproc
   if the M4 is off (about 0.6 s). A new firmware installed by <code>deploy.sh</code> takes over at once.</li>
 <li><strong>Link.</strong> One RPMsg virtual serial port (<code>/dev/ttyRPMSG*</code>; the number changes when the M4
   restarts, so <code>mpy_m4</code> looks it up). Requests and answers carry a length, a sequence number and an
@@ -775,7 +799,7 @@ on the ST wiki.</p>
   about 0.35 ms there and back.</li>
 <li><strong>Python.</strong> <code>mpy_m4</code> (frozen) has the classes; the frozen <code>machine</code> module takes the place of
   MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from <code>umachine</code>
-  and adds <code>I2C</code> and <code>ADC</code> on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.</li>
+  and adds <code>I2C</code>, <code>ADC</code> and <code>PWM</code> on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.</li>
 </ul>
 <h3 id="i2c">I2C<a class="headerlink" href="#i2c" title="Permanent link">&para;</a></h3>
 <p>Bus 5 only (<code>I2C(5)</code>, the default): SDA PA12, SCL PA11, on the Arduino connector (D14, D15) and on
@@ -869,9 +893,21 @@ of Arduino pins has some rows shifted. Pin names (<code>ADC("PF14")</code>) work
 (datasheet 1.18 to 1.24 V; its factory calibration in OTP says 1.209 V), the six inputs convert,
 an empty I2C bus answers <code>ENODEV</code>. Not checked yet: a real I2C device and a known voltage on an
 input.</p>
+<h3 id="pwm">PWM<a class="headerlink" href="#pwm" title="Permanent link">&para;</a></h3>
+<p>TIM1 channel 1 on PE9, Arduino D6 (<code>PWM("D6")</code> or <code>PWM("PE9")</code>), the pin the device tree gives the
+M4 for it. The MicroPython API: <code>freq()</code>, <code>duty_u16()</code>, <code>duty_ns()</code>, <code>init()</code>, <code>deinit()</code>; a new
+frequency keeps the pulse width when it was set in nanoseconds, the share otherwise. A new duty
+takes effect at the next period, without a glitch. From 1 Hz up; the timer counts at 208.9 MHz, so
+the duty has 16 bits of resolution up to 3.2 kHz (about 11 bits at 100 kHz). <code>invert</code> is not
+supported.</p>
+<p><code>mpy_m4.measure(pin, ms)</code> has the M4 sample a pin for a while (about 8 million samples a second)
+and returns its frequency and the share of time it was high: that is how the tests check the PWM
+without instruments. Measured on PE9: 1 kHz 25% gives 1000.00 Hz 25.00%; 50 Hz 1.5 ms gives
+50.00 Hz 7.50%; 100 kHz 30% gives 99,990 Hz (208.9 MHz / 2089) 29.95%; 0% and 100% are steady.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>PWM</code> on TIM1 channel 1 (PE9) and <code>SPI</code> on SPI4, then <code>Timer</code>, <code>UART</code> and the DAC.</li>
+<li><code>SPI</code> on SPI4, then <code>Timer</code>, <code>UART</code> and the DAC; more PWM channels (TIM1 channels 2 and 4 share
+  pins with SPI4).</li>
 <li>An I2C sensor and a known voltage on A0 for the HIL tests.</li>
 <li>A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at
   first use, if the 0.6 s matter.</li>
@@ -899,7 +935,7 @@ input.</p>
 </tr>
 <tr>
 <td><code>tests/hil/test_m4.sh</code></td>
-<td>Tests of <code>machine.I2C</code> and <code>machine.ADC</code> on the board</td>
+<td>Tests of <code>machine.I2C</code>, <code>machine.ADC</code> and <code>machine.PWM</code> on the board</td>
 </tr>
 </tbody>
 </table>

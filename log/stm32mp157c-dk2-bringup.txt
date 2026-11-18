@@ -117,3 +117,19 @@ machine.I2C and machine.ADC on the Cortex-M4 (2026-11-18):
     (2872 a second); LED and machine.Pin beside the M4.
   Cold boot: M4 offline; the first machine.I2C(5) starts mpy_m4.elf in 613 ms.
   Regression: test_repl.sh, test_tcp_hub.py, test_touch_evdev.py pass; the shell is on the screen.
+
+machine.PWM on TIM1 channel 1, PE9 = Arduino D6 (2026-11-18):
+  UM2534 Table 23 says "PE9 ARD_D6: TIM4_CH1"; the schematic net name is ARDUINO_D6_TIM1_CH1 and
+  the m4-examples device tree reserves PE9 for timer@44000000 (TIM1): TIM1_CH1, AF1.
+  tim1_k 208877930 Hz. Registers set directly (PWM mode 1, preload, MOE); duty given with the
+  init so that the first period is right.
+  No instrument at hand: the M4 samples GPIOE IDR (it shows the level of an alternate-function
+  pin) about 8 million times a second, timed by the DWT cycle counter. A first version counted
+  samples and read 20.8% for 25%: the loop is slower when the pin is high. Weighted by cycles:
+    1 kHz 25%    -> 1000.00 Hz 24.998%      50 Hz 7.5%  -> 50.00 Hz 7.499%
+    20 kHz 50%   -> 20000.08 Hz 49.990%     1 Hz 50%    -> 1.00 Hz 50.000%
+    100 kHz 30%  -> 99990 Hz (period 2089 ticks) 29.952%
+    0% and 100%  -> steady, no edges        deinit      -> low
+  machine.PWM: duty_u16 49152 -> 74.998%; duty_ns 100 us at 1 kHz -> 9.999%, kept at 2 kHz ->
+  20.001%; servo 50 Hz 1.5 ms -> 7.501%; 341 us a duty change. test_m4.sh, test_repl.sh,
+  test_tcp_hub.py pass.
