@@ -1003,7 +1003,10 @@ are evenly spaced whatever Linux does; Python sleeps meanwhile (the GUI and the 
 then collects them, 200 at a time. <code>array('H')</code> gets 16-bit values, a <code>bytearray</code> their top 8
 bits; afterwards <code>adc.freq</code> is the exact rate (TIM2's clock over its period) and <code>adc.overruns</code>
 the conversions lost (none so far). The sampling time is the longest that fits the rate (810.5
-ADC cycles up to 10 kHz, 64.5 at 100 kHz).</p>
+ADC cycles up to 10 kHz, 64.5 at 100 kHz).
+For a GUI that must not wait, the same in steps (not in MicroPython's API): <code>adc.capture(count,
+freq)</code> starts and returns the exact rate, <code>adc.capture_done()</code>, <code>adc.capture_read(buf)</code>; the
+oscilloscope example draws from them.</p>
 <p>Measured: VREFINT at 1 kHz, 10 kHz and 100 kHz averages 1.206 V; the times between the first and
 the last conversion give 1000.00 Hz, 9999.90 Hz and 99,989.4 Hz (TIM2's 208.9 MHz over 2089);
 32768 samples at 100 kHz take 0.41 s with their collection (0.33 s of sampling); no overruns.
