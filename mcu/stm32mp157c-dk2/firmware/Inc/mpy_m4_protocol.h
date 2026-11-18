@@ -36,6 +36,15 @@ enum {
     OP_PWM_COMPARE = 0x31,     // ticks u32
     OP_PWM_DEINIT = 0x32,      // the pin back to analog, the timer off
 
+    // SPI4: SCK PE12 (Arduino D13), MISO PE13 (D12), MOSI PE14 (D11); 8-bit frames. Chip select
+    // is the caller's (PE11, D10, is free for a Linux GPIO line).
+    OP_SPI_INIT = 0x50,        // baud rate u32, mode u8 (bit 0 CPOL, bit 1 CPHA, bit 2 LSB first),
+                               //   MISO pull u8 (0 none, 1 up, 2 down) -> baud rate u32
+    OP_SPI_TRANSFER = 0x51,    // flags u8 (bit 0 answer the bytes read, bit 1 watch the pins), data
+                               //   -> bytes read (bit 0), then with bit 1: the bytes seen on MOSI
+                               //      at the sampling edges of SCK, and the SCK edges u32
+    OP_SPI_DEINIT = 0x52,      // the pins back to analog, SPI4 off
+
     // What a pin does, sampled by the M4 for a while: for tests without instruments.
     OP_PIN_MEASURE = 0x40,     // port u8, pin u8, milliseconds u16
                                //   -> samples u32, cycles high u32, rising edges u32,

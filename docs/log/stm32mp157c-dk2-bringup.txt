@@ -133,3 +133,16 @@ machine.PWM on TIM1 channel 1, PE9 = Arduino D6 (2026-11-18):
   machine.PWM: duty_u16 49152 -> 74.998%; duty_ns 100 us at 1 kHz -> 9.999%, kept at 2 kHz ->
   20.001%; servo 50 Hz 1.5 ms -> 7.501%; 341 us a duty change. test_m4.sh, test_repl.sh,
   test_tcp_hub.py pass.
+
+machine.SPI on SPI4 (2026-11-18):
+  Pins from the m4-examples device tree: SCK PE12 (D13), MISO PE13 (D12), MOSI PE14 (D11), AF5;
+  PE11 (D10, NSS) UNCLAIMED by Linux: chip select through machine.Pin on Linux. spi4_k 64 MHz.
+  First transfer: ETIMEDOUT. Registers: CR1 0x1000 (SPE off), SR 0x10200 (MODF): MASTER was set
+  while SSI was 0, the internal chip select looked active and the mode fault turned SPI off.
+  Fixed: SSI before MASTER, all flags cleared (IFCR) before each transfer.
+  No device at hand: during a transfer the M4 samples PE12/PE14 and rebuilds the MOSI bytes at
+  the sampling edges. 8 modes (CPOL, CPHA, MSB/LSB) at 250 kHz: a53c0180ff005a96 seen as sent,
+  127 or 128 edges (the last one ends with the transfer). Up to 1 MHz the sampling keeps up; at
+  4 MHz and above it does not (22, 6, 2 edges seen). MISO: ffffffff with the pull-up, 00000000
+  with the pull-down. 250 kHz..32 MHz (asked 100 MHz -> 32 MHz). 1024 bytes at 32 MHz in 1399 us
+  (732 kB/s); 2-byte write 363 us. test_m4.sh, test_repl.sh, test_tcp_hub.py pass.

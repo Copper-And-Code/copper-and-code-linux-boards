@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Cortex-M4 firmware of lvgl-mpy-linux for the STM32MP157C-DK2: it serves machine.I2C,
-// machine.ADC and machine.PWM to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
+// machine.ADC, machine.PWM and machine.SPI to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
 // virtual serial port (/dev/ttyRPMSG0 on Linux).
 //
 // Linux loads it through remoteproc and, from the "m4-examples" device tree, gives it its
@@ -460,6 +460,159 @@ static void handle_pwm(uint8_t sequence, uint8_t operation, const uint8_t *args,
     send(sequence, E_INVAL, NULL, 0);
 }
 
+// ---- SPI4 on the registers (the STM32H7 generation of SPI: FIFO, transfer size, CSTART)
+
+static uint8_t spi_mode = 0xFF;  // bit 0 CPOL, bit 1 CPHA, bit 2 LSB first; 0xFF: off
+
+static void spi_pins(int on, uint8_t miso_pull) {
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    GPIO_InitTypeDef pins = {
+        .Pin = GPIO_PIN_12 | GPIO_PIN_14,
+        .Mode = on ? GPIO_MODE_AF_PP : GPIO_MODE_ANALOG,
+        .Pull = GPIO_NOPULL,
+        .Speed = GPIO_SPEED_FREQ_VERY_HIGH,
+        .Alternate = on ? GPIO_AF5_SPI4 : 0,
+    };
+    PERIPH_LOCK(GPIOE);
+    HAL_GPIO_Init(GPIOE, &pins);
+    pins.Pin = GPIO_PIN_13;
+    pins.Pull = !on ? GPIO_NOPULL : miso_pull == 1 ? GPIO_PULLUP : miso_pull == 2 ? GPIO_PULLDOWN : GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOE, &pins);
+    PERIPH_UNLOCK(GPIOE);
+}
+
+static void handle_spi_init(uint8_t sequence, const uint8_t *args, size_t size) {
+    if (size != 6 || args[4] > 7 || args[5] > 2) {
+        send(sequence, E_INVAL, NULL, 0);
+        return;
+    }
+    uint32_t clock = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_SPI45);
+    if (!clock) {
+        clock = 64000000;
+    }
+    // The fastest rate not above the one asked: the kernel clock over 2, 4, ... 256.
+    uint32_t divider = 0, baud = get32(args);
+    while (divider < 7 && clock >> (divider + 1) > baud) {
+        divider++;
+    }
+    uint8_t mode = args[4];
+    __HAL_RCC_SPI4_CLK_ENABLE();
+    // SSI before MASTER: with the internal chip select seen active, a master latches a mode
+    // fault (MODF) and turns itself off.
+    SPI4->CR1 = 0;
+    SPI4->CR1 = SPI_CR1_SSI;
+    SPI4->CFG1 = (divider << SPI_CFG1_MBR_Pos) | (7U << SPI_CFG1_DSIZE_Pos);  // 8-bit frames
+    // Master, chip select by software, the pins kept driven between transfers (AFCNTR), so
+    // that SCK rests at its idle level.
+    SPI4->CFG2 = SPI_CFG2_MASTER | SPI_CFG2_SSM | SPI_CFG2_AFCNTR | ((mode & 1) ? SPI_CFG2_CPOL : 0) |
+        ((mode & 2) ? SPI_CFG2_CPHA : 0) | ((mode & 4) ? SPI_CFG2_LSBFRST : 0);
+    SPI4->IFCR = 0xFF8;  // every flag, MODF too
+    spi_pins(1, args[5]);
+    spi_mode = mode;
+    uint32_t actual = clock >> (divider + 1);
+    uint8_t result[4] = {actual, actual >> 8, actual >> 16, actual >> 24};
+    send(sequence, 0, result, 4);
+}
+
+static void handle_spi_transfer(uint8_t sequence, const uint8_t *args, size_t size) {
+    static uint8_t data[2 * MPY_M4_MAX_DATA + 4];
+    if (spi_mode == 0xFF || size < 2 || size - 1 > MPY_M4_MAX_DATA) {
+        send(sequence, E_INVAL, NULL, 0);
+        return;
+    }
+    uint8_t flags = args[0];
+    const uint8_t *out = args + 1;
+    size_t count = size - 1, sent = 0, got = 0;
+    uint8_t *in = data, *seen = data + count;
+    // Watching the pins: SCK is PE12, MOSI PE14. The data are sampled on the leading edge
+    // (CPHA 0) or the trailing edge (CPHA 1); the leading edge leaves the idle level (CPOL).
+    uint32_t idle = (spi_mode & 1) ? GPIO_PIN_12 : 0;
+    uint32_t sample_level = (spi_mode & 2) ? idle : (idle ^ GPIO_PIN_12);
+    uint32_t last = GPIOE->IDR & GPIO_PIN_12, edges = 0, bits = 0;
+    if (flags & 2) {
+        memset(seen, 0, count);
+    }
+
+    SPI4->IFCR = 0xFF8;
+    SPI4->CR2 = count;
+    SPI4->CR1 = SPI_CR1_SSI | SPI_CR1_SPE;
+    SPI4->CR1 = SPI_CR1_SSI | SPI_CR1_SPE | SPI_CR1_CSTART;
+    uint32_t start = HAL_GetTick();
+    while (got < count) {
+        uint32_t status = SPI4->SR;
+        if (sent < count && (status & SPI_SR_TXP)) {
+            *(volatile uint8_t *)&SPI4->TXDR = out[sent++];
+        }
+        if (status & SPI_SR_RXP) {
+            in[got++] = *(volatile uint8_t *)&SPI4->RXDR;
+        }
+        if (flags & 2) {
+            uint32_t pins = GPIOE->IDR;
+            uint32_t sck = pins & GPIO_PIN_12;
+            if (sck != last) {
+                edges++;
+                if (sck == sample_level && bits < 8 * count) {
+                    uint32_t bit = (pins & GPIO_PIN_14) ? 1 : 0, byte = bits / 8, place = bits % 8;
+                    seen[byte] |= bit << ((spi_mode & 4) ? place : 7 - place);
+                    bits++;
+                }
+                last = sck;
+            }
+        }
+        if (HAL_GetTick() - start > 100 + count) {
+            break;
+        }
+    }
+    uint32_t wait = HAL_GetTick();
+    while (!(SPI4->SR & SPI_SR_EOT) && HAL_GetTick() - wait < 10) {
+    }
+    if (flags & 2) {  // the last edge, back to idle, comes with the end of transfer
+        uint32_t sck = GPIOE->IDR & GPIO_PIN_12;
+        if (sck != last) {
+            edges++;
+        }
+    }
+    SPI4->IFCR = SPI_IFCR_EOTC | SPI_IFCR_TXTFC;
+    SPI4->CR1 = SPI_CR1_SSI;
+    if (got < count) {
+        send(sequence, (SPI4->SR & SPI_SR_MODF) ? E_IO : E_TIMEDOUT, NULL, 0);
+        return;
+    }
+    size_t length = 0;
+    if (flags & 1) {
+        length = count;
+    }
+    if (flags & 2) {
+        if (length != count) {
+            memmove(data, seen, count);
+        }
+        length += count;
+        memcpy(data + length, &edges, 4);
+        length += 4;
+    }
+    send(sequence, 0, data, length);
+}
+
+static void handle_spi(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
+    switch (operation) {
+        case OP_SPI_INIT:
+            handle_spi_init(sequence, args, size);
+            return;
+        case OP_SPI_TRANSFER:
+            handle_spi_transfer(sequence, args, size);
+            return;
+        default:  // OP_SPI_DEINIT
+            if (spi_mode != 0xFF) {
+                SPI4->CR1 = 0;
+                spi_pins(0, 0);
+                __HAL_RCC_SPI4_CLK_DISABLE();
+                spi_mode = 0xFF;
+            }
+            send(sequence, 0, NULL, 0);
+            return;
+    }
+}
+
 // ---- a pin sampled for a while, timed by the cycle counter
 
 static void handle_measure(uint8_t sequence, const uint8_t *args, size_t size) {
@@ -531,6 +684,11 @@ static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, siz
         case OP_PWM_COMPARE:
         case OP_PWM_DEINIT:
             handle_pwm(sequence, operation, args, size);
+            return;
+        case OP_SPI_INIT:
+        case OP_SPI_TRANSFER:
+        case OP_SPI_DEINIT:
+            handle_spi(sequence, operation, args, size);
             return;
         case OP_PIN_MEASURE:
             handle_measure(sequence, args, size);

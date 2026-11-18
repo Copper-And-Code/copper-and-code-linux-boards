@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# machine.I2C, machine.ADC and machine.PWM served by the Cortex-M4 of the STM32MP157C-DK2, with
-# nothing wired to the connectors: the bus is empty, the internal reference is known, the M4
-# measures the PWM on its own pin.
+# machine.I2C, ADC, PWM and SPI served by the Cortex-M4 of the STM32MP157C-DK2, with nothing wired
+# to the connectors: the bus is empty, the internal reference is known, the M4 measures the PWM and
+# watches the SPI on its own pins.
 #
 #   P=/dev/ttyACM1 tests/hil/test_m4.sh
 set -euo pipefail
@@ -95,6 +95,39 @@ for bad in (lambda: machine.PWM('PA14'), lambda: machine.PWM('D6', invert=True),
     except ValueError:
         pass
 print('PASS: PWM 1 kHz 25%, 2 kHz 100 us, 50 Hz 1.5 ms, 0% and 100%, 100 kHz 30%, deinit')
+
+# SPI4: the M4 watches its own MOSI and SCK pins during a transfer (up to 1 MHz); MISO reads its
+# internal pull-up or pull-down. The chip select is a Linux GPIO line (PE11, D10).
+cs = machine.Pin('PE11', machine.Pin.OUT, value=1)
+spi = machine.SPI(4, baudrate=1000000, _miso_pull=1)
+assert spi.baudrate == 1000000, spi.baudrate
+for polarity in (0, 1):
+    for phase in (0, 1):
+        for firstbit in (machine.SPI.MSB, machine.SPI.LSB):
+            spi.init(baudrate=500000, polarity=polarity, phase=phase, firstbit=firstbit)
+            cs(0)
+            seen, edges = spi._watch(b'\xa5\x3c\x01\x80MicroPython')
+            cs(1)
+            assert seen == b'\xa5\x3c\x01\x80MicroPython', (polarity, phase, firstbit, seen)
+            assert edges in (2 * 8 * 15 - 1, 2 * 8 * 15), edges  # the last edge may end with the transfer
+assert spi.read(4, 0x9F) == b'\xff' * 4
+buf = bytearray(4)
+spi.write_readinto(b'abcd', buf)
+assert buf == b'\xff' * 4
+spi = machine.SPI(4, baudrate=1000000, _miso_pull=2)
+assert spi.read(3) == b'\x00' * 3
+spi.init(baudrate=100000000)
+assert spi.baudrate == 32000000, spi.baudrate
+spi.write(bytes(1000))
+spi.deinit()
+cs.deinit()
+for bad in (lambda: machine.SPI(1), lambda: machine.SPI(4, bits=16), lambda: machine.SPI(4, sck='PA1')):
+    try:
+        bad()
+        raise AssertionError('no ValueError')
+    except ValueError:
+        pass
+print('PASS: SPI4 in the 8 modes seen on the pins, MISO pull-up and pull-down, 32 MHz, CS on Linux')
 
 mpy_m4.led(True)
 time.sleep_ms(200)

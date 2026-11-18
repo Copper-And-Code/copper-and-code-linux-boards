@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# machine.I2C, machine.ADC and machine.PWM served by the Cortex-M4 of an STM32MP15 board, as on a
+# machine.I2C, ADC, PWM and SPI served by the Cortex-M4 of an STM32MP15 board, as on a
 # microcontroller: the same MicroPython code runs on both.
 #
 #   from machine import I2C, ADC
@@ -7,6 +7,7 @@
 #   i2c.scan()
 #   ADC("A0").read_uv()              # Arduino A0..A5, pin names ("PF14") or ADC.CORE_VREF
 #   PWM("D6", freq=1000, duty_u16=16384)   # TIM1 channel 1 on PE9 (Arduino D6)
+#   SPI(4, baudrate=1000000)         # SCK D13, MISO D12, MOSI D11; chip select: Pin("PE11") (D10)
 #
 # The firmware (mcu/stm32mp157c-dk2, mpy_m4.elf) runs on the M4, loaded by Linux through
 # remoteproc; the two talk over an RPMsg virtual serial port with the protocol of
@@ -36,6 +37,9 @@ _PWM_INIT = 0x30
 _PWM_COMPARE = 0x31
 _PWM_DEINIT = 0x32
 _PIN_MEASURE = 0x40
+_SPI_INIT = 0x50
+_SPI_TRANSFER = 0x51
+_SPI_DEINIT = 0x52
 
 _MAX_DATA = 400
 _EOPNOTSUPP = 95
@@ -234,7 +238,7 @@ class I2C:
 
 
 # Arduino digital pins the M4 uses (connector CN14/CN13, from the board's schematic).
-_DIGITAL = {"D6": "PE9", "D14": "PA12", "D15": "PA11"}
+_DIGITAL = {"D6": "PE9", "D10": "PE11", "D11": "PE14", "D12": "PE13", "D13": "PE12", "D14": "PA12", "D15": "PA11"}
 
 
 def _pin_name(pin):
@@ -398,3 +402,83 @@ class ADC:
 
     def read_uv(self):
         return self.read_u16() * ADC.VREF_UV // 65535
+
+
+class SPI:
+    # machine.SPI on the M4's SPI4: SCK PE12 (D13), MISO PE13 (D12), MOSI PE14 (D11), 8-bit frames.
+    # The rate is the fastest not above the one asked: 64 MHz over 2, 4, ... 256 (32 MHz to
+    # 250 kHz). The chip select is the program's: PE11 (D10) is free as a Linux GPIO line,
+    # Pin("PE11", Pin.OUT, value=1).
+
+    MSB = 0
+    LSB = 1
+    _CHUNK = _MAX_DATA
+
+    def __init__(self, id=4, baudrate=1000000, *, polarity=0, phase=0, bits=8, firstbit=0, sck=None,
+                 mosi=None, miso=None, _miso_pull=0):
+        if id != 4:
+            raise ValueError("SPI(%r) doesn't exist: the Cortex-M4 has SPI4" % (id,))
+        for pin, name in ((sck, "PE12"), (mosi, "PE14"), (miso, "PE13")):
+            if pin is not None and _pin_name(pin) != name:
+                raise ValueError("SPI4 uses SCK PE12, MISO PE13, MOSI PE14")
+        self._settings = {"baudrate": baudrate, "polarity": polarity, "phase": phase, "bits": bits,
+                          "firstbit": firstbit}
+        self._miso_pull = _miso_pull  # for tests without a device: 1 up, 2 down
+        self.init()
+
+    def init(self, baudrate=None, *, polarity=None, phase=None, bits=None, firstbit=None, **ignored):
+        for key, value in (("baudrate", baudrate), ("polarity", polarity), ("phase", phase), ("bits", bits),
+                           ("firstbit", firstbit)):
+            if value is not None:
+                self._settings[key] = value
+        settings = self._settings
+        if settings["bits"] != 8:
+            raise ValueError("bits must be 8")
+        if settings["polarity"] not in (0, 1) or settings["phase"] not in (0, 1) or settings["firstbit"] not in (0, 1):
+            raise ValueError("polarity, phase and firstbit are 0 or 1")
+        if settings["baudrate"] < 1:
+            raise ValueError("baudrate must be positive")
+        mode = settings["polarity"] | settings["phase"] << 1 | settings["firstbit"] << 2
+        answer = link.request(_SPI_INIT, struct.pack("<IBB", settings["baudrate"], mode, self._miso_pull))
+        self.baudrate = struct.unpack("<I", answer)[0]
+        self._on = True
+
+    def __repr__(self):
+        s = self._settings
+        return "SPI(4, baudrate=%d, polarity=%d, phase=%d, bits=8, firstbit=%s)" % (
+            self.baudrate, s["polarity"], s["phase"], "SPI.LSB" if s["firstbit"] else "SPI.MSB")
+
+    def deinit(self):
+        link.request(_SPI_DEINIT)
+        self._on = False
+
+    def _transfer(self, data, flags):
+        if not self._on:
+            self.init()
+        answer = b""
+        for start in range(0, len(data), self._CHUNK):
+            part = data[start : start + self._CHUNK]
+            answer += link.request(_SPI_TRANSFER, bytes([flags]) + part, 1000 + len(part))
+        return answer
+
+    def write(self, buf):
+        self._transfer(bytes(buf), 0)
+
+    def read(self, nbytes, write=0x00):
+        return self._transfer(bytes([write]) * nbytes, 1)
+
+    def readinto(self, buf, write=0x00):
+        buf[:] = self.read(len(buf), write)
+
+    def write_readinto(self, write_buf, read_buf):
+        if len(write_buf) != len(read_buf):
+            raise ValueError("buffers must be the same length")
+        read_buf[:] = self._transfer(bytes(write_buf), 1)
+
+    def _watch(self, buf):
+        # For tests: the bytes the M4 saw on the MOSI pin and the SCK edges, during one transfer of
+        # at most 400 bytes; reliable up to 1 MHz, the sampling's limit.
+        data = bytes(buf)
+        answer = link.request(_SPI_TRANSFER, bytes([2]) + data, 1000 + len(data))
+        return answer[: len(data)], struct.unpack("<I", answer[len(data) :])[0]
+
