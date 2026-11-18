@@ -149,8 +149,9 @@ hardware code moves between boards unchanged.
 
 A board that pairs Linux with a microcontroller gets the best of both: Python and the GUI on
 Linux, the real-time work on the MCU. On the STM32MP157C-DK2 `machine` talks to our firmware on the
-Cortex-M4 over RPMsg (about 0.35 ms a request), so a Python app reads sensors with microcontroller
-timing while Linux keeps the screen, the network and the programs. On boards without an MCU the
+Cortex-M4 over RPMsg (about 0.3 ms a request: [measured latency](stm32mp157c-dk2.md#latency)), so a Python app
+reads sensors with microcontroller timing while Linux keeps the screen, the network and the
+programs. On boards without an MCU the
 same classes will use the kernel's drivers.
 See [the STM32MP157C-DK2](stm32mp157c-dk2.md).
 
