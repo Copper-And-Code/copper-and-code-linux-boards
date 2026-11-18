@@ -459,6 +459,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#web-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Panel
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -771,6 +782,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#web-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Panel
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -865,6 +887,13 @@ What must happen at an exact time belongs on the M4. Nothing to wire.
 it sends a UART message, an SPI transfer or the PWM, started with the capture; Python decodes them
 (UART 8N1, SPI mode 0, PWM) and draws one row a pin, the bytes over their frames.
 <a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/logic-analyzer">Source</a></p>
+<h3 id="web-panel">Web Panel<a class="headerlink" href="#web-panel" title="Permanent link">&para;</a></h3>
+<p><img alt="Web Panel" src="../images/web-panel.png" /></p>
+<p>The board serves a page to the phones of its network: scan the QR code, type the PIN on the screen,
+see A0 to A5 live, switch the LEDs, set the PWM, send a message to the board's screen, which shows
+what each browser did. A few lines of MicroPython, polled from the GUI's timer: about 16 ms a
+request. (Above: the Studio simulator.)
+<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/web-panel">Source</a></p>
 
 
 
