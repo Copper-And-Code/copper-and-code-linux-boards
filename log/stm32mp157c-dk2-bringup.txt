@@ -217,3 +217,19 @@ Latency to the M4 (2026-11-18), 2000 requests each, median / p99 / max:
   312..346/589 us/13 ms loaded. The remaining max: the tty's kworker (flush_to_ldisc), at normal
   priority. rpmsg_char (/dev/rpmsg_ctrl0, module loaded; its alias is rpmsg_chrdev only) would go
   around it. test_m4.sh, test_repl.sh, test_tcp_hub.py pass; the radio plays.
+
+rpmsg_char (2026-11-18):
+  Firmware: a second endpoint "rpmsg-raw" next to the virtual UART; an answer goes back the way
+  its request came, events the way of the last request. Linux binds it to rpmsg_chrdev by itself:
+  /dev/rpmsg0 (no ioctl on /dev/rpmsg_ctrl0 needed). MicroPython's ffi (libc open/read/write) reads
+  one whole message a read.
+  Bare requests, median / p99 / p99.9 / max: INFO tty 188-192 / 293-305 us / up to 2.9 ms / 10 ms,
+  raw 162 / 215-240 / 270-600 us / 0.3-1.7 ms idle; loaded tty 226-228 us / 0.35-0.6 ms / 10-11 ms
+  / 16-19 ms, raw 161-162 / 220-259 us / 7-9 ms / 7-11 ms. The same with the load at nice 19:
+  the 10 ms left is not the load: CONFIG_HZ=100, PREEMPT (no RT); the IPCC interrupt threads are
+  already SCHED_FIFO 50.
+  Through mpy_m4 (a fast path: one message is one frame): ADC tty 316 / 411-467 us / 2.3 ms idle,
+  raw 290-294 / 371 / 0.5-0.8 ms; loaded tty 315 / 0.5-1.1 / 9.9 ms, raw 292 / 386-418 us /
+  5.8-6.9 ms. mpy_m4 prefers /dev/rpmsgN, falls back on the tty (checked by forcing it).
+  Cold start of the M4 from mpy_m4: 378-515 ms, raw channel each time. test_m4.sh twice (over
+  rpmsg_char), test_repl.sh, test_tcp_hub.py pass.
