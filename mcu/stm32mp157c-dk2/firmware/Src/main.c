@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-// Cortex-M4 firmware of lvgl-mpy-linux for the STM32MP157C-DK2: it serves machine.I2C,
-// machine.ADC, machine.PWM, machine.SPI, machine.UART and machine.Timer to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
-// virtual serial port (/dev/ttyRPMSG0 on Linux).
+// Cortex-M4 firmware of lvgl-mpy-linux for the STM32MP157C-DK2: it serves machine.I2C, ADC,
+// PWM, SPI, UART and Timer to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over
+// RPMsg (a raw channel, /dev/rpmsgN on Linux, and a virtual serial port, /dev/ttyRPMSGN).
 //
 // Linux loads it through remoteproc and, from the "m4-examples" device tree, gives it its
 // peripherals: clocks, pins (I2C5 on PA11/PA12, the orange LED on PH7) and the ADC's 2.5 V
@@ -16,11 +16,22 @@
 #define FIRMWARE_TEXT "mpy-m4 stm32mp157c-dk2"
 
 IPCC_HandleTypeDef hipcc;  // used by ST's mbox_ipcc.c
-static VIRT_UART_HandleTypeDef channel;
 
-// Bytes received from Linux: the serial port is a stream, so a request may arrive in pieces.
-static uint8_t received[2 * MPY_M4_MAX_FRAME];
-static size_t received_count;
+// Two ways in from Linux, the same frames on both: the RPMsg virtual serial port (rpmsg-tty,
+// /dev/ttyRPMSG*), and a raw RPMsg channel (rpmsg-raw, /dev/rpmsg* through rpmsg_char), which
+// goes around Linux's tty layer. An answer goes back the way its request came; events go the way
+// of the last request.
+enum { CHANNEL_TTY, CHANNEL_RAW };
+static VIRT_UART_HandleTypeDef channel;
+static struct rpmsg_endpoint raw;
+static int channel_now = CHANNEL_TTY;
+
+// Bytes received: the serial port is a stream, so a request may arrive in pieces.
+typedef struct {
+    uint8_t data[2 * MPY_M4_MAX_FRAME];
+    size_t count;
+} inbox_t;
+static inbox_t received, raw_received;
 
 static uint8_t answer[MPY_M4_MAX_FRAME + 4];
 
@@ -34,14 +45,22 @@ void Error_Handler(void) {
     }
 }
 
-static void on_receive(VIRT_UART_HandleTypeDef *huart) {
-    size_t size = huart->RxXferSize;
-    if (received_count + size > sizeof(received)) {
-        received_count = 0;  // nonsense: start again; the requests in it get no answer
+static void keep(inbox_t *inbox, const void *data, size_t size) {
+    if (inbox->count + size > sizeof(inbox->data)) {
+        inbox->count = 0;  // nonsense: start again; the requests in it get no answer
         return;
     }
-    memcpy(received + received_count, huart->pRxBuffPtr, size);
-    received_count += size;
+    memcpy(inbox->data + inbox->count, data, size);
+    inbox->count += size;
+}
+
+static void on_receive(VIRT_UART_HandleTypeDef *huart) {
+    keep(&received, huart->pRxBuffPtr, huart->RxXferSize);
+}
+
+static int on_raw(struct rpmsg_endpoint *ept, void *data, size_t size, uint32_t source, void *priv) {
+    keep(&raw_received, data, size);
+    return 0;
 }
 
 static void send(uint8_t sequence, uint8_t status, const uint8_t *data, size_t size) {
@@ -53,7 +72,11 @@ static void send(uint8_t sequence, uint8_t status, const uint8_t *data, size_t s
     if (size) {
         memcpy(answer + 4, data, size);
     }
-    VIRT_UART_Transmit(&channel, answer, 2 + length);
+    if (channel_now == CHANNEL_RAW) {
+        OPENAMP_send(&raw, answer, 2 + length);
+    } else {
+        VIRT_UART_Transmit(&channel, answer, 2 + length);
+    }
 }
 
 static uint16_t get16(const uint8_t *p) {
@@ -1197,19 +1220,20 @@ static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, siz
     send(sequence, E_INVAL, NULL, 0);
 }
 
-static void handle_received(void) {
-    while (received_count >= 2) {
-        size_t length = get16(received);
+static void handle_received(inbox_t *inbox, int way) {
+    while (inbox->count >= 2) {
+        size_t length = get16(inbox->data);
         if (length < 2 || length > MPY_M4_MAX_FRAME) {
-            received_count = 0;  // out of step: drop everything; Linux times out and goes on
+            inbox->count = 0;  // out of step: drop everything; Linux times out and goes on
             return;
         }
-        if (received_count < 2 + length) {
+        if (inbox->count < 2 + length) {
             return;
         }
-        handle(received[2], received[3], received + 4, length - 2);
-        received_count -= 2 + length;
-        memmove(received, received + 2 + length, received_count);
+        channel_now = way;
+        handle(inbox->data[2], inbox->data[3], inbox->data + 4, length - 2);
+        inbox->count -= 2 + length;
+        memmove(inbox->data, inbox->data + 2 + length, inbox->count);
     }
 }
 
@@ -1228,6 +1252,10 @@ int main(void) {
         VIRT_UART_RegisterCallback(&channel, VIRT_UART_RXCPLT_CB_ID, on_receive) != VIRT_UART_OK) {
         Error_Handler();
     }
+    // Announced to Linux by name; with rpmsg_char it becomes /dev/rpmsg*.
+    if (OPENAMP_create_endpoint(&raw, "rpmsg-raw", RPMSG_ADDR_ANY, on_raw, NULL) < 0) {
+        Error_Handler();
+    }
 
     core_hz = HAL_RCC_GetMCUFreq();
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -1235,7 +1263,8 @@ int main(void) {
 
     while (1) {
         OPENAMP_check_for_message();
-        handle_received();
+        handle_received(&received, CHANNEL_TTY);
+        handle_received(&raw_received, CHANNEL_RAW);
         timers_poll();
     }
 }

@@ -13,7 +13,7 @@
 #   Timer(0, period=500, callback=lambda t: print("tick"))    # 8 timers of the M4, 1 ms and up
 #
 # The firmware (mcu/stm32mp157c-dk2, mpy_m4.elf) runs on the M4, loaded by Linux through
-# remoteproc; the two talk over an RPMsg virtual serial port with the protocol of
+# remoteproc; the two talk over RPMsg (a raw channel, or the virtual serial port) with the protocol of
 # mcu/stm32mp157c-dk2/firmware/Inc/mpy_m4_protocol.h. An error of the M4 is an OSError with the
 # errno a microcontroller gives: ENODEV when no device answers an address, ETIMEDOUT, EIO.
 
@@ -92,9 +92,58 @@ def _start():
         f.write("start")
 
 
-def _port():
-    names = sorted(n for n in os.listdir("/dev") if n.startswith("ttyRPMSG"))
-    return "/dev/" + names[0] if names else None
+def _ports():
+    # The firmware's two channels: the raw one (rpmsg-raw: /dev/rpmsgN through rpmsg_char) and
+    # the virtual serial port (rpmsg-tty: /dev/ttyRPMSGN). Their numbers change when the M4
+    # restarts.
+    names = os.listdir("/dev")
+    raw = sorted(n for n in names if n.startswith("rpmsg") and n[5:].isdigit())
+    tty = sorted(n for n in names if n.startswith("ttyRPMSG"))
+    return ("/dev/" + raw[0]) if raw else None, ("/dev/" + tty[0]) if tty else None
+
+
+_libc = None
+
+
+def _c(name, result, arguments):
+    global _libc
+    if _libc is None:
+        import ffi
+
+        _libc = ffi.open("libc.so.6")
+    return _libc.func(result, name, arguments)
+
+
+class _Raw:
+    # A raw RPMsg channel (rpmsg_char), used like the serial port's file: each read() returns one
+    # whole message, which the firmware makes one frame. It goes around Linux's tty layer: about
+    # 30 us less a request idle, 60 us less with Linux busy. Through the C library (ffi), as
+    # MicroPython's read(n) would wait for n bytes.
+
+    def __init__(self, path):
+        self._read = _c("read", "i", "ipi")
+        self._write = _c("write", "i", "ipi")
+        self._close = _c("close", "i", "i")
+        self._fd = _c("open", "i", "si")(path, 0o2000002)  # O_RDWR | O_CLOEXEC
+        if self._fd < 0:
+            raise OSError(_EIO, "cannot open " + path)
+        self._buffer = bytearray(512)
+
+    def fileno(self):
+        return self._fd
+
+    def read(self, count):
+        size = self._read(self._fd, self._buffer, len(self._buffer))
+        if size < 0:
+            raise OSError(_EIO, "the Cortex-M4's channel failed")
+        return bytes(self._buffer[:size])
+
+    def write(self, data):
+        if self._write(self._fd, data, len(data)) != len(data):
+            raise OSError(_EIO, "the Cortex-M4's channel failed")
+
+    def close(self):
+        self._close(self._fd)
 
 
 class _Link:
@@ -106,6 +155,8 @@ class _Link:
 
     def __init__(self):
         self._file = None
+        self.transport = None  # "rpmsg_char /dev/rpmsgN" or "tty /dev/ttyRPMSGN", once open
+        self._raw = False
         self._sequence = 0
         self._received = b""  # bytes read past the last frame
         self._io = _thread.allocate_lock()
@@ -117,22 +168,36 @@ class _Link:
         if not available():
             raise OSError(19, "no Cortex-M4 on this board")
         _start()
-        port = None
-        for _ in range(40):  # the virtual serial port appears once the firmware is up
-            port = _port()
-            if port:
+        raw = tty = None
+        for _ in range(40):  # the channels appear once the firmware is up
+            raw, tty = _ports()
+            if raw or tty:
                 break
             time.sleep_ms(50)
-        if not port:
-            raise OSError(19, "the Cortex-M4 firmware does not answer (no /dev/ttyRPMSG*)")
-        self._file = open(port, "r+b", buffering=0)
-        termios.setraw(self._file.fileno())
-        # VMIN 0: a read returns what has arrived instead of waiting for all it asked for
-        # (MicroPython's read(n) waits for n bytes until the driver returns 0). poll() waits.
-        attributes = termios.tcgetattr(self._file.fileno())
-        attributes[6][_VMIN] = 0
-        attributes[6][_VTIME] = 0
-        termios.tcsetattr(self._file.fileno(), termios.TCSANOW, attributes)
+        if tty and not raw:
+            time.sleep_ms(100)  # the raw channel is announced right after the serial port
+            raw, tty = _ports()
+        self._file = None
+        self._raw = False
+        if raw:
+            try:
+                self._file = _Raw(raw)
+                self._raw = True
+                self.transport = "rpmsg_char " + raw
+            except (ImportError, OSError):
+                self._file = None  # no ffi, or the channel is busy: the serial port then
+        if self._file is None:
+            if not tty:
+                raise OSError(19, "the Cortex-M4 firmware does not answer (no /dev/rpmsg*, /dev/ttyRPMSG*)")
+            self._file = open(tty, "r+b", buffering=0)
+            self.transport = "tty " + tty
+            termios.setraw(self._file.fileno())
+            # VMIN 0: a read returns what has arrived instead of waiting for all it asked for
+            # (MicroPython's read(n) waits for n bytes until the driver returns 0). poll() waits.
+            attributes = termios.tcgetattr(self._file.fileno())
+            attributes[6][_VMIN] = 0
+            attributes[6][_VTIME] = 0
+            termios.tcsetattr(self._file.fileno(), termios.TCSANOW, attributes)
         self._poll = select.poll()
         self._poll.register(self._file.fileno(), select.POLLIN)
         self._watch = select.poll()  # the reader thread's own
@@ -161,6 +226,14 @@ class _Link:
         received = self._received
         poll = self._poll.poll
         read = self._file.read
+        if self._raw and not received:
+            # A raw channel's message is one whole frame: no buffer to go through.
+            if not poll(timeout_ms):
+                raise OSError(_ETIMEDOUT, "the Cortex-M4 did not answer")
+            message = read(0)
+            if len(message) >= 2 and len(message) == 2 + (message[0] | message[1] << 8):
+                return message[2:]
+            received = message
         while True:
             if len(received) >= 2:
                 length = received[0] | received[1] << 8

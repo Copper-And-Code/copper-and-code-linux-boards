@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // The protocol between MicroPython on Linux (python/linux/mpy_m4.py) and the Cortex-M4 firmware,
-// over the RPMsg virtual serial port /dev/ttyRPMSG0. Little endian.
+// over RPMsg: the raw channel rpmsg-raw (/dev/rpmsgN through rpmsg_char), one frame a message, or
+// the virtual serial port rpmsg-tty (/dev/ttyRPMSGN), a stream of frames. Little endian.
 //
 //   request:  length u16, sequence u8, operation u8, arguments
 //   answer:   length u16, sequence u8, status u8, result

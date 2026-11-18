@@ -21,7 +21,8 @@ def fails(errno_wanted, call, *args, **kwargs):
     raise AssertionError('no OSError %d from %r' % (errno_wanted, call))
 
 assert machine.Pin and machine.I2C and machine.ADC
-print('firmware:', mpy_m4.info())
+print('firmware:', mpy_m4.info(), 'over', mpy_m4.link.transport)
+assert mpy_m4.link.transport.startswith('rpmsg_char'), mpy_m4.link.transport
 
 i2c = machine.I2C(5, freq=100000)
 assert i2c.freq == 100000, i2c.freq

@@ -68,36 +68,45 @@ How it fits together:
   expiry). A thread of `mpy_m4` reads the port while nobody makes requests; events read during a
   request are kept for later. Handlers run outside the port's lock, so a callback may use the M4
   itself. Then Python acknowledges, and only then does the M4 send that timer's next event.
-- **Link.** One RPMsg virtual serial port (`/dev/ttyRPMSG*`; the number changes when the M4
-  restarts, so `mpy_m4` looks it up). Requests and answers carry a length, a sequence number and an
-  errno: the protocol is in `mcu/stm32mp157c-dk2/firmware/Inc/mpy_m4_protocol.h`. A request takes
-  about 0.35 ms there and back.
+- **Link.** Two RPMsg channels, the same frames on both: a raw one (`rpmsg-raw`, which Linux's
+  `rpmsg_char` turns into `/dev/rpmsgN` by itself) and a virtual serial port (`rpmsg-tty`,
+  `/dev/ttyRPMSGN`). `mpy_m4` uses the raw one, through the C library (`ffi`), and falls back on
+  the serial port; their numbers change when the M4 restarts, so it looks them up. Requests and
+  answers carry a length, a sequence number and an errno: the protocol is in
+  `mcu/stm32mp157c-dk2/firmware/Inc/mpy_m4_protocol.h`. A request takes about 0.3 ms there and
+  back (see Latency below).
 - **Python.** `mpy_m4` (frozen) has the classes; the frozen `machine` module takes the place of
   MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from `umachine`
   and adds `I2C`, `ADC`, `PWM`, `SPI`, `UART` and `Timer` on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.
 
 ### Latency
 
-What a request to the M4 costs, there and back (2000 requests each, `mpy_m4` and the service as
-installed):
+What a request to the M4 costs, there and back (2000 to 3000 requests each, as installed):
 
-| | idle: median / 99% / max | two busy Linux processes: median / 99% / max |
+| | idle: median / 99% / 99.9% | two busy Linux processes: median / 99% / 99.9% |
 |---|---|---|
-| the RPMsg serial port alone | 193 / 291 us / 2.8 ms | 194 / 382 us / 10.4 ms |
-| `ADC.read_u16()` | 312 / 411 us / 2.0 ms | 312 to 346 / 589 us / 13 ms |
+| `ADC.read_u16()`, raw channel (`rpmsg_char`, the default) | 290 / 371 / 494 to 772 us | 292 / 386 to 418 us / 5.8 to 6.9 ms |
+| `ADC.read_u16()`, serial port | 316 / 411 to 467 us / 2.3 ms | 316 / 503 to 1103 us / 9.9 ms |
+| a bare request on the raw channel, no `mpy_m4` | 162 / 215 to 240 / 270 to 600 us | 162 / 220 to 260 us / 7 to 9 ms |
 | a Linux GPIO line, `Pin.value()`, for comparison | 8 us | 8 us |
 
 About 3000 requests a second: plenty to command and read, 40 times a GPIO line, so the fast loops
 stay on the M4 (`read_timed`, `mpy_m4.measure`, a whole I2C scan in one request). The M4's own work
-is small (the slowest ADC conversion, 810.5 cycles, about 70 us); the rest is Linux: the tty driver
-hands each answer to a kernel worker thread before Python wakes up.
+is small (the slowest ADC conversion, 810.5 cycles, about 70 us); of the rest, about 160 us are
+Linux (system calls, the M4's interrupt, waking Python up) and about 70 us `mpy_m4`'s Python.
 
-Two things brought these numbers down: `mpy_m4` reads a whole answer in one `poll()` and one
-`read()` (the port in raw mode with VMIN 0; MicroPython's `read(n)` otherwise waits for all n
-bytes), about 10%; and `mpy-repl.service` runs MicroPython at real-time priority (`SCHED_FIFO` 10;
-the programs it starts through `linuxproc` at normal priority): under load the slowest 1% went from
-8 ms to under 0.6 ms. The rare 10 ms left under load is the tty's worker thread, at normal priority:
-going around the tty (`rpmsg_char`) is the next step to measure.
+What brought these numbers down, measured one step at a time:
+
+- `mpy_m4` reads a whole answer in one `poll()` and one `read()`: about 10%.
+- `mpy-repl.service` runs MicroPython at real-time priority (`SCHED_FIFO` 10; the programs it starts
+  through `linuxproc` at normal priority): under load the slowest 1% went from 8 ms to under 0.6 ms.
+- The raw channel goes around Linux's tty layer and its worker thread: 25 us less a request through
+  `mpy_m4`, and a slowest 0.1% three to four times shorter when idle.
+
+Left: under load, about one request in a thousand takes up to 10 ms. That is one tick of this
+kernel (`CONFIG_HZ=100`): it stays even with the load at the lowest priority, so it is not the load
+taking the CPU but a stage of the kernel waiting for its tick. Only another kernel (HZ 1000,
+PREEMPT_RT) would remove it; what must happen at an exact time runs on the M4 anyway.
 
 ### I2C
 
