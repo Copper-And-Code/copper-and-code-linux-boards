@@ -1,7 +1,9 @@
 # Settings
 
-The board's settings screen, made with LVGL MPY Studio and its MCP tools. For now it sets up Wi-Fi:
-scan, choose a network, type the password on the touch keyboard, save and connect.
+The board's settings screen, made with LVGL MPY Studio and its MCP tools. It sets up Wi-Fi: scan,
+choose a network, type the password on the touch keyboard, save and connect. And it chooses the
+layout of a keyboard plugged into the board (US or Italian): the REPL hub, which turns its keys into
+text for the shell and the REPL, follows the choice within a second.
 
 The choice is saved in `settings.json` in the board's folder (`/usr/local/mpy/fs` on the
 STM32MP135F-DK), which every app reads through the frozen modules of the firmware:
@@ -9,6 +11,7 @@ STM32MP135F-DK), which every app reads through the frozen modules of the firmwar
 ```python
 import mpy_settings, mpy_wifi
 mpy_settings.get("wifi")     # {"ssid": ..., "password": ...}
+mpy_settings.get("keyboard") # {"layout": "it"}
 mpy_wifi.ensure()            # connect to that network unless already on it
 mpy_wifi.online()            # True with a default route (Wi-Fi or cable)
 ```

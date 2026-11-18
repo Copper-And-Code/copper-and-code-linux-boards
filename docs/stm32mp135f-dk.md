@@ -252,6 +252,18 @@ again, so a closed serial port never blocks the REPL. When MicroPython exits the
 The TCP listener has no authentication or encryption and is bound only to the USB gadget address.
 Results: `docs/log/stm32mp135f-dk-repl-hub.txt`.
 
+A keyboard plugged into the board (USB, or any evdev device with letter keys) is one more input of
+the hub (`tools/mpy-repl-hub/keyboard.c`): its keys become what a terminal sends, so it types into
+the REPL, the shell on the screen, `vi` and the Linux programs, and Ctrl-C interrupts as from the
+serial port. One plugged in later is found within a second. The hub grabs it (`EVIOCGRAB`): the
+kernel's console would otherwise get the keys too, and the login prompt on tty1, which nobody sees,
+would take them as a user name. Layouts: `us` and `it` (AltGr included), chosen in the Settings app
+(`{"keyboard": {"layout": "it"}}` in `settings.json`, read again when it changes) or, without it, by
+`MPY_KEYBOARD` in the unit; `none` leaves the keyboards alone. The shell on the screen draws ASCII
+only: accented letters and the euro reach the programs, but show as `?`. On the STM32MP157C-DK2
+`tests/hil/test_keyboard.sh` checks both layouts with a virtual keyboard (uinput): letters, Caps
+Lock, the symbols, cursor keys and history, Ctrl-C.
+
 UM2993 maps B1/USER1 to PA14 and B2/USER2 to PA13. The original configuration exposed PA13 as
 `BTN_1` and drove PA14 as the blue heartbeat LED, so B1 presses produced no input events. The DTB
 overlay now disables that LED, exposes B1/PA14 as `BTN_1` (`0x101`) and preserves B2/PA13 as

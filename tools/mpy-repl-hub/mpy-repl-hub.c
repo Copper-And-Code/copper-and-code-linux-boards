@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 // One MicroPython REPL process on a pseudo-terminal, shared by the USB serial port and one TCP client.
 //
-//   mpy-repl-hub [--tty PATH] [--listen ADDRESS:PORT] -- PROGRAM [ARGUMENT...]
+//   mpy-repl-hub [--tty PATH] [--listen ADDRESS:PORT] [--keyboard LAYOUT] -- PROGRAM [ARGUMENT...]
 //
 // The program runs with the pseudo-terminal as stdin, stdout, stderr and controlling terminal, so
 // its line discipline turns Ctrl-C into SIGINT whatever the client: serial or TCP. Its output goes
 // to every client, as with MicroPython's dupterm on the MCU ports; input from every client goes to
 // it. A new TCP connection replaces the previous one. When the program exits it is started again.
+// The keyboards plugged into the board type into it too (keyboard.c): LAYOUT is us (the default),
+// it, or none; the "keyboard" section of settings.json (in the working directory, or $MPY_SETTINGS)
+// chooses another, as the Settings app does.
 
 #define _GNU_SOURCE
 #include <arpa/inet.h>
@@ -28,6 +31,8 @@
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
+
+#include "keyboard.h"
 
 #define OUTPUT_SIZE 65536
 #define CHUNK 4096
@@ -205,7 +210,7 @@ static void client_flush(struct client *client) {
 }
 
 static void usage(void) {
-    fprintf(stderr, "usage: mpy-repl-hub [--tty PATH] [--listen ADDRESS:PORT] -- PROGRAM [ARGUMENT...]\n");
+    fprintf(stderr, "usage: mpy-repl-hub [--tty PATH] [--listen ADDRESS:PORT] [--keyboard us|it|none] -- PROGRAM [ARGUMENT...]\n");
     exit(2);
 }
 
@@ -218,6 +223,11 @@ int main(int argc, char **argv) {
             tty_path = argv[++index];
         } else if (!strcmp(argv[index], "--listen") && index + 1 < argc) {
             listen_address = argv[++index];
+        } else if (!strcmp(argv[index], "--keyboard") && index + 1 < argc) {
+            if (!keyboard_layout(argv[++index])) {
+                fprintf(stderr, "mpy-repl-hub: unknown keyboard layout %s\n", argv[index]);
+                usage();
+            }
         } else if (!strcmp(argv[index], "--")) {
             ++index;
             break;
@@ -229,6 +239,7 @@ int main(int argc, char **argv) {
         usage();
     }
     char **program = argv + index;
+    keyboard_settings(getenv("MPY_SETTINGS") ? getenv("MPY_SETTINGS") : "settings.json");
 
     signal(SIGPIPE, SIG_IGN);
     signal(SIGTERM, on_terminate);
@@ -250,7 +261,7 @@ int main(int argc, char **argv) {
 
     unsigned char input[CHUNK];
     size_t input_offset = 0, input_length = 0;
-    long long serial_retry_ms = 0, started_ms = now_ms(), respawn_ms = 0;
+    long long serial_retry_ms = 0, keyboard_scan_ms = 0, started_ms = now_ms(), respawn_ms = 0;
     pid_t child = spawn(slave, program);
     notify("READY=1");
     // WatchdogSec= in the unit: the hub's loop pings at a third of the period. It shows that the
@@ -284,6 +295,10 @@ int main(int argc, char **argv) {
             serial_open(tty_path);
             serial_retry_ms = now + RETRY_MS;
         }
+        if (now >= keyboard_scan_ms) {
+            keyboard_scan();
+            keyboard_scan_ms = now + RETRY_MS;
+        }
         for (size_t i = 0; i < sizeof(clients) / sizeof(clients[0]); ++i) {
             struct client *client = clients[i];
             if (client->fd >= 0 && client->length && !client->discarding && now - client->progress_ms > STALL_MS) {
@@ -301,7 +316,7 @@ int main(int argc, char **argv) {
                 room = false;
             }
         }
-        struct pollfd fds[4];
+        struct pollfd fds[4 + KEYBOARD_MAX];
         nfds_t count = 0;
         fds[count++] = (struct pollfd){master, (room ? POLLIN : 0) | (input_length ? POLLOUT : 0), 0};
         int client_slot[2] = {-1, -1};
@@ -318,6 +333,9 @@ int main(int argc, char **argv) {
             listener_slot = count;
             fds[count++] = (struct pollfd){listener, POLLIN, 0};
         }
+        // The keyboards wait, as the clients do, while earlier input is still on its way.
+        nfds_t keyboard_slot = count;
+        count += keyboard_poll_fds(fds + count, input_length ? 0 : POLLIN);
         if (poll(fds, count, 100) < 0) {
             if (errno == EINTR) {
                 continue;
@@ -374,6 +392,10 @@ int main(int argc, char **argv) {
                     client_close(client, strerror(errno));
                 }
             }
+        }
+        if (!input_length) {
+            input_length = keyboard_read(fds + keyboard_slot, count - keyboard_slot, input, 0, sizeof(input));
+            input_offset = 0;
         }
         if (listener_slot >= 0 && (fds[listener_slot].revents & POLLIN)) {
             int fd = accept4(listener, NULL, NULL, SOCK_CLOEXEC);

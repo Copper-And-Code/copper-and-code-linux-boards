@@ -103,7 +103,8 @@ cp "$BINARY" "$REPO/dist/$OUT"
 log "REPL hub"
 HUB=mpy-repl-hub-$REV
 # shellcheck disable=SC2086
-$CC $CFLAGS -Wall -Wextra -Werror -o "$REPO/dist/$HUB" "$REPO/tools/mpy-repl-hub/mpy-repl-hub.c" $LDFLAGS
+$CC $CFLAGS -Wall -Wextra -Werror -o "$REPO/dist/$HUB" "$REPO/tools/mpy-repl-hub/mpy-repl-hub.c" \
+    "$REPO/tools/mpy-repl-hub/keyboard.c" $LDFLAGS
 (cd "$REPO/dist" && sha256sum "$HUB" > "$HUB.sha256")
 
 log "screenshot tool"

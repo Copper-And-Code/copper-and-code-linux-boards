@@ -17,9 +17,16 @@ Environment=MICROPYPATH=.frozen:/usr/local/mpy/fs:/usr/local/mpy/fs/lib
 Environment=TERM=xterm-256color
 # Also shown on the ready screen.
 Environment=MPY_REPL_TCP=192.168.7.1:8266
-# One MicroPython process on a pseudo-terminal, shared by the USB serial port and one TCP client
-# on the USB network only (no authentication). The hub restarts MicroPython when it exits.
-ExecStart=/usr/local/mpy/bin/mpy-repl-hub --tty /dev/ttyGS0 --listen ${MPY_REPL_TCP} -- /usr/local/mpy/bin/micropython /usr/local/mpy/lib/mpy_launcher.py
+# The layout of the keyboards plugged into the board: us, it, or none. To change it:
+#   systemctl edit mpy-repl     [Service]  Environment=MPY_KEYBOARD=it
+Environment=MPY_KEYBOARD=us
+# One MicroPython process on a pseudo-terminal, shared by the USB serial port, one TCP client on
+# the USB network only (no authentication) and the keyboards. The hub restarts MicroPython when
+# it exits.
+# The raw REPL survives a soft reset (mpyrepl keeps it in /run/mpy-repl-mode), not a restart of
+# the service: a tool that left it on would otherwise leave the board with no screen and no shell.
+ExecStartPre=-/bin/rm -f /run/mpy-repl-mode
+ExecStart=/usr/local/mpy/bin/mpy-repl-hub --tty /dev/ttyGS0 --listen ${MPY_REPL_TCP} --keyboard ${MPY_KEYBOARD} -- /usr/local/mpy/bin/micropython /usr/local/mpy/lib/mpy_launcher.py
 Restart=always
 RestartSec=0
 # Real-time priority, low among real-time tasks (the kernel's interrupt threads run at 50): busy

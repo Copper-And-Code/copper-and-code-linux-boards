@@ -43,15 +43,15 @@ next, volume, progress. The same player module as the radio.
 
 ![Settings](images/settings.png)
 
-Wi-Fi: scan, choose, type the password on the touch keyboard, connect. The choice goes to
-`settings.json`, where every app finds it through `mpy_settings` and `mpy_wifi.ensure()`.
+Wi-Fi: scan, choose, type the password on the touch keyboard, connect; and the layout of a
+keyboard plugged into the board. The choices go to `settings.json`, where every app finds it through `mpy_settings` and `mpy_wifi.ensure()`.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/settings)
 
 ## Shell
 
 A terminal on the display, the home screen at power-on: built-in commands, the `vi` and `edit`
-editors, Python programs and Linux programs on a pseudo-terminal, with the keyboard of the serial or
-TCP terminal. A tap opens the app menu.
+editors, Python programs and Linux programs on a pseudo-terminal, with a USB keyboard plugged into the
+board or the keyboard of the serial or TCP terminal. A tap opens the app menu.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/shell-linux)
 
 ## machine: the hardware

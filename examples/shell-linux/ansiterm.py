@@ -7,7 +7,8 @@
 #   ansiterm.start()
 #   print("\x1b[2J\x1b[H\x1b[1;33mhello\x1b[0m at the top left, in yellow")
 #
-# The keyboard is the one of the serial port, which keeps receiving the output too. The
+# The keyboard is the one of the serial port, which keeps receiving the output too, or on a
+# Linux board one plugged into it (the REPL hub types its keys into the REPL). The
 # grid is 8x16 cells: 60x17 at 480x272. shell_linux.py runs on it; so can a full-screen editor,
 # which gets its size from ansiterm.term.cols and .rows, or by asking with ESC[6n.
 #

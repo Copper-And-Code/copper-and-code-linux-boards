@@ -35,7 +35,7 @@ same Python code reaches everything Linux can do:
 | plays a song or an internet radio | `gst-play-1.0` (GStreamer), driven while it plays |
 | shows the weather of the next days | `curl` in the background, the system clock |
 | connects to a Wi-Fi network | `wpa_supplicant` and `systemd-networkd`, configured the standard way |
-| runs a command, edits a file | a shell with real Linux programs on a pseudo-terminal |
+| runs a command, edits a file | a shell with real Linux programs on a pseudo-terminal, typed on a USB keyboard or a terminal on the PC |
 | switches a LED, reads a button | the kernel's GPIO lines (`machine.Pin`) |
 | powers the board off | `systemctl poweroff` |
 
@@ -73,7 +73,7 @@ stations" to an app running on the board.
 
 | Example | What it shows |
 |---|---|
-| [settings](examples/settings) | Wi-Fi scan and connect; saved in `settings.json`, where every app finds it |
+| [settings](examples/settings) | Wi-Fi scan and connect, keyboard layout; saved in `settings.json`, where every app finds it |
 | [weather](examples/weather) | Open-Meteo forecast for five days with drawn icons; settings page with night dimming |
 | [mp3-player](examples/mp3-player) | Track list with ID3 titles, play, pause, next, volume: GStreamer driven from the GUI |
 | [web-radio](examples/web-radio) | Internet radio stations, the same player for `http://` streams |

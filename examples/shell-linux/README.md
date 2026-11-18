@@ -3,7 +3,8 @@
 `shell-linux` is a board-specific derivative of `examples/shell`. The original example is unchanged.
 It combines the MicroPython shell, the `edit` and `vi` editors, and execution of Linux programs on a
 pseudo-terminal (PTY). The panel displays an ANSI terminal while keyboard input comes from the
-MicroPython serial REPL connection.
+MicroPython serial or TCP REPL connection, or from a USB keyboard plugged into the board (layout in
+the Settings app).
 
 On the 480x272 panel the terminal has 60 columns and 17 rows. Linux child processes receive the same
 terminal size, so commands such as `stty size` report `17 60`.
@@ -94,6 +95,8 @@ inside the Linux command is wanted.
 - The service currently runs as root, so Linux commands inherit root privileges. The application can
   modify the whole Linux filesystem; use filesystem and removal commands accordingly.
 - There is no on-screen keyboard. The touchscreen is not a terminal input device in this example.
+- The terminal draws ASCII only: accented letters typed on a keyboard reach the programs but show
+  as `?`.
 - The ANSI terminal is optimized for text. Its alternate-screen support redraws saved cells instead
   of allocating a second full-screen framebuffer, which is important for `edit` and `vi` on this
   small MicroPython heap.
