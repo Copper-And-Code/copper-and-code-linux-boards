@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# machine.I2C and machine.ADC served by the Cortex-M4 of the STM32MP157C-DK2, with nothing wired
-# to the connectors: the bus is empty, the internal reference is known.
+# machine.I2C, machine.ADC and machine.PWM served by the Cortex-M4 of the STM32MP157C-DK2, with
+# nothing wired to the connectors: the bus is empty, the internal reference is known, the M4
+# measures the PWM on its own pin.
 #
 #   P=/dev/ttyACM1 tests/hil/test_m4.sh
 set -euo pipefail
@@ -61,6 +62,39 @@ start = time.ticks_us()
 for _ in range(500):
     vref.read_u16()
 print('PASS: %d us a reading' % (time.ticks_diff(time.ticks_us(), start) // 500))
+
+# PWM on PE9 (Arduino D6), measured on the pin by the M4 itself.
+def near(value, wanted, tolerance):
+    assert abs(value - wanted) <= tolerance, (value, wanted)
+pwm = machine.PWM('D6', freq=1000, duty_u16=16384)
+f, d = mpy_m4.measure('D6', 200)
+near(f, 1000, 0.1); near(d, 0.25, 0.001)
+pwm.duty_ns(100000)
+pwm.freq(2000)
+f, d = mpy_m4.measure('D6', 200)
+near(f, 2000, 0.1); near(d, 0.2, 0.001)
+assert pwm.duty_ns() == 100000, pwm.duty_ns()
+pwm.init(freq=50, duty_ns=1500000)
+f, d = mpy_m4.measure('PE9', 200)
+near(f, 50, 0.01); near(d, 0.075, 0.001)
+for duty in (0, 65535):
+    pwm.init(freq=1000, duty_u16=duty)
+    time.sleep_ms(2)
+    f, d = mpy_m4.measure('D6', 50)
+    assert f == 0 and d == duty // 65535, (duty, f, d)
+pwm.freq(100000)
+pwm.duty_u16(19661)
+f, d = mpy_m4.measure('D6', 100)
+near(f, 100000, 20); near(d, 0.3, 0.002)
+pwm.deinit()
+assert mpy_m4.measure('D6', 20) == (0, 0)
+for bad in (lambda: machine.PWM('PA14'), lambda: machine.PWM('D6', invert=True), lambda: machine.PWM('D6', freq=0)):
+    try:
+        bad()
+        raise AssertionError('no ValueError')
+    except ValueError:
+        pass
+print('PASS: PWM 1 kHz 25%, 2 kHz 100 us, 50 Hz 1.5 ms, 0% and 100%, 100 kHz 30%, deinit')
 
 mpy_m4.led(True)
 time.sleep_ms(200)

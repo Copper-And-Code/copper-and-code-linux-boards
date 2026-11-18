@@ -28,6 +28,18 @@ enum {
     OP_I2C_MEM_WRITE = 0x15,   // address u8, memory address size u8, memory u16, data
 
     OP_ADC_READ = 0x20,        // ADC u8 (1, 2), channel u8, port u8, pin u8 -> value u16
+
+    // TIM1 channel 1 on PE9 (Arduino D6). PWM_INIT sets the frequency and the duty (65535:
+    // always high) from the first period; PWM_COMPARE sets the high time in timer ticks (period
+    // ticks: always high), from the next period.
+    OP_PWM_INIT = 0x30,        // frequency u32, duty u16 -> frequency u32, period ticks u32, tick Hz u32
+    OP_PWM_COMPARE = 0x31,     // ticks u32
+    OP_PWM_DEINIT = 0x32,      // the pin back to analog, the timer off
+
+    // What a pin does, sampled by the M4 for a while: for tests without instruments.
+    OP_PIN_MEASURE = 0x40,     // port u8, pin u8, milliseconds u16
+                               //   -> samples u32, cycles high u32, rising edges u32,
+                               //      cycles u32, core Hz u32
 };
 
 // Channels of ADC_READ beyond the inputs 0 to 19; ADC2 only.

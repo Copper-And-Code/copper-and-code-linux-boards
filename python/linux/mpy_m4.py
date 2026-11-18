@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: MIT
-# machine.I2C and machine.ADC served by the Cortex-M4 of an STM32MP15 board, as on a
+# machine.I2C, machine.ADC and machine.PWM served by the Cortex-M4 of an STM32MP15 board, as on a
 # microcontroller: the same MicroPython code runs on both.
 #
 #   from machine import I2C, ADC
 #   i2c = I2C(5, freq=400000)        # I2C5: Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5
 #   i2c.scan()
 #   ADC("A0").read_uv()              # Arduino A0..A5, pin names ("PF14") or ADC.CORE_VREF
+#   PWM("D6", freq=1000, duty_u16=16384)   # TIM1 channel 1 on PE9 (Arduino D6)
 #
 # The firmware (mcu/stm32mp157c-dk2, mpy_m4.elf) runs on the M4, loaded by Linux through
 # remoteproc; the two talk over an RPMsg virtual serial port with the protocol of
@@ -31,6 +32,10 @@ _I2C_READ = 0x13
 _I2C_MEM_READ = 0x14
 _I2C_MEM_WRITE = 0x15
 _ADC_READ = 0x20
+_PWM_INIT = 0x30
+_PWM_COMPARE = 0x31
+_PWM_DEINIT = 0x32
+_PIN_MEASURE = 0x40
 
 _MAX_DATA = 400
 _EOPNOTSUPP = 95
@@ -228,13 +233,121 @@ class I2C:
         link.request(_I2C_MEM_WRITE, self._memory(addr, memaddr, addrsize) + data)
 
 
+# Arduino digital pins the M4 uses (connector CN14/CN13, from the board's schematic).
+_DIGITAL = {"D6": "PE9", "D14": "PA12", "D15": "PA11"}
+
+
 def _pin_name(pin):
-    # "PF14", or the name inside a machine.Pin's repr: Pin('PF14', ...).
+    # "PF14", an Arduino name, or the name inside a machine.Pin's repr: Pin('PF14', ...).
     if isinstance(pin, str):
-        return pin.upper()
-    text = repr(pin)
-    start = text.find("'")
-    return text[start + 1 : text.find("'", start + 1)] if start >= 0 else text
+        name = pin.upper()
+    else:
+        text = repr(pin)
+        start = text.find("'")
+        name = text[start + 1 : text.find("'", start + 1)] if start >= 0 else text
+    return _DIGITAL.get(name, name)
+
+
+def _port_pin(name):
+    if len(name) < 3 or name[0] != "P" or not "A" <= name[1] <= "K" or not name[2:].isdigit() or int(name[2:]) > 15:
+        raise ValueError("not a pin name: %r" % name)
+    return ord(name[1]) - ord("A"), int(name[2:])
+
+
+def measure(pin, ms=100):
+    # What a pin does, sampled by the M4 for ms milliseconds (1 to 1000): (frequency in Hz, share
+    # of the time it was high from 0 to 1). About 8 million samples a second: good up to a few
+    # hundred kHz. For tests without instruments; the M4 does nothing else meanwhile.
+    port, number = _port_pin(_pin_name(pin))
+    answer = link.request(_PIN_MEASURE, struct.pack("<BBH", port, number, ms), ms + 1000)
+    samples, high, rising, cycles, core = struct.unpack("<5I", answer)
+    seconds = cycles / core
+    return rising / seconds, high / cycles
+
+
+class PWM:
+    # machine.PWM on the M4's TIM1 channel 1: pin PE9, Arduino D6. 1 Hz to about 100 MHz; the
+    # duty has 16 bits of resolution up to 3.2 kHz and fewer above (the timer's period in ticks).
+
+    def __init__(self, dest, *, freq=None, duty_u16=None, duty_ns=None, invert=False):
+        if _pin_name(dest) != "PE9":
+            raise ValueError("PWM is on PE9 (Arduino D6): TIM1 channel 1 of the Cortex-M4")
+        self._freq = 1000
+        self._duty = ("u16", 0)  # what was asked last: kept when the frequency changes
+        self._period = 0
+        self.init(freq=freq, duty_u16=duty_u16, duty_ns=duty_ns, invert=invert)
+
+    def init(self, *, freq=None, duty_u16=None, duty_ns=None, invert=False):
+        if invert:
+            raise ValueError("invert is not supported")
+        if duty_u16 is not None and duty_ns is not None:
+            raise ValueError("duty_u16 or duty_ns, not both")
+        if duty_u16 is not None:
+            self._duty = ("u16", self._check_u16(duty_u16))
+        elif duty_ns is not None:
+            self._duty = ("ns", max(0, int(duty_ns)))
+        self._start(self._freq if freq is None else freq)
+
+    def _check_u16(self, value):
+        if not 0 <= value <= 65535:
+            raise ValueError("duty_u16 is 0 to 65535")
+        return int(value)
+
+    def _start(self, freq):
+        freq = int(freq)
+        if freq < 1:
+            raise ValueError("freq must be at least 1 Hz")
+        kind, value = self._duty
+        approx = value if kind == "u16" else min(65535, value * freq * 65535 // 1000000000)
+        answer = link.request(_PWM_INIT, struct.pack("<IH", freq, approx))
+        self._actual, self._period, self._tick = struct.unpack("<3I", answer)
+        self._freq = freq
+        if kind == "ns":
+            self._compare(self._ns_ticks(value))  # exact, from the next period
+
+    def _ns_ticks(self, ns):
+        return min(self._period, (ns * self._tick + 500000000) // 1000000000)
+
+    def _compare(self, ticks):
+        link.request(_PWM_COMPARE, struct.pack("<I", ticks))
+        self._ticks = ticks
+
+    def __repr__(self):
+        if not self._period:
+            return "PWM(PE9, deinit)"
+        return "PWM(PE9, freq=%d, duty_u16=%d)" % (self._actual, self.duty_u16())
+
+    def deinit(self):
+        link.request(_PWM_DEINIT)
+        self._period = 0
+
+    def freq(self, value=None):
+        if value is None:
+            return self._actual
+        self._start(value)
+
+    def duty_u16(self, value=None):
+        if value is None:
+            kind, duty = self._duty
+            if kind == "u16":
+                return duty
+            return min(65535, self._ns_ticks(duty) * 65535 // self._period)
+        self._duty = ("u16", self._check_u16(value))
+        if not self._period:
+            self._start(self._freq)
+        else:
+            self._compare(self._period * self._duty[1] // 65535)
+
+    def duty_ns(self, value=None):
+        if value is None:
+            kind, duty = self._duty
+            ticks = self._period * duty // 65535 if kind == "u16" else self._ns_ticks(duty)
+            return ticks * 1000000000 // self._tick
+        self._duty = ("ns", max(0, int(value)))
+        if not self._period:
+            self._start(self._freq)
+        else:
+            self._compare(self._ns_ticks(self._duty[1]))
 
 
 _NO_PIN = 0xFF
@@ -273,7 +386,7 @@ class ADC:
         if name.startswith("ANA"):
             port = pin = _NO_PIN  # dedicated analog pads, no GPIO to set
         else:
-            port, pin = ord(name[1]) - ord("A"), int(name[2:])
+            port, pin = _port_pin(name)
         self._args = bytes([number, channel, port, pin])
         self._name = name
 

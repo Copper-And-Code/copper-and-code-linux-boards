@@ -1,6 +1,6 @@
 # Cortex-M4 firmware for the STM32MP157C-DK2
 
-The firmware that serves `machine.I2C` and `machine.ADC` to MicroPython on Linux, over RPMsg. Linux
+The firmware that serves `machine.I2C`, `machine.ADC` and `machine.PWM` to MicroPython on Linux, over RPMsg. Linux
 loads it through remoteproc (`/lib/firmware/mpy_m4.elf`). Built with `arm-none-eabi-gcc` against
 STM32CubeMP1 1.7.0, without STM32CubeIDE:
 
@@ -12,7 +12,7 @@ make -C mcu/stm32mp157c-dk2 APP=<STM32CubeMP1>/Projects/STM32MP157C-DK2/Applicat
 
 | Path | Content |
 |---|---|
-| `firmware/Src/main.c` | Requests: I2C5, ADC1/ADC2, the orange LED |
+| `firmware/Src/main.c` | Requests: I2C5, ADC1/ADC2, PWM on TIM1, pin measurement, the orange LED |
 | `firmware/Inc/mpy_m4_protocol.h` | The protocol, shared with `python/linux/mpy_m4.py` |
 | `firmware/Inc/stm32mp1xx_hal_conf.h` | The HAL modules beyond those of ST's echo example |
 

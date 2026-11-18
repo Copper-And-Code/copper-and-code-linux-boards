@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-// Cortex-M4 firmware of lvgl-mpy-linux for the STM32MP157C-DK2: it serves machine.I2C and
-// machine.ADC to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
+// Cortex-M4 firmware of lvgl-mpy-linux for the STM32MP157C-DK2: it serves machine.I2C,
+// machine.ADC and machine.PWM to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over an RPMsg
 // virtual serial port (/dev/ttyRPMSG0 on Linux).
 //
 // Linux loads it through remoteproc and, from the "m4-examples" device tree, gives it its
 // peripherals: clocks, pins (I2C5 on PA11/PA12, the orange LED on PH7) and the ADC's 2.5 V
-// reference. The firmware never touches the system clocks.
+// reference. Linux only reserves the pins: the firmware sets them. It never touches the system
+// clocks.
 
 #include <string.h>
 
@@ -383,6 +384,117 @@ static void handle_adc(uint8_t sequence, const uint8_t *args, size_t size) {
     send(sequence, 0, result, 2);
 }
 
+// ---- PWM on TIM1 channel 1, PE9 (Arduino D6), on the registers
+
+static uint32_t pwm_period;  // timer ticks a period: ARR + 1
+
+static uint32_t timer_clock(void) {
+    uint32_t hz = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_TIMG2);  // TIM1 is in timer group 2
+    return hz ? hz : 208877930;
+}
+
+static void pwm_pin(int on) {
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    GPIO_InitTypeDef pin = {
+        .Pin = GPIO_PIN_9,
+        .Mode = on ? GPIO_MODE_AF_PP : GPIO_MODE_ANALOG,
+        .Pull = GPIO_NOPULL,
+        .Speed = GPIO_SPEED_FREQ_HIGH,
+        .Alternate = on ? GPIO_AF1_TIM1 : 0,
+    };
+    PERIPH_LOCK(GPIOE);
+    HAL_GPIO_Init(GPIOE, &pin);
+    PERIPH_UNLOCK(GPIOE);
+}
+
+static void handle_pwm(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
+    switch (operation) {
+        case OP_PWM_INIT: {
+            if (size != 6) {
+                break;
+            }
+            uint32_t clock = timer_clock(), frequency = get32(args), duty = get16(args + 4);
+            if (frequency == 0 || frequency > clock / 2) {
+                break;
+            }
+            uint32_t ticks = clock / frequency;  // at most the clock: 32 bits are enough
+            uint32_t prescaler = (ticks + 65535) / 65536;  // TIM1 counts to 65535
+            uint32_t period = (clock / prescaler + frequency / 2) / frequency;
+            __HAL_RCC_TIM1_CLK_ENABLE();
+            TIM1->CR1 = 0;
+            TIM1->PSC = prescaler - 1;
+            TIM1->ARR = period - 1;
+            TIM1->CCR1 = (uint64_t)period * duty / 65535;
+            TIM1->CCMR1 = (6U << TIM_CCMR1_OC1M_Pos) | TIM_CCMR1_OC1PE;  // PWM mode 1, preload
+            TIM1->CCER = TIM_CCER_CC1E;
+            TIM1->BDTR = TIM_BDTR_MOE;  // an advanced timer: outputs on
+            TIM1->EGR = TIM_EGR_UG;
+            TIM1->CR1 = TIM_CR1_ARPE | TIM_CR1_CEN;
+            pwm_pin(1);
+            pwm_period = period;
+            uint32_t tick = clock / prescaler, actual = (tick + period / 2) / period;
+            uint8_t result[12] = {actual, actual >> 8, actual >> 16, actual >> 24, period, period >> 8,
+                period >> 16, period >> 24, tick, tick >> 8, tick >> 16, tick >> 24};
+            send(sequence, 0, result, sizeof(result));
+            return;
+        }
+        case OP_PWM_COMPARE: {
+            if (size != 4 || !pwm_period || get32(args) > pwm_period) {
+                break;
+            }
+            TIM1->CCR1 = get32(args);  // from the next period (preload): no glitch
+            send(sequence, 0, NULL, 0);
+            return;
+        }
+        case OP_PWM_DEINIT:
+            if (pwm_period) {
+                TIM1->CR1 = 0;
+                TIM1->CCER = 0;
+                pwm_pin(0);
+                __HAL_RCC_TIM1_CLK_DISABLE();
+                pwm_period = 0;
+            }
+            send(sequence, 0, NULL, 0);
+            return;
+    }
+    send(sequence, E_INVAL, NULL, 0);
+}
+
+// ---- a pin sampled for a while, timed by the cycle counter
+
+static void handle_measure(uint8_t sequence, const uint8_t *args, size_t size) {
+    if (size != 4 || args[0] > 10 || args[1] > 15 || get16(args + 2) == 0 || get16(args + 2) > 1000) {
+        send(sequence, E_INVAL, NULL, 0);
+        return;
+    }
+    GPIO_TypeDef *gpio = (GPIO_TypeDef *)(GPIOA_BASE + args[0] * (GPIOB_BASE - GPIOA_BASE));
+    SET_BIT(RCC->MC_AHB4ENSETR, 1U << args[0]);
+    uint32_t mask = 1U << args[1];
+    uint32_t core = HAL_RCC_GetMCUFreq();
+    uint32_t length = core / 1000 * get16(args + 2);
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    // The time between two samples counts as high when the first was high: a loop that takes
+    // longer on one branch would bias a count of samples.
+    uint32_t samples = 0, high = 0, rising = 0, last = gpio->IDR & mask;
+    uint32_t start = DWT->CYCCNT, before = start, now;
+    do {
+        uint32_t level = gpio->IDR & mask;
+        now = DWT->CYCCNT;
+        samples++;
+        if (last) {
+            high += now - before;
+        } else if (level) {
+            rising++;
+        }
+        last = level;
+        before = now;
+    } while (now - start < length);
+    uint32_t cycles = now - start;
+    uint32_t values[5] = {samples, high, rising, cycles, core};
+    send(sequence, 0, (const uint8_t *)values, sizeof(values));  // the M4 is little endian too
+}
+
 // ---- requests
 
 static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, size_t size) {
@@ -414,6 +526,14 @@ static void handle(uint8_t sequence, uint8_t operation, const uint8_t *args, siz
             return;
         case OP_ADC_READ:
             handle_adc(sequence, args, size);
+            return;
+        case OP_PWM_INIT:
+        case OP_PWM_COMPARE:
+        case OP_PWM_DEINIT:
+            handle_pwm(sequence, operation, args, size);
+            return;
+        case OP_PIN_MEASURE:
+            handle_measure(sequence, args, size);
             return;
         default:
             send(sequence, E_OPNOTSUPP, NULL, 0);
