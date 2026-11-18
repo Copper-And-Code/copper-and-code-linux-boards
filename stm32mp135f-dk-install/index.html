@@ -377,6 +377,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#working-from-afar-screenshots-and-taps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working from afar: screenshots and taps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uninstall-and-recovery" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -677,6 +688,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#working-from-afar-screenshots-and-taps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working from afar: screenshots and taps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uninstall-and-recovery" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -841,6 +863,17 @@ scp<span class="w"> </span>examples/shell-linux/edit.py<span class="w"> </span>e
 <p>The application is not added to <code>main.py</code> by default. See <code>examples/shell-linux/README.md</code> for command
 lookup, the <code>linux</code> override, Ctrl-C behavior, tests and current pipeline/exit-status limitations.
 Linux commands inherit the REPL service's root privileges.</p>
+<h2 id="working-from-afar-screenshots-and-taps">Working from afar: screenshots and taps<a class="headerlink" href="#working-from-afar-screenshots-and-taps" title="Permanent link">&para;</a></h2>
+<p>Two tools let a board be checked and driven without looking at it or touching it:</p>
+<div class="highlight"><pre><span></span><code>scripts/screen.sh<span class="w"> </span>screen.png<span class="w">          </span><span class="c1"># what the panel shows now, turned as the user sees it</span>
+scripts/tap.sh<span class="w"> </span><span class="m">400</span><span class="w"> </span><span class="m">300</span><span class="w">                </span><span class="c1"># a tap at screen coordinates (x, y)</span>
+</code></pre></div>
+<p><code>mpy-screenshot</code> (<code>tools/mpy-screenshot/</code>, installed in <code>/usr/local/mpy/bin</code>) reads the
+framebuffer the display controller shows through DRM and writes a PNG; it does not disturb the
+program that draws it or the REPL. <code>mpy_tap.py</code> writes a press and a release into the
+touchscreen's own event device, turned back from screen to panel coordinates, so <code>display_driver</code>
+reads them as a finger. Both need root. With two boards at the same address, set <code>MPY_SSH_ALIAS</code>
+as for <code>scripts/deploy.sh</code>.</p>
 <h2 id="uninstall-and-recovery">Uninstall and recovery<a class="headerlink" href="#uninstall-and-recovery" title="Permanent link">&para;</a></h2>
 <p>To return to the original OpenSTLinux configuration (original DTB and USB gadget, Weston and the
 demo), run on the board and reboot:</p>
