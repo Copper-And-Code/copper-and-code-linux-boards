@@ -27,7 +27,7 @@
     
     
       
-        <title>Next board, STM32MP157C-DK2 - lvgl-mpy-linux</title>
+        <title>The STM32MP157C-DK2 and its Cortex-M4 - lvgl-mpy-linux</title>
       
     
     
@@ -109,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Next board, STM32MP157C-DK2
+              The STM32MP157C-DK2 and its Cortex-M4
             
           </span>
         </div>
@@ -386,7 +386,7 @@
   <span class="md-ellipsis">
     
   
-    Next board, STM32MP157C-DK2
+    The STM32MP157C-DK2 and its Cortex-M4
   
 
     
@@ -404,7 +404,7 @@
   <span class="md-ellipsis">
     
   
-    Next board, STM32MP157C-DK2
+    The STM32MP157C-DK2 and its Cortex-M4
   
 
     
@@ -430,10 +430,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#checked" class="md-nav__link">
+  <a href="#the-board" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Checked
+        The board
       
     </span>
   </a>
@@ -441,32 +441,49 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#checked-in-the-releases-files-no-board-yet" class="md-nav__link">
+  <a href="#machine-on-the-cortex-m4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Checked in the release's files (no board yet)
+        machine on the Cortex-M4
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="machine on the Cortex-M4">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#i2c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        I2C
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#to-verify-on-the-board-rule-6-of-the-plan-device-tree-first" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#adc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        To verify on the board (rule 6 of the plan: device tree first)
+        ADC
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#design-from-the-portable-machine-api-decision-in-docsstm32mp135f-dkmd" class="md-nav__link">
+  <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Design (from the portable machine API decision in docs/stm32mp135f-dk.md)
+        Next
       
     </span>
   </a>
@@ -600,10 +617,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#checked" class="md-nav__link">
+  <a href="#the-board" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Checked
+        The board
       
     </span>
   </a>
@@ -611,32 +628,49 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#checked-in-the-releases-files-no-board-yet" class="md-nav__link">
+  <a href="#machine-on-the-cortex-m4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Checked in the release's files (no board yet)
+        machine on the Cortex-M4
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="machine on the Cortex-M4">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#i2c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        I2C
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#to-verify-on-the-board-rule-6-of-the-plan-device-tree-first" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#adc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        To verify on the board (rule 6 of the plan: device tree first)
+        ADC
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#design-from-the-portable-machine-api-decision-in-docsstm32mp135f-dkmd" class="md-nav__link">
+  <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Design (from the portable machine API decision in docs/stm32mp135f-dk.md)
+        Next
       
     </span>
   </a>
@@ -672,94 +706,175 @@
 
 
 <h1 id="stm32mp157c-dk2">STM32MP157C-DK2<a class="headerlink" href="#stm32mp157c-dk2" title="Permanent link">&para;</a></h1>
-<p>Second board of this project. <strong>Status:</strong> OpenSTLinux flashed, our firmware installed with
-<code>scripts/deploy.sh</code>, the shell and the REPL working (serial and TCP), the 480x800 panel turned to
-800x480 in software (about 50 full frames per second). The Cortex-M4 and <code>machine</code> over RPMsg are
-next. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>. Product page:
-<a href="https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html">https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html</a>.
-Flashing and boot: <a href="https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image">Populate the target and boot the image</a>
+<p>Second board of this project, and the first with a microcontroller beside Linux: its Cortex-M4
+serves <code>machine.I2C</code> and <code>machine.ADC</code> to MicroPython on the Cortex-A7.</p>
+<p><strong>Status:</strong> OpenSTLinux flashed; our build installed with <code>scripts/deploy.sh</code> (the same MicroPython
+binary as the STM32MP135F-DK); shell, app menu and REPL working (serial and TCP); the 480×800 panel
+turned to 800×480 in software (about 50 full frames per second); Wi-Fi, weather and the web radio
+with sound through the board's codec; <code>machine.Pin</code> on Linux GPIO lines, <code>machine.I2C</code> and
+<code>machine.ADC</code> on the Cortex-M4. Bring-up log: <code>docs/log/stm32mp157c-dk2-bringup.txt</code>.
+Product page: <a href="https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html">https://www.st.com/en/evaluation-tools/stm32mp157c-dk2.html</a>. Flashing and boot:
+<a href="https://wiki.st.com/stm32mpu/wiki/Getting_started/STM32MP1_boards/STM32MP157x-DK2/Let%27s_start/Populate_the_target_and_boot_the_image">Populate the target and boot the image</a>
 on the ST wiki.</p>
-<p>The goal is the same as on the STM32MP135F-DK (MicroPython unix port with LVGL on the Cortex-A7,
-the MCU-style REPL, <code>display_driver</code>, LVGL MPY Studio), plus a <code>machine</code> backend served by the
-board's Cortex-M4. This document separates what was checked from what is still assumed.</p>
-<h2 id="checked">Checked<a class="headerlink" href="#checked" title="Permanent link">&para;</a></h2>
-<ul>
-<li>MicroPython v1.29.0 has no STM32MP157 board in <code>ports/stm32/boards</code>: a MicroPython build for the
-  Cortex-M4 would be a new port of the stm32 port, not an existing board.</li>
-<li>MicroPython v1.29.0 has an <code>openamp</code> module (<code>extmod/modopenamp.c</code>,
-  <code>extmod/modopenamp_remoteproc.c</code>) with RPMsg endpoints and remoteproc, used today on MCU ports
-  (<code>ports/stm32/mpmetalport.c</code>, <code>mpremoteprocport.c</code>). It is the MCU side of the link, not the
-  Linux side.</li>
-</ul>
-<h2 id="checked-in-the-releases-files-no-board-yet">Checked in the release's files (no board yet)<a class="headerlink" href="#checked-in-the-releases-files-no-board-yet" title="Permanent link">&para;</a></h2>
-<p>The OpenSTLinux release used for the STM32MP135F-DK (<code>openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10</code>)
-covers this board too: its Starter Package has the microSD flash layouts
-(<code>FlashLayout_sdcard_stm32mp157c-dk2-optee.tsv</code> and others) and its SDK, the same one, has the device
-trees <code>stm32mp157c-dk2.dtb</code> and <code>stm32mp157c-dk2-m4-examples.dtb</code>. Both CPUs are Cortex-A7 with the
-same ABI (<code>cortexa7t2hf-neon-vfpv4</code>), so the same toolchain builds for both. From the device trees:</p>
+<h2 id="the-board">The board<a class="headerlink" href="#the-board" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Topic</th>
-<th>stm32mp157c-dk2.dtb</th>
+<th>What the build does</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Display</td>
-<td>DSI panel <code>orisetech,otm8009a</code> through <code>st,stm32-dsi</code> and <code>st,stm32-ltdc</code>; no separate backlight node (the panel driver controls the brightness)</td>
+<td>DSI panel 480×800 portrait, turned to 800×480 landscape by LVGL (<code>MPY_DISPLAY_ROTATION=90</code>, set by <code>install.sh</code>)</td>
 </tr>
 <tr>
 <td>Touch</td>
-<td><code>focaltech,ft6236</code> on I2C at <code>0x38</code>, <code>touchscreen-size</code> 480 × 800: a 480×800 portrait panel</td>
+<td>FT6236 at I2C <code>0x38</code>, its range matches the panel; LVGL turns the points with the screen</td>
 </tr>
 <tr>
-<td>USB device port</td>
-<td><code>st,stm32mp15-hsotg</code> (<code>dwc2</code>) at <code>49000000</code>, <code>dr_mode = "otg"</code>, <code>usb-role-switch</code>: the composite serial and network gadget of the STM32MP135F-DK should work</td>
+<td>USB</td>
+<td><code>dwc2</code> OTG port (USB-C CN7): the composite serial and network gadget, with TX FIFOs set by a device tree overlay</td>
 </tr>
 <tr>
-<td>Cortex-M4</td>
-<td><code>st,stm32mp1-m4</code> under remoteproc, with reserved memory (<code>mcuram</code>, <code>mcuram2</code>, <code>retram</code>, <code>vdev0buffer</code> for RPMsg) and mailboxes <code>vq0</code>, <code>vq1</code>, <code>shutdown</code>, <code>detach</code></td>
+<td>Audio</td>
+<td>CS42L51 codec on the headphone jack, through <code>alsasink device=plughw:0,0</code> (<code>MPY_AUDIO_SINK</code>): ALSA's default device goes to PulseAudio, which runs only with the graphical session</td>
 </tr>
 <tr>
-<td>Peripherals given to the Cortex-M4 (<code>m4-examples</code>)</td>
-<td>ADC <code>48003000</code>, DAC <code>40017000</code>, DMA <code>48001000</code>, I2C <code>40015000</code>, SPI <code>44005000</code>, UART <code>40018000</code>, timers <code>40000000</code> and <code>44000000</code>, CRC, CRYP, HASH, RNG</td>
+<td>Device tree</td>
+<td>ST's <code>stm32mp157c-dk2-m4-examples.dtb</code> with our USB overlay (<code>scripts/build_mp157_usb.sh</code>), installed as <code>/boot/stm32mp157c-dk2.dtb</code>; the original is kept as <code>.st-original</code></td>
 </tr>
 </tbody>
 </table>
-<p>The <code>m4-examples</code> device tree is a ready starting point for <code>machine</code>: it already hands the Cortex-M4
-the ADC, DAC, I2C, SPI, a UART and two timers (PWM).</p>
-<p>Consequences:</p>
+<h2 id="machine-on-the-cortex-m4"><code>machine</code> on the Cortex-M4<a class="headerlink" href="#machine-on-the-cortex-m4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ADC</span><span class="p">,</span> <span class="n">Pin</span>
+
+<span class="n">i2c</span> <span class="o">=</span> <span class="n">I2C</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">400000</span><span class="p">)</span>        <span class="c1"># Arduino D14 SDA / D15 SCL, 40-pin header pins 3 and 5</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">i2c</span><span class="o">.</span><span class="n">scan</span><span class="p">())</span>
+<span class="n">i2c</span><span class="o">.</span><span class="n">readfrom_mem</span><span class="p">(</span><span class="mh">0x76</span><span class="p">,</span> <span class="mh">0xD0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># a register, as on any MicroPython board</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">ADC</span><span class="p">(</span><span class="s2">"A0"</span><span class="p">)</span><span class="o">.</span><span class="n">read_uv</span><span class="p">())</span>       <span class="c1"># Arduino A0..A5, from 0 to 2.5 V</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ADC</span><span class="p">(</span><span class="n">ADC</span><span class="o">.</span><span class="n">CORE_VREF</span><span class="p">)</span><span class="o">.</span><span class="n">read_uv</span><span class="p">())</span>
+
+<span class="n">Pin</span><span class="p">(</span><span class="s2">"PA14"</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">PULL_UP</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>   <span class="c1"># Pin stays on Linux GPIO lines, as on the STM32MP135F-DK</span>
+</code></pre></div>
+<p>How it fits together:</p>
 <ul>
-<li>The panel is 480×800 portrait, not 480×272: the LVGL MPY Studio examples need a new board profile
-  and a layout for it, or the display turned to 800×480 landscape in software (LVGL rotation, at a
-  CPU cost to measure).</li>
-<li><code>display_driver</code> and <code>touch_evdev</code> find the resolution, the touchscreen and the backlight by
-  themselves; the FT6236 range matches the panel, so no <code>MPY_TOUCH_RANGE</code> is expected.</li>
+<li><strong>Device tree.</strong> The <code>m4-examples</code> device tree gives the Cortex-M4 the Arduino connector's ADC,
+  DAC, I2C5, SPI4, UART7, TIM1 and TIM2, and the orange LED; Linux keeps the display, touch, Wi-Fi,
+  audio and USB. Linux only reserves those pins: the firmware sets them itself.</li>
+<li><strong>Firmware</strong> (<code>mcu/stm32mp157c-dk2/</code>, built by <code>scripts/build_m4.sh</code> with <code>arm-none-eabi-gcc</code>,
+  without STM32CubeIDE): STM32Cube HAL and OpenAMP from STM32CubeMP1 1.7.0, our <code>main.c</code> and the
+  protocol. <code>install.sh</code> puts it in <code>/lib/firmware/mpy_m4.elf</code>.</li>
+<li><strong>Start.</strong> The first use of <code>machine.I2C</code> or <code>machine.ADC</code> loads the firmware through remoteproc
+  if the M4 is off (about 0.6 s). A new firmware installed by <code>deploy.sh</code> takes over at once.</li>
+<li><strong>Link.</strong> One RPMsg virtual serial port (<code>/dev/ttyRPMSG*</code>; the number changes when the M4
+  restarts, so <code>mpy_m4</code> looks it up). Requests and answers carry a length, a sequence number and an
+  errno: the protocol is in <code>mcu/stm32mp157c-dk2/firmware/Inc/mpy_m4_protocol.h</code>. A request takes
+  about 0.35 ms there and back.</li>
+<li><strong>Python.</strong> <code>mpy_m4</code> (frozen) has the classes; the frozen <code>machine</code> module takes the place of
+  MicroPython's built-in one (an "extensible" module in v1.29), imports all of it from <code>umachine</code>
+  and adds <code>I2C</code> and <code>ADC</code> on a board with a Cortex-M4. On the STM32MP135F-DK nothing changes.</li>
 </ul>
-<h2 id="to-verify-on-the-board-rule-6-of-the-plan-device-tree-first">To verify on the board (rule 6 of the plan: device tree first)<a class="headerlink" href="#to-verify-on-the-board-rule-6-of-the-plan-device-tree-first" title="Permanent link">&para;</a></h2>
+<h3 id="i2c">I2C<a class="headerlink" href="#i2c" title="Permanent link">&para;</a></h3>
+<p>Bus 5 only (<code>I2C(5)</code>, the default): SDA PA12, SCL PA11, on the Arduino connector (D14, D15) and on
+the 40-pin header (pins 3 and 5, GPIO2/GPIO3). 10 kHz to 1 MHz; the default is 400 kHz. The weak
+internal pull-ups keep an empty bus high; devices bring their own.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scan()</code></td>
+<td>the addresses 0x08 to 0x77 that answer (3 ms for an empty bus at 400 kHz)</td>
+</tr>
+<tr>
+<td><code>writeto</code>, <code>writevto</code>, <code>readfrom</code>, <code>readfrom_into</code></td>
+<td>as on MicroPython; <code>OSError(ENODEV)</code> when no device answers the address</td>
+</tr>
+<tr>
+<td><code>readfrom_mem</code>, <code>readfrom_mem_into</code>, <code>writeto_mem</code></td>
+<td><code>addrsize</code> 8 or 16</td>
+</tr>
+<tr>
+<td><code>writeto(addr, reg, False)</code> then <code>readfrom(addr, n)</code></td>
+<td>the register read with a repeated start, for a register address of 1 or 2 bytes</td>
+</tr>
+</tbody>
+</table>
+<p>Up to 400 bytes a transfer. Not there: the primitive operations (<code>start</code>, <code>stop</code>, <code>readinto</code>,
+<code>write</code>), 10-bit addresses.</p>
+<h3 id="adc">ADC<a class="headerlink" href="#adc" title="Permanent link">&para;</a></h3>
+<p>16 bits against the 2.5 V reference buffer (VREFBUF), which Linux turns on for the M4: inputs from
+0 to 2.5 V, never more than 3.3 V. <code>read_u16()</code> and <code>read_uv()</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Pin</th>
+<th>Converter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A0</code></td>
+<td>ANA0</td>
+<td>ADC1 input 0</td>
+</tr>
+<tr>
+<td><code>A1</code></td>
+<td>ANA1</td>
+<td>ADC1 input 1</td>
+</tr>
+<tr>
+<td><code>A2</code></td>
+<td>PF14</td>
+<td>ADC2 input 6</td>
+</tr>
+<tr>
+<td><code>A3</code></td>
+<td>PF13</td>
+<td>ADC2 input 2</td>
+</tr>
+<tr>
+<td><code>A4</code></td>
+<td>PC3</td>
+<td>ADC1 input 13</td>
+</tr>
+<tr>
+<td><code>A5</code></td>
+<td>PF12</td>
+<td>ADC1 input 6</td>
+</tr>
+<tr>
+<td><code>ADC.CORE_VREF</code></td>
+<td>internal reference, about 1.21 V</td>
+<td>ADC2</td>
+</tr>
+<tr>
+<td><code>ADC.CORE_TEMP</code></td>
+<td>temperature sensor (a voltage; Linux gives the chip's temperature in <code>/sys/class/thermal</code>)</td>
+<td>ADC2</td>
+</tr>
+</tbody>
+</table>
+<p>The names follow the board's schematic (the net names of user manual UM2534); the manual's table
+of Arduino pins has some rows shifted. Pin names (<code>ADC("PF14")</code>) work too.</p>
+<p>Checked on the board (<code>tests/hil/test_m4.sh</code>, nothing wired): VREFINT reads 1.203 to 1.216 V
+(datasheet 1.18 to 1.24 V; its factory calibration in OTP says 1.209 V), the six inputs convert,
+an empty I2C bus answers <code>ENODEV</code>. Not checked yet: a real I2C device and a known voltage on an
+input.</p>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
-<li>That the release boots on the board: flash with <code>FlashLayout_sdcard_stm32mp157c-dk2-optee.tsv</code>,
-  then <code>uname -a</code>, <code>/etc/os-release</code>, the inventory of the STM32MP135F-DK's phase 1.</li>
-<li>Whether <code>linuxfb</code> (DRM dumb buffer) works unchanged on the DSI panel, and how the brightness is
-  exposed (a <code>/sys/class/backlight</code> entry from the panel driver, or none).</li>
-<li>USB gadget: which port is dual-role, UDC name; whether <code>mpy-usb-composite.sh</code> applies.</li>
-<li>remoteproc: <code>/sys/class/remoteproc/remoteproc0</code> (<code>firmware</code>, <code>state</code>), where firmware files are
-  looked up (<code>/lib/firmware</code>), and the RPMsg devices the kernel offers (<code>rpmsg_tty</code>:
-  <code>/dev/ttyRPMSG*</code>, or <code>rpmsg_char</code>).</li>
-<li>Which connector pins the peripherals given to the Cortex-M4 use (the user manual of the board),
-  and which of them <code>machine</code> will offer first.</li>
-<li>Free GPIO lines and their connector pins for the HIL tests.</li>
-</ul>
-<h2 id="design-from-the-portable-machine-api-decision-in-docsstm32mp135f-dkmd">Design (from the portable <code>machine</code> API decision in <code>docs/stm32mp135f-dk.md</code>)<a class="headerlink" href="#design-from-the-portable-machine-api-decision-in-docsstm32mp135f-dkmd" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>machine.Pin</code> keeps the interface already implemented for the STM32MP135F-DK
-  (<code>modules/linuxmachine/</code>). A second backend sends the same operations to the Cortex-M4 over RPMsg;
-  which backend a pin uses depends on the board, not on application code.</li>
-<li>First classes: <code>Pin</code> and <code>I2C</code>. <code>PWM</code>, <code>ADC</code> and <code>Timer</code> later.</li>
-<li>The RPMsg protocol (requests, replies, errors, versions) is to be defined before the firmware.</li>
-<li>Cortex-M4 firmware options, to be decided: written from scratch on STM32Cube or Zephyr with
-  OpenAMP; or MicroPython on the Cortex-M4, which needs the port described above.</li>
+<li><code>PWM</code> on TIM1 channel 1 (PE9) and <code>SPI</code> on SPI4, then <code>Timer</code>, <code>UART</code> and the DAC.</li>
+<li>An I2C sensor and a known voltage on A0 for the HIL tests.</li>
+<li>A firmware that answers while Linux sleeps, and the M4 started at boot by a unit instead of at
+  first use, if the 0.6 s matter.</li>
 </ul>
 <h2 id="layout">Layout<a class="headerlink" href="#layout" title="Permanent link">&para;</a></h2>
 <table>
@@ -771,16 +886,20 @@ the ADC, DAC, I2C, SPI, a UART and two timers (PWM).</p>
 </thead>
 <tbody>
 <tr>
-<td><code>boards/unix/STM32MP157C_DK2/</code></td>
-<td>Unix variant for the Cortex-A7 (placeholder)</td>
-</tr>
-<tr>
 <td><code>mcu/stm32mp157c-dk2/</code></td>
-<td>Cortex-M4 firmware (placeholder)</td>
+<td>Cortex-M4 firmware: <code>Makefile</code>, <code>firmware/</code> (our sources)</td>
 </tr>
 <tr>
-<td><code>docs/stm32mp157c-dk2.md</code></td>
-<td>This plan</td>
+<td><code>python/linux/mpy_m4.py</code>, <code>python/linux/machine.py</code></td>
+<td>The Python side, frozen in the firmware</td>
+</tr>
+<tr>
+<td><code>scripts/build_m4.sh</code>, <code>scripts/build_mp157_usb.sh</code></td>
+<td>Firmware and device tree builds</td>
+</tr>
+<tr>
+<td><code>tests/hil/test_m4.sh</code></td>
+<td>Tests of <code>machine.I2C</code> and <code>machine.ADC</code> on the board</td>
 </tr>
 </tbody>
 </table>
