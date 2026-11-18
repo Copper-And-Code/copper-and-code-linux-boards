@@ -448,6 +448,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#logic-analyzer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logic Analyzer
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -749,6 +760,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#logic-analyzer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logic Analyzer
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -837,6 +859,12 @@ processes. Measured: even idle, Linux stretches some intervals to tens of millis
 while the screen is drawn), loaded to over 100 ms; the M4's count stays whole, with no drift.
 What must happen at an exact time belongs on the M4. Nothing to wire.
 <a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/timing-lab">Source</a></p>
+<h3 id="logic-analyzer">Logic Analyzer<a class="headerlink" href="#logic-analyzer" title="Permanent link">&para;</a></h3>
+<p><img alt="Logic Analyzer" src="../images/logic-analyzer.png" /></p>
+<p>The board watches its own buses, no wires: the Cortex-M4 samples GPIO port E at up to 4 MHz while
+it sends a UART message, an SPI transfer or the PWM, started with the capture; Python decodes them
+(UART 8N1, SPI mode 0, PWM) and draws one row a pin, the bytes over their frames.
+<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/logic-analyzer">Source</a></p>
 
 
 
