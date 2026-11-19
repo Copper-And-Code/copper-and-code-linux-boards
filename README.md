@@ -114,6 +114,14 @@ board then needs a unix variant in `boards/unix/` built with its toolchain, and 
    mpremote connect /dev/ttyACM2 exec "import sys; print(sys.platform)"   # or socket://192.168.7.1:8266
    ```
 
+   On a Linux PC with ModemManager (most desktops), install the board's udev rule once, or at
+   every start of the board ModemManager probes its serial port with AT commands and the shell on
+   the screen gets them as input:
+
+   ```sh
+   sudo cp linux/host/70-mpy-lvgl-board.rules /etc/udev/rules.d/ && sudo udevadm control --reload
+   ```
+
 4. Open an example in LVGL MPY Studio and run it on the board.
 
 `/usr/local/mpy/bin/mpy-uninstall` brings the original system back.

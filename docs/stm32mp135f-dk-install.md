@@ -115,6 +115,18 @@ mpremote connect $P fs ls
 mpremote connect socket://192.168.7.1:8266 fs ls
 ```
 
+The name that does not change is in `/dev/serial/by-id/`: `usb-Copper-And-Code_MicroPython_LVGL_*`.
+
+On a PC with ModemManager (most Linux desktops), install the board's udev rule once. Without it,
+ModemManager takes the board's serial port for a modem whenever the board starts and sends it AT
+commands; while it probes, the port echoes the board's output back as input, and the shell on the
+screen runs that text as commands (`AT: command not found`) and may leave:
+
+```sh
+sudo cp linux/host/70-mpy-lvgl-board.rules /etc/udev/rules.d/
+sudo udevadm control --reload
+```
+
 Run the full HIL test only after backing up any existing `:main.py`, because the test temporarily
 replaces it and removes it during cleanup:
 

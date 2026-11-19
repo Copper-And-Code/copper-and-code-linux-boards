@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: MIT
+# On the PC, not on the board. ModemManager takes the board's USB serial port for a modem when
+# it appears and sends it AT commands; while it probes, the port echoes what the board prints
+# back to it as input, and the shell on the screen runs that text as commands (and may leave).
+# This rule tells ModemManager to leave the board alone:
+#
+#   sudo cp linux/host/70-mpy-lvgl-board.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload
+#
+# then unplug and plug the board's USB cable (or reboot it).
+ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0104", ATTRS{manufacturer}=="Copper-And-Code", ENV{ID_MM_DEVICE_IGNORE}="1"

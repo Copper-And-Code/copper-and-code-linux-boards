@@ -18,7 +18,8 @@ on the ST wiki.
 |---|---|
 | Display | DSI panel 480×800 portrait, turned to 800×480 landscape by LVGL (`MPY_DISPLAY_ROTATION=90`, set by `install.sh`) |
 | Touch | FT6236 at I2C `0x38`, its range matches the panel; LVGL turns the points with the screen |
-| USB | `dwc2` OTG port (USB-C CN7): the composite serial and network gadget, with TX FIFOs set by a device tree overlay |
+| USB | `dwc2` OTG port (USB-C CN7): the composite serial and network gadget, with TX FIFOs set by a device tree overlay. On the PC the REPL is the second `ttyACM` (`usb-Copper-And-Code_MicroPython_LVGL_MP157*` in `/dev/serial/by-id/`); the first is the ST-LINK console. A PC with ModemManager needs the board's udev rule ([Connect and test](stm32mp135f-dk-install.md#connect-and-test)) |
+| USB keyboard | On the USB-A ports: it types into the shell and the REPL; layout in the Settings app |
 | Audio | CS42L51 codec on the headphone jack, through `alsasink device=plughw:0,0` (`MPY_AUDIO_SINK`): ALSA's default device goes to PulseAudio, which runs only with the graphical session |
 | Device tree | ST's `stm32mp157c-dk2-m4-examples.dtb` with our USB overlay (`scripts/build_mp157_usb.sh`), installed as `/boot/stm32mp157c-dk2.dtb`; the original is kept as `.st-original` |
 
