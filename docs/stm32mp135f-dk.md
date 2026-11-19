@@ -261,7 +261,10 @@ would take them as a user name. Layouts: `us` and `it` (AltGr included), chosen 
 (`{"keyboard": {"layout": "it"}}` in `settings.json`, read again when it changes) or, without it, by
 `MPY_KEYBOARD` in the unit; `none` leaves the keyboards alone. The Windows key alone, or the Menu
 key, is the home key: the hub counts it in `/run/mpy-home-key`, and `mpy_home` opens the app menu
-over the shell (and closes it again), or leaves an app as its home button does. The shell on the screen draws ASCII
+over the shell (and closes it again), or leaves an app as its home button does. While the menu is
+shown (`/run/mpy-menu`), the hub sends its keys (arrows, Tab, Home, End, Enter, Space, Esc) to
+`mpy_home` as LVGL key codes on the datagram socket `/run/mpy-keys`, not to the terminal: they move
+between the buttons and press one whatever program runs in the shell behind the menu. The shell on the screen draws ASCII
 only: accented letters and the euro reach the programs, but show as `?`. On the STM32MP157C-DK2
 `tests/hil/test_keyboard.sh` checks both layouts with a virtual keyboard (uinput): letters, Caps
 Lock, the symbols, cursor keys and history, Ctrl-C.

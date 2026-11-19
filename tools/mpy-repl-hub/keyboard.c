@@ -11,7 +11,10 @@
 // and it (with AltGr for [ ] { } @ # ` ~ and the euro). Auto-repeat is the kernel's.
 //
 // The Windows key alone, or the Menu key, is the board's home key: the hub counts it in
-// /run/mpy-home-key, and mpy_home opens the app menu (or leaves the app) as a tap would.
+// /run/mpy-home-key, and mpy_home opens the app menu (or leaves the app) as a tap would. While
+// the menu is open (mpy_home creates /run/mpy-menu), the keys that move in it (arrows, Tab, Home,
+// End, Enter, Space, Esc) go to it as LVGL key codes, one datagram each on /run/mpy-keys, and not
+// to the shell, whatever program reads the terminal behind the menu.
 //
 // The layout is the one of settings.json ({"keyboard": {"layout": "it"}}, written by the Settings
 // app through mpy_settings), read again whenever the file changes; without it, --keyboard's.
@@ -27,6 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -34,6 +39,8 @@
 #define TEST_BIT(bit, array) (((array)[(bit) / BITS_PER_LONG] >> ((bit) % BITS_PER_LONG)) & 1)
 #define EVENT_DEVICES 64
 #define HOME_KEY_FILE "/run/mpy-home-key"
+#define MENU_FILE "/run/mpy-menu"
+#define MENU_SOCKET "/run/mpy-keys"
 
 struct keyboard {
     int fd;
@@ -232,6 +239,8 @@ void keyboard_scan(void) {
         // presses from mpy_home, which watches for a change.
         started = true;
         unlink(HOME_KEY_FILE);
+        unlink(MENU_FILE); // a menu of the MicroPython before is gone
+
     }
     read_settings();
     DIR *dir = opendir("/dev/input");
@@ -355,6 +364,43 @@ static const char *translate(unsigned short code, char buffer[4]) {
     return NULL;
 }
 
+// LVGL's key codes (lv_key_t) for the keys of the menu, or 0.
+static unsigned char menu_code(unsigned short code, bool shift) {
+    switch (code) {
+        case KEY_UP: return 17;
+        case KEY_DOWN: return 18;
+        case KEY_RIGHT: return 19;
+        case KEY_LEFT: return 20;
+        case KEY_ESC: return 27;
+        case KEY_ENTER:
+        case KEY_KPENTER:
+        case KEY_SPACE: return 10;
+        case KEY_TAB: return shift ? 11 : 9; // LV_KEY_PREV, LV_KEY_NEXT
+        case KEY_HOME: return 2;
+        case KEY_END: return 3;
+        default: return 0;
+    }
+}
+
+// True when the key went to the open menu.
+static bool menu_key(unsigned short code) {
+    if (access(MENU_FILE, F_OK) != 0) {
+        return false;
+    }
+    unsigned char lv_key = menu_code(code, shift_left || shift_right);
+    if (lv_key) {
+        static int fd = -1;
+        if (fd < 0) {
+            fd = socket(AF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
+        }
+        struct sockaddr_un address = {.sun_family = AF_UNIX, .sun_path = MENU_SOCKET};
+        if (fd >= 0) {
+            sendto(fd, &lv_key, 1, 0, (struct sockaddr *)&address, sizeof(address));
+        }
+    }
+    return true; // other keys do nothing while the menu is open
+}
+
 static size_t key(unsigned short code, int value, unsigned char *out, size_t length, size_t size) {
     bool down = value != 0;
     if (value == 1 && code != KEY_LEFTMETA && code != KEY_RIGHTMETA) {
@@ -395,6 +441,9 @@ static size_t key(unsigned short code, int value, unsigned char *out, size_t len
             return length;
     }
     if (!down) {
+        return length;
+    }
+    if (menu_key(code)) {
         return length;
     }
     char buffer[4];

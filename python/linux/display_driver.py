@@ -11,7 +11,8 @@
 # Environment: MPY_DISPLAY_CONNECTOR (a name as in /sys/class/drm, such as HDMI-A-1 or DSI-1: that
 # screen only, no switching), MPY_DISPLAY_MODE (WIDTHxHEIGHT, instead of the preferred mode),
 # MPY_BACKLIGHT (a /sys/class/backlight/... directory), MPY_TOUCH_NAME, MPY_TOUCH_RANGE,
-# MPY_DISPLAY_ROTATION (the panel's: 0, 90, 180 or 270; for example 90 turns a 480x800 portrait
+# MPY_AUDIO_SINK_MONITOR (the GStreamer sink for the sound on a monitor), MPY_APP_SIZE (set by
+# mpy_home: see below), MPY_DISPLAY_ROTATION (the panel's: 0, 90, 180 or 270; for example 90 turns a 480x800 portrait
 # panel into an 800x480 landscape screen; LVGL renders turned and linuxfb.blit_rotated() turns it
 # back).
 
@@ -50,6 +51,13 @@ if _bpp != 16:
     linuxfb.close()
     raise RuntimeError("unexpected DRM mode: %sx%s, %s bpp" % (_drm_width, _drm_height, _bpp))
 ROTATION = int(os.getenv("MPY_DISPLAY_ROTATION") or 0) if INTERNAL else 0
+# The sound follows the screen: on a monitor MPY_AUDIO_SINK_MONITOR (the board's HDMI audio), on
+# the panel the MPY_AUDIO_SINK the service started with, kept in MPY_AUDIO_SINK_PANEL across soft
+# resets. Players read MPY_AUDIO_SINK after this module is imported.
+if os.getenv("MPY_AUDIO_SINK_PANEL") is None:
+    os.putenv("MPY_AUDIO_SINK_PANEL", os.getenv("MPY_AUDIO_SINK") or "")
+if os.getenv("MPY_AUDIO_SINK_MONITOR"):
+    os.putenv("MPY_AUDIO_SINK", os.getenv("MPY_AUDIO_SINK_PANEL") if INTERNAL else os.getenv("MPY_AUDIO_SINK_MONITOR"))
 if ROTATION not in (0, 90, 180, 270):
     linuxfb.close()
     raise ValueError("MPY_DISPLAY_ROTATION must be 0, 90, 180 or 270")
@@ -57,6 +65,17 @@ PANEL_WIDTH = _drm_width
 PANEL_HEIGHT = _drm_height
 # What LVGL and the application see.
 WIDTH, HEIGHT = (_drm_height, _drm_width) if ROTATION in (90, 270) else (_drm_width, _drm_height)
+# An app made for a smaller screen runs at its own size in the middle of a monitor, on black:
+# mpy_home sets MPY_APP_SIZE (WIDTHxHEIGHT) from the app's board profile.
+OX = OY = 0
+_app_size = os.getenv("MPY_APP_SIZE")
+if _app_size and not INTERNAL:
+    _w, _, _h = _app_size.lower().partition("x")
+    _w, _h = int(_w), int(_h)
+    if _w <= WIDTH and _h <= HEIGHT:
+        OX, OY = (WIDTH - _w) // 2, (HEIGHT - _h) // 2
+        WIDTH = PANEL_WIDTH = _w
+        HEIGHT = PANEL_HEIGHT = _h
 
 if not lv.is_initialized():
     lv.init()
@@ -87,9 +106,9 @@ def _flush(disp, area, _color_p):
         linuxfb.blit_rotated(x, y, area.get_width(), area.get_height(), _buffer, ROTATION)
     elif DIRECT:
         offset = (y * WIDTH + x) * 2
-        linuxfb.blit(x, y, area.get_width(), area.get_height(), memoryview(_buffer)[offset:], WIDTH * 2)
+        linuxfb.blit(x + OX, y + OY, area.get_width(), area.get_height(), memoryview(_buffer)[offset:], WIDTH * 2)
     else:
-        linuxfb.blit(x, y, area.get_width(), area.get_height(), _buffer, area.get_width() * 2)
+        linuxfb.blit(x + OX, y + OY, area.get_width(), area.get_height(), _buffer, area.get_width() * 2)
     disp.flush_ready()
 
 

@@ -32,6 +32,7 @@ case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
         DTB_NAME=stm32mp135f-dk.dtb  # with the USB FIFOs of the composite gadget and B1 on PA14
         ROTATION=0
         AUDIO_SINK=""                # GStreamer's default (a USB audio adapter, for example)
+        AUDIO_SINK_MONITOR=""        # no HDMI
         M4_FIRMWARE=""               # no Cortex-M4
         HOSTNAME_DEFAULT=mp135-mpy ;;
     *st,stm32mp157c-dk2*)
@@ -43,6 +44,8 @@ case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
         # The CS42L51 codec (headphone jack) directly: ALSA's default device goes to PulseAudio,
         # which runs only with the graphical session.
         AUDIO_SINK="alsasink device=plughw:0,0"
+        # On a monitor the sound goes with the picture: HDMI audio, the SiI9022A's I2S input.
+        AUDIO_SINK_MONITOR="alsasink device=plughw:0,2"
         M4_FIRMWARE=mpy_m4.elf       # machine.I2C and machine.ADC; mpy_m4 starts it when needed
         HOSTNAME_DEFAULT=mp157-mpy ;;
     *) die "not an STM32MP135F-DK or STM32MP157C-DK2" ;;
@@ -108,11 +111,12 @@ put "$SOURCE/mpy-usb-composite.service" "$UNITS/mpy-usb-composite.service" 0644
 put "$SOURCE/mpy-repl.service" "$UNITS/mpy-repl.service" 0644
 # The board's own settings of the service, in a drop-in.
 install -d "$UNITS/mpy-repl.service.d"
-if [ "$ROTATION" != 0 ] || [ -n "$AUDIO_SINK" ]; then
+if [ "$ROTATION" != 0 ] || [ -n "$AUDIO_SINK" ] || [ -n "$AUDIO_SINK_MONITOR" ]; then
     {
         printf '[Service]\n'
         [ "$ROTATION" != 0 ] && printf 'Environment=MPY_DISPLAY_ROTATION=%s\n' "$ROTATION"
         [ -n "$AUDIO_SINK" ] && printf 'Environment="MPY_AUDIO_SINK=%s"\n' "$AUDIO_SINK"
+        [ -n "$AUDIO_SINK_MONITOR" ] && printf 'Environment="MPY_AUDIO_SINK_MONITOR=%s"\n' "$AUDIO_SINK_MONITOR"
     } > "$SOURCE/board.conf"
     put "$SOURCE/board.conf" "$UNITS/mpy-repl.service.d/board.conf" 0644
 elif [ -e "$UNITS/mpy-repl.service.d/board.conf" ]; then

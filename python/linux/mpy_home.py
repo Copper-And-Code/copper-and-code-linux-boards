@@ -10,7 +10,9 @@
 #
 # The home key of a keyboard plugged into the board (the Windows key alone, or the Menu key; the
 # REPL hub counts it in /run/mpy-home-key) does what a tap does: on the shell it opens the menu,
-# and closes it again; in an app it brings the shell back, as the home button.
+# and closes it again; in an app it brings the shell back, as the home button. In the menu the
+# arrows, Tab, Home and End move between the buttons, Enter or Space presses one, Esc goes back:
+# while the menu is shown /run/mpy-menu exists, and the hub sends those keys to /run/mpy-keys.
 #
 # LVGL MPY Studio and mpremote take the board as usual: the shell leaves on their Ctrl-A, and
 # after a soft reset from the raw REPL main.py does not run.
@@ -23,6 +25,10 @@ import mpy_settings
 import mpyrepl
 
 HOME_KEY = "/run/mpy-home-key"
+MENU_FLAG = "/run/mpy-menu"
+MENU_KEYS = "/run/mpy-keys"
+KEY_UP, KEY_DOWN, KEY_RIGHT, KEY_LEFT, KEY_ESC = 17, 18, 19, 20, 27
+KEY_ENTER, KEY_NEXT, KEY_PREV, KEY_HOME, KEY_END = 10, 9, 11, 2, 3
 NEXT = "/run/mpy-home-next"  # the app to run after the restart; in RAM, so a reboot forgets it
 LINUX_SHELL = "linux-shell"  # NEXT for the Linux shell instead of an app
 BACK = 0x121820
@@ -69,6 +75,104 @@ def _tile(parent, text, color, callback):
 
 
 _menu = None  # the menu's screen, while it is built
+_choices = []  # the buttons the keyboard moves between: the tiles, or those of a question
+_chosen = 0
+_back = None  # what Esc does
+_flag = None  # whether /run/mpy-menu exists
+
+
+def _set_flag(on):
+    global _flag
+    if on == _flag:
+        return
+    _flag = on
+    try:
+        if on:
+            open(MENU_FLAG, "w").close()
+        else:
+            os.remove(MENU_FLAG)
+    except OSError:
+        pass
+
+
+def _choose(buttons, back, index=0):
+    global _choices, _chosen, _back
+    if _choices:
+        _choices[_chosen].set_style_outline_width(0, 0)
+    _choices, _back, _chosen = buttons, back, 0
+    _select(index)
+
+
+def _select(index):
+    global _chosen
+    if not _choices:
+        return
+    _choices[_chosen].set_style_outline_width(0, 0)
+    _chosen = max(0, min(index, len(_choices) - 1))
+    button = _choices[_chosen]
+    button.set_style_outline_width(3, 0)
+    button.set_style_outline_color(lv.color_hex(0xFFFFFF), 0)
+    button.set_style_outline_pad(2, 0)
+
+
+def _vertical(step):
+    # The button of the next (step 1) or previous (step -1) row nearest below or above.
+    here = _choices[_chosen]
+    y, x = here.get_y(), here.get_x()
+    rows = [b.get_y() for b in _choices if (b.get_y() - y) * step > 0]
+    if not rows:
+        return
+    row = min(rows) if step > 0 else max(rows)
+    nearest = min((abs(b.get_x() - x), i) for i, b in enumerate(_choices) if b.get_y() == row)
+    _select(nearest[1])
+
+
+def _menu_key(code):
+    if code in (KEY_RIGHT, KEY_NEXT):
+        _select(_chosen + 1)
+    elif code in (KEY_LEFT, KEY_PREV):
+        _select(_chosen - 1)
+    elif code == KEY_DOWN:
+        _vertical(1)
+    elif code == KEY_UP:
+        _vertical(-1)
+    elif code == KEY_HOME:
+        _select(0)
+    elif code == KEY_END:
+        _select(len(_choices) - 1)
+    elif code == KEY_ENTER and _choices:
+        _choices[_chosen].send_event(lv.EVENT.CLICKED, None)
+    elif code == KEY_ESC and _back is not None:
+        _back()
+
+
+def _watch_menu_keys():
+    # The keys come from the hub as datagrams of one byte; a timer of LVGL reads them, and keeps
+    # /run/mpy-menu while the menu is the screen shown.
+    import socket
+    import struct
+
+    try:
+        os.remove(MENU_KEYS)
+    except OSError:
+        pass
+    keys = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    keys.bind(struct.pack("H", socket.AF_UNIX) + MENU_KEYS.encode() + b"\0")
+    keys.setblocking(False)
+    _set_flag(False)
+
+    def check(_timer):
+        shown = _menu is not None and lv.screen_active() == _menu
+        _set_flag(shown)
+        while True:
+            try:
+                data = keys.recv(16)
+            except OSError:
+                return
+            if shown and data:
+                _menu_key(data[0])
+
+    lv.timer_create(check, 40, None)
 
 
 def _home_key_count():
@@ -103,9 +207,12 @@ def _toggle_menu():
 
 def menu():
     # The app menu, over the shell. The shell keeps running behind it.
-    global _menu
+    global _menu, _choices
     import ansiterm
 
+    if _menu is not None and lv.screen_active() != _menu:
+        _choices = []  # its buttons go with it
+        _menu.delete()  # the menu of the time before: one at a time in memory
     screen = _menu = lv.obj()
     screen.set_style_bg_color(lv.color_hex(BACK), 0)
     screen.set_style_pad_all(12, 0)
@@ -119,15 +226,17 @@ def menu():
     grid.set_style_pad_row(10, 0)
     grid.set_style_pad_column(10, 0)
     grid.set_flex_flow(lv.FLEX_FLOW.ROW_WRAP)
-    for app in apps():
-        _tile(grid, app["name"], TILE, lambda p=app["path"]: launch(p))
-    _tile(grid, lv.SYMBOL.KEYBOARD + "  Shell", ACCENT, lambda: ansiterm.term.show())
-    _tile(grid, lv.SYMBOL.KEYBOARD + "  Linux shell", 0x2A3444, lambda: launch(LINUX_SHELL))
-    _tile(grid, lv.SYMBOL.POWER + "  Power off", 0xB3261E, lambda: confirm_power_off(screen))
+    tiles = [_tile(grid, app["name"], TILE, lambda p=app["path"]: launch(p)) for app in apps()]
+    shell = _tile(grid, lv.SYMBOL.KEYBOARD + "  Shell", ACCENT, lambda: ansiterm.term.show())
+    tiles.append(shell)
+    tiles.append(_tile(grid, lv.SYMBOL.KEYBOARD + "  Linux shell", 0x2A3444, lambda: launch(LINUX_SHELL)))
+    tiles.append(_tile(grid, lv.SYMBOL.POWER + "  Power off", 0xB3261E, lambda: confirm_power_off(screen)))
     if not apps():
         note = _label(screen, "Add apps to settings.json, section \"home\"", 14, 0x9AA6B8)
         note.align(lv.ALIGN.BOTTOM_LEFT, 4, 0)
     lv.screen_load(screen)
+    grid.update_layout()  # the tiles' places, for the arrow keys
+    _choose(tiles, lambda: ansiterm.term.show())
 
 
 def confirm_power_off(screen):
@@ -145,13 +254,20 @@ def confirm_power_off(screen):
     cancel.align(lv.ALIGN.BOTTOM_LEFT, 0, 0)
     cancel.set_style_bg_color(lv.color_hex(0x2A3444), 0)
     _label(cancel, "Cancel", 16, 0xFFFFFF).center()
-    cancel.add_event_cb(lambda e: box.delete(), lv.EVENT.CLICKED, None)
+    tiles, chosen = _choices, _chosen
+
+    def back():
+        _choose(tiles, lambda: __import__("ansiterm").term.show(), chosen)  # before its buttons go
+        box.delete()
+
+    cancel.add_event_cb(lambda e: back(), lv.EVENT.CLICKED, None)
     off = lv.button(box)
     off.set_size(120, 44)
     off.align(lv.ALIGN.BOTTOM_RIGHT, 0, 0)
     off.set_style_bg_color(lv.color_hex(0xB3261E), 0)
     _label(off, "Power off", 16, 0xFFFFFF).center()
     off.add_event_cb(lambda e: power_off(), lv.EVENT.CLICKED, None)
+    _choose([cancel, off], back)  # Cancel first: Enter twice must not switch the board off
 
 
 def power_off():
@@ -186,8 +302,23 @@ def _home_button():
     b.add_event_cb(lambda e: go_home(), lv.EVENT.CLICKED, None)
 
 
+def _app_size(folder):
+    # The screen an LVGL MPY Studio app was made for, from the profile the Studio uploaded with it.
+    import json
+
+    try:
+        with open(folder + "/board_profile.json") as source:
+            profile = json.load(source)
+        return "%dx%d" % (profile["logicalWidth"], profile["logicalHeight"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
 def run_app(path):
     folder = path.rsplit("/", 1)[0]
+    size = _app_size(folder)
+    if size:
+        os.putenv("MPY_APP_SIZE", size)  # on a bigger monitor display_driver centres it
     if folder not in sys.path:
         sys.path.insert(0, folder)
     with open(path) as source:
@@ -198,6 +329,7 @@ def run_app(path):
 
 
 def main():
+    os.unsetenv("MPY_APP_SIZE")  # an app's size, from before the soft reset: the shell has the whole screen
     try:
         with open(NEXT) as source:
             path = source.read().strip()
@@ -217,6 +349,7 @@ def main():
 
     ansiterm.on_screen = _on_terminal
     _watch_home_key(_toggle_menu)
+    _watch_menu_keys()
     startup = None
     if path == LINUX_SHELL:
         # The system's own shell, full screen; its `exit` leaves the MicroPython shell. While it
