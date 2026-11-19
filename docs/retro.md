@@ -11,12 +11,12 @@ emulates, every frame drawn, 600 frames after 1800 of warm-up (its benchmark bui
 
 | Game | Emulation and drawing | Budget | STM32H743 at 480 MHz |
 |---|---:|---:|---:|
-| Super Mario World | 9.2 ms | 16.7 ms | 24.0 ms |
-| F-Zero | 13.1 ms (slowest 16.1) | 16.7 ms | 24.9 ms |
-| Zelda: A Link to the Past | 11.3 ms | 16.7 ms | 26.1 ms |
+| A platform game, 1990 | 9.2 ms | 16.7 ms | 24.0 ms |
+| A racing game in Mode 7, 1990 | 13.1 ms (slowest 16.1) | 16.7 ms | 24.9 ms |
+| An action adventure, 1991 | 11.3 ms | 16.7 ms | 26.1 ms |
 
-The final image of Super Mario World matches the PC build's bit for bit. Through the frontend, with
-the sound pacing it and the scaling on the other CPU, Super Mario World runs at 60.0 emulated frames
+The final image of the platform game matches the PC build's bit for bit. Through the frontend, with
+the sound pacing it and the scaling on the other CPU, the platform game runs at 60.0 emulated frames
 a second on a 1280×720 monitor and on the turned 800×480 panel. On the panel, 59.8 of them a second
 reach the screen: the panel is switched to its 60 Hz mode (it prefers 50), the scaled and turned
 frame takes 3.6 ms to draw, and three buffers keep a frame that comes while another waits for the
@@ -41,6 +41,37 @@ The Commodore ROMs are the user's, in `/usr/local/mpy/retro/system/c64/` (see
 demo used to check it, [Nine](https://www.linusakesson.net/scene/nine/) by Linus Åkesson, comes
 from its author's page.
 
+## Neo Geo and the arcade: FBNeo
+
+FBNeo, the libretro core of reference for the Neo Geo, built for our CPU (`platform=rpi2`: Cortex-A7
+with NEON) with Cyclone, its 68000 in ARM assembly. The full build, which also brings CPS1, CPS2,
+Sega System 16 and the other arcade systems FBNeo knows; romsets are FBNeo's (`.zip`), the BIOS
+`neogeo.zip` goes next to the Neo Geo games and is not listed. The Neo Geo runs at 59.19 frames a
+second; measured on the STM32MP157C-DK2:
+
+| Game | As fast as it goes (no sound, no pacing) | With the sound pacing it: emulated, shown |
+|---|---:|---:|
+| A puzzle game, 1994 | 74.5 | 58.8, 58.1 |
+| An action platformer, 1990 | 71.5 | |
+| A shoot-'em-up, 1998 | 66.8 | |
+| A shoot-'em-up, 1995 | 66.6 | 58.7, 57.7 |
+| A fighting game, 1997 | 59.4 | 54.4; with its 68000 at 85 %: 59.1, 45.8 |
+| A fighting game, 1999 | 56.7 | 55.0; with its 68000 at 85 %: 59.0, 46.3 |
+
+(As fast as it goes: the first four over their first 15 seconds, mostly the BIOS screen and
+the demo; the two fighting games over a minute, with the sound interpolation off. With the sound: a
+minute each; the emulated frames count the second a game takes to start.)
+
+Most games keep their speed as they are. The heaviest ones (the fighting games of the late 1990s) have scenes beyond a
+Cortex-A7 at 650 MHz: there the frontend skips drawing a frame when the sound runs low (never two in
+a row), and a game's own options can lower the emulated 68000's clock, as FBNeo allows:
+`GAME.opt` next to `GAME.zip` with `fbneo-cpu-speed-adjust = "85%"`. Then the 1999 fighting game keeps 59.0 frames
+a second, about four in five of them drawn. `options.cfg` turns FBNeo's sound interpolation off for
+all games (it costs what those games need).
+
+FBNeo is fetched at a fixed commit and built in `work/`; it has non-commercial terms. The BIOS and
+the games are the user's.
+
 ## The frontend
 
 | | |
@@ -52,6 +83,8 @@ from its author's page.
 | Leaving | Esc (unless the core has the keyboard), the Windows key, Select and Start together, the gamepad's home button, SIGTERM |
 | Saves | The core's save RAM next to the game, as `GAME.srm` |
 | ROMs | The cores' system folder: `/usr/local/mpy/retro/system` (`MPY_RETRO_SYSTEM`) |
+| Options | `key = "value"` lines as in RetroArch: `GAME.opt` next to a game, then `/usr/local/mpy/retro/options.cfg` (`MPY_RETRO_OPTIONS`) |
+| Keeping time | When the sound buffer runs low the next frame is emulated but not drawn (never two in a row); `--bench` runs without sound or pacing, to measure the headroom |
 
 ```sh
 mpy-retro /usr/local/mpy/retro/cores/snes9x2005_libretro.so "/usr/local/mpy/fs/games/snes/My game.sfc"
@@ -66,13 +99,13 @@ scripts/build_retro.sh      # the cores at a fixed commit, and the frontend, wit
 scripts/deploy.sh           # installs dist/retro/ when present
 ```
 
-Snes9x2005 is fetched and built in `work/`; its sources and license stay its own and are not part
-of this repository (Snes9x has non-commercial terms: see its `copyright` file). The C64 core is in
+Snes9x2005 and FBNeo are fetched and built in `work/`; their sources and licenses stay their own
+and are not part of this repository (both have non-commercial terms). The C64 core is in
 `cores/c64`, MIT. The frontend and `libretro.h` are MIT. No game, demo or ROM comes with the board
 or this repository.
 
 ## Next
 
 - More cores, each measured the same way before it is listed: NES, Game Boy, Mega Drive, PC Engine,
-  Game Boy Advance, arcade, PlayStation.
+  Game Boy Advance, PlayStation.
 - A real C64 joystick or SNES pad on the Arduino connector, read by the Cortex-M4.

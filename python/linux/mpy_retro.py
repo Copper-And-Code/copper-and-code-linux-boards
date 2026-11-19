@@ -25,7 +25,11 @@ SYSTEMS = {
     "prg": "c64",
     "d64": "c64",
     "crt": "c64",
+    "zip": "fbneo",  # arcade romsets (Neo Geo, CPS1, CPS2, ...), as FBNeo names them
 }
+# Romsets that are BIOSes, not games: kept next to the games (FBNeo looks there), not listed.
+BIOS = ("neogeo", "pgm", "qsound", "decocass", "isgsm", "midssio", "nmk004", "ym2608", "cchip",
+        "bubsys", "coleco", "msx", "spectrum", "namcoc69", "namcoc70", "namcoc75")
 
 
 def _extension(path):
@@ -60,7 +64,7 @@ def games(folder=GAMES):
         path = folder + "/" + name
         if _is_dir(path):
             found.extend(games(path))
-        elif _extension(name) in SYSTEMS:
+        elif _extension(name) in SYSTEMS and name.rsplit(".", 1)[0].lower() not in BIOS:
             found.append((name.rsplit(".", 1)[0], path))
     found.sort()
     return found

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // A libretro frontend for Linux boards: one core, one game, full screen.
 //
-//   mpy-retro CORE.so GAME [--frames N]
+//   mpy-retro CORE.so GAME [--frames N] [--bench]
 //
 // Video: DRM/KMS, the screen display_driver would choose (a monitor connected wins over the board's
 // panel, MPY_DISPLAY_CONNECTOR and MPY_DISPLAY_MODE as there) at the refresh nearest the game's,
@@ -23,7 +23,9 @@
 //
 // Leaving: Esc (unless the core reads the keyboard), the Windows key, Select and Start together,
 // the gamepad's home button, SIGTERM or SIGINT. The save RAM is kept next to the game, as GAME.srm;
-// the cores' ROMs are in /usr/local/mpy/retro/system (MPY_RETRO_SYSTEM).
+// the cores' ROMs are in /usr/local/mpy/retro/system (MPY_RETRO_SYSTEM), their options in
+// /usr/local/mpy/retro/options.cfg (MPY_RETRO_OPTIONS) and GAME.opt for one game, key = "value"
+// lines as in RetroArch.
 
 #define _GNU_SOURCE
 #include <dirent.h>
@@ -132,6 +134,35 @@ static char system_dir[512] = "/usr/local/mpy/retro/system";  // the cores' ROMs
 static char save_dir[512] = ".";  // next to the game
 static float aspect;  // the core's, width over height; 0: its pixels are square
 static double fps = 60;  // the core's frames a second
+// Frame skipping: when the game falls behind (the sound buffer runs low), the core emulates the
+// next frame without drawing it, and the screen keeps the one before. Never twice in a row.
+static bool skip_video;
+static unsigned long frames_skipped;
+
+// The cores' options: key = "value" lines, as RetroArch writes them, in GAME.opt next to the game
+// (for that game) and /usr/local/mpy/retro/options.cfg (MPY_RETRO_OPTIONS, for all). A key in
+// neither keeps the core's default.
+#define MAX_OPTIONS 64
+static struct {
+    char key[64], value[64];
+} options[MAX_OPTIONS];
+static int option_count;
+
+static void load_options(const char *path) {
+    FILE *file = fopen(path, "r");
+    char line[256];
+    while (file && option_count < MAX_OPTIONS && fgets(line, sizeof(line), file)) {
+        char key[64], value[64];
+        if (line[0] != '#' && sscanf(line, " %63[^= ] = \"%63[^\"]\"", key, value) == 2) {
+            snprintf(options[option_count].key, sizeof(options[0].key), "%s", key);
+            snprintf(options[option_count].value, sizeof(options[0].value), "%s", value);
+            ++option_count;
+        }
+    }
+    if (file) {
+        fclose(file);
+    }
+}
 
 static void core_log(enum retro_log_level level, const char *format, ...) {
     if (level < RETRO_LOG_WARN) {
@@ -167,6 +198,16 @@ static bool environment(unsigned command, void *data) {
         case RETRO_ENVIRONMENT_GET_CAN_DUPE:
             *(bool *)data = true;
             return true;
+        case RETRO_ENVIRONMENT_GET_VARIABLE: {
+            struct retro_variable *variable = data;
+            for (int i = 0; i < option_count; ++i) {
+                if (variable->key && !strcmp(options[i].key, variable->key)) {
+                    variable->value = options[i].value;
+                    return true;
+                }
+            }
+            return false;
+        }
         case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE:
             *(bool *)data = false;
             return true;
@@ -175,6 +216,9 @@ static bool environment(unsigned command, void *data) {
             aspect = geometry->aspect_ratio > 0 ? geometry->aspect_ratio : 0;
             return true;
         }
+        case RETRO_ENVIRONMENT_GET_AUDIO_VIDEO_ENABLE:
+            *(int *)data = skip_video ? 2 : 3;  // bit 0 video, bit 1 audio
+            return true;
         case RETRO_ENVIRONMENT_SET_MESSAGE:
             fprintf(stderr, "core: %s\n", ((const struct retro_message *)data)->msg);
             return true;
@@ -539,7 +583,9 @@ static void *video_thread(void *unused) {
 // ---- Audio ----
 
 static snd_pcm_t *pcm;
+static double sample_rate = 48000;
 static long long next_frame_us;
+static bool bench;  // as fast as it goes: no sound, no pacing, to measure the headroom
 static int16_t mono_buffer[2 * 4096];
 static size_t mono_count;
 
@@ -560,6 +606,7 @@ static void open_audio(double rate) {
         pcm = NULL;
         return;
     }
+    sample_rate = rate;
     fprintf(stderr, "mpy-retro: sound on %s at %u Hz\n", device, (unsigned)(rate + 0.5));
 }
 
@@ -590,13 +637,27 @@ static void audio_sample(int16_t left, int16_t right) {
     }
 }
 
+// Behind time: less than two and a half frames of sound left to play, or none at all (the
+// buffer ran dry: snd_pcm_delay() fails in that state). Without sound or when measuring, never:
+// bench shows the whole cost.
+static bool behind(void) {
+    snd_pcm_sframes_t delay;
+    if (!pcm || bench) {
+        return false;
+    }
+    if (snd_pcm_delay(pcm, &delay) < 0) {
+        return true;
+    }
+    return delay < (snd_pcm_sframes_t)(2.5 * sample_rate / fps);
+}
+
 // Without sound, the frame period paces the game.
 static void pace(void) {
     if (mono_count) {
         audio_batch(mono_buffer, mono_count);
         mono_count = 0;
     }
-    if (pcm) {
+    if (pcm || bench) {
         return;
     }
     long long now = now_us(), period = (long long)(1000000 / fps);
@@ -911,13 +972,15 @@ static void on_signal(int signal_number) {
 
 int main(int argc, char **argv) {
     if (argc < 3) {
-        fprintf(stderr, "usage: mpy-retro CORE.so GAME [--frames N]\n");
+        fprintf(stderr, "usage: mpy-retro CORE.so GAME [--frames N] [--bench]\n");
         return 2;
     }
     unsigned long max_frames = 0;
-    for (int i = 3; i + 1 < argc; ++i) {
-        if (!strcmp(argv[i], "--frames")) {
+    for (int i = 3; i < argc; ++i) {
+        if (!strcmp(argv[i], "--frames") && i + 1 < argc) {
             max_frames = strtoul(argv[++i], NULL, 10);
+        } else if (!strcmp(argv[i], "--bench")) {
+            bench = true;
         }
     }
     signal(SIGTERM, on_signal);
@@ -929,6 +992,13 @@ int main(int argc, char **argv) {
         snprintf(system_dir, sizeof(system_dir), "%s", getenv("MPY_RETRO_SYSTEM"));
     }
 
+    // The game's own options first (GAME.opt next to it: the first value found wins), then all.
+    char game_options[600];
+    const char *dot = strrchr(game_path, '.');
+    snprintf(game_options, sizeof(game_options), "%.*s.opt",
+        dot && dot > (slash ? slash : game_path) ? (int)(dot - game_path) : (int)strlen(game_path), game_path);
+    load_options(game_options);
+    load_options(getenv("MPY_RETRO_OPTIONS") ? getenv("MPY_RETRO_OPTIONS") : "/usr/local/mpy/retro/options.cfg");
     load_core(argv[1]);
     core.set_environment(environment);
     core.init();
@@ -966,7 +1036,9 @@ int main(int argc, char **argv) {
     save_ram(srm, true);
 
     open_screen();
-    open_audio(av.timing.sample_rate);
+    if (!bench) {
+        open_audio(av.timing.sample_rate);
+    }
     borrow_keyboards();
     open_inputs();
     pthread_t video;
@@ -975,6 +1047,8 @@ int main(int argc, char **argv) {
     long long started = now_us();
     unsigned long frames = 0;
     while (!quit && (!max_frames || frames < max_frames)) {
+        skip_video = !skip_video && behind();
+        frames_skipped += skip_video;
         core.run();
         pace();
         ++frames;
@@ -982,7 +1056,8 @@ int main(int argc, char **argv) {
     double seconds = (now_us() - started) / 1e6;
     fprintf(stderr, "mpy-retro: %lu frames in %.1f s, %.2f fps, %.2f shown a second\n", frames, seconds,
         frames / seconds, frames_shown / seconds);
-    fprintf(stderr, "mpy-retro: drawing %.2f ms a frame\n", draws ? draw_us / 1000.0 / draws : 0.0);
+    fprintf(stderr, "mpy-retro: drawing %.2f ms a frame, %lu frames not drawn to keep time\n",
+        draws ? draw_us / 1000.0 / draws : 0.0, frames_skipped);
 
     quit = 1;
     pthread_cond_signal(&frame.ready);

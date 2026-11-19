@@ -67,6 +67,7 @@ fi
 # The games frontend and its cores, when built (scripts/build_retro.sh).
 if [[ -f $REPO/dist/retro/mpy-retro ]]; then
     stage "$REPO/dist/retro/mpy-retro" mpy-retro
+    cp "$REPO/linux/retro-options.cfg" "$STAGE/retro-options.cfg"
     mkdir -p "$STAGE/retro-cores"
     cp "$REPO"/dist/retro/cores/*_libretro.so "$STAGE/retro-cores/"
 fi

@@ -118,6 +118,8 @@ if [ -f "$SOURCE/mpy-retro" ]; then
     for core in "$SOURCE"/retro-cores/*_libretro.so; do
         [ -f "$core" ] && put "$core" "$PREFIX/retro/cores/$(basename "$core")" 0644
     done
+    # The cores' options: the user's own changes are kept.
+    [ -e "$PREFIX/retro/options.cfg" ] || put "$SOURCE/retro-options.cfg" "$PREFIX/retro/options.cfg" 0644
 fi
 put "$SOURCE/mpy-usb-composite.sh" "$PREFIX/bin/mpy-usb-composite" 0755
 put "$SOURCE/mpy_launcher.py" "$PREFIX/lib/mpy_launcher.py" 0644

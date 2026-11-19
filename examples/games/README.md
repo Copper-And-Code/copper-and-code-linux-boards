@@ -5,8 +5,10 @@
 Your games, full screen, through libretro cores. The list is an LVGL app made with LVGL MPY Studio
 and its MCP tools; the game is `mpy-retro`, a frontend in C, which has the screen, the sound and the
 keyboard while it runs. When the game ends the list comes back. For now on the STM32MP157C-DK2
-(800×480): SNES through Snes9x2005, and the C64 through the core of `cores/c64`, both at full speed
-with every frame drawn.
+(800×480): SNES through Snes9x2005 and the C64 through the core of `cores/c64`, at full speed with
+every frame drawn; Neo Geo and arcade through FBNeo (romsets as FBNeo names them, the Neo Geo BIOS
+`neogeo.zip` next to the games), most of them at full speed, the heaviest with a frame skipped now
+and then (see the frontend's notes).
 
 ## Setting up
 

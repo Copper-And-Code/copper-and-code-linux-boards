@@ -1,21 +1,24 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# Build the games frontend (mpy-retro) and its libretro cores for the STM32MP1 boards: Snes9x2005,
-# fetched, and the C64 core of cores/c64.
+# Build the games frontend (mpy-retro) and its libretro cores for the STM32MP1 boards: Snes9x2005
+# and FBNeo, fetched, and the C64 core of cores/c64.
 #
 #   scripts/build_retro.sh
 #
 # The cores are fetched at a fixed commit and built with the board's SDK; their sources stay in
-# work/ and under their own licenses (Snes9x: non-commercial terms, see its copyright file), never
+# work/ and under their own licenses (Snes9x and FBNeo: non-commercial terms), never
 # in this repository. Outputs in dist/retro/: mpy-retro and cores/NAME_libretro.so, which
 # scripts/deploy.sh installs when present.
 #
 # Environment: WORK_DIR, SDK_DIR as for scripts/build_mp135.sh; JOBS (default: nproc).
 set -euo pipefail
 
-# name, repository, commit
+# name, repository, commit, folder of its libretro Makefile, its platform
 CORES=(
-    "snes9x2005 https://github.com/libretro/snes9x2005.git a79dfe9047e7fec58808aefe48ad2bf499c7af11"
+    "snes9x2005 https://github.com/libretro/snes9x2005.git a79dfe9047e7fec58808aefe48ad2bf499c7af11 . unix"
+    # Arcade (Neo Geo, CPS1, CPS2, ...): rpi2 is our CPU (Cortex-A7, NEON) with Cyclone, the
+    # 68000 in ARM assembly, which only the full build uses.
+    "fbneo https://github.com/libretro/FBNeo.git 9c6d05d00476de561ffb50928b9a2fed73142dea src/burner/libretro rpi2"
 )
 SDK_RELEASE=openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10
 
@@ -39,15 +42,16 @@ mkdir -p "$OUT/cores" "$WORK_DIR/retro"
 LIBRETRO_H=
 
 for entry in "${CORES[@]}"; do
-    read -r name url commit <<<"$entry"
+    read -r name url commit folder platform <<<"$entry"
     log "core $name"
     src=$WORK_DIR/retro/$name
-    [[ -d $src/.git ]] || git clone -q "$url" "$src"
-    git -C "$src" fetch -q origin "$commit" 2>/dev/null || true
+    [[ -d $src/.git ]] || git clone -q --filter=blob:none "$url" "$src"
+    git -C "$src" fetch -q --depth 1 origin "$commit" 2>/dev/null || true
     git -C "$src" checkout -q "$commit"
-    make -C "$src" clean >/dev/null 2>&1 || true
-    make -C "$src" platform=unix CC="$CC" CXX="$CXX" -j"$JOBS" >/dev/null
-    cp "$src/${name}_libretro.so" "$OUT/cores/"
+    make -C "$src/$folder" platform="$platform" clean >/dev/null 2>&1 || true
+    make -C "$src/$folder" platform="$platform" CC="$CC" CXX="$CXX" -j"$JOBS" >/dev/null
+    # Without the debugging symbols: FBNeo goes from 187 MB to 61.
+    "${CROSS_COMPILE}strip" --strip-unneeded -o "$OUT/cores/${name}_libretro.so" "$src/$folder/${name}_libretro.so"
     [[ -z $LIBRETRO_H ]] && LIBRETRO_H=$(dirname "$(find "$src" -name libretro.h -path '*libretro-common/include/*' | head -1)")
 done
 
