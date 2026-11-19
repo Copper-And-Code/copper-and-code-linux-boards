@@ -10,6 +10,9 @@
 // Alt as an ESC prefix, VT100 sequences for the cursor, editing and function keys. Layouts: us
 // and it (with AltGr for [ ] { } @ # ` ~ and the euro). Auto-repeat is the kernel's.
 //
+// The Windows key alone, or the Menu key, is the board's home key: the hub counts it in
+// /run/mpy-home-key, and mpy_home opens the app menu (or leaves the app) as a tap would.
+//
 // The layout is the one of settings.json ({"keyboard": {"layout": "it"}}, written by the Settings
 // app through mpy_settings), read again whenever the file changes; without it, --keyboard's.
 #define _GNU_SOURCE
@@ -30,6 +33,7 @@
 #define BITS_PER_LONG (8 * sizeof(long))
 #define TEST_BIT(bit, array) (((array)[(bit) / BITS_PER_LONG] >> ((bit) % BITS_PER_LONG)) & 1)
 #define EVENT_DEVICES 64
+#define HOME_KEY_FILE "/run/mpy-home-key"
 
 struct keyboard {
     int fd;
@@ -104,6 +108,20 @@ static struct timespec settings_time; // of the settings.json read last
 static struct keyboard keyboards[KEYBOARD_MAX] = {{-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}};
 static uint64_t checked; // event devices looked at: keyboards open, the others skipped
 static bool shift_left, shift_right, ctrl_left, ctrl_right, alt, altgr, caps_lock, num_lock = true;
+static bool meta_alone; // the Windows key is down and no other key was pressed with it
+
+static void home_key(void) {
+    static unsigned count;
+    char text[16];
+    int length = snprintf(text, sizeof(text), "%u\n", ++count);
+    int fd = open(HOME_KEY_FILE ".tmp", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    if (fd >= 0) {
+        if (write(fd, text, length) == length) {
+            rename(HOME_KEY_FILE ".tmp", HOME_KEY_FILE);
+        }
+        close(fd);
+    }
+}
 
 static const struct layout *find_layout(const char *name, size_t length) {
     if (length == 2 && !strncmp(name, "us", 2)) {
@@ -207,6 +225,13 @@ static void keyboard_close(struct keyboard *keyboard, const char *why) {
 void keyboard_scan(void) {
     if (!enabled) {
         return;
+    }
+    static bool started;
+    if (!started) {
+        // The count starts again with the hub: a file left from before would hide its first
+        // presses from mpy_home, which watches for a change.
+        started = true;
+        unlink(HOME_KEY_FILE);
     }
     read_settings();
     DIR *dir = opendir("/dev/input");
@@ -332,7 +357,24 @@ static const char *translate(unsigned short code, char buffer[4]) {
 
 static size_t key(unsigned short code, int value, unsigned char *out, size_t length, size_t size) {
     bool down = value != 0;
+    if (value == 1 && code != KEY_LEFTMETA && code != KEY_RIGHTMETA) {
+        meta_alone = false;
+    }
     switch (code) {
+        case KEY_LEFTMETA:
+        case KEY_RIGHTMETA:
+            if (value == 1) {
+                meta_alone = true;
+            } else if (value == 0 && meta_alone) {
+                meta_alone = false;
+                home_key();
+            }
+            return length;
+        case KEY_COMPOSE: // the Menu key
+            if (value == 1) {
+                home_key();
+            }
+            return length;
         case KEY_LEFTSHIFT: shift_left = down; return length;
         case KEY_RIGHTSHIFT: shift_right = down; return length;
         case KEY_LEFTCTRL: ctrl_left = down; return length;

@@ -1,9 +1,17 @@
 // SPDX-License-Identifier: MIT
 // RGB565 scan-out through a Linux DRM dumb buffer.
+//
+// open(path=None, connector=None, mode=None): connector is a name as in /sys/class/drm (HDMI-A-1,
+// DSI-1); without it, a connected external screen (HDMI, DisplayPort, ...) wins over the board's
+// own panel (DSI, LVDS, eDP, DPI), so a monitor plugged in at start is used. mode is "WIDTHxHEIGHT";
+// without it, the connector's preferred mode among those the display controller can drive.
+// connector() returns (name, internal) of the connector in use.
 
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -24,7 +32,27 @@ static struct {
     uint64_t map_size;
     drmModeRes *resources;
     drmModeConnector *connector;
+    char name[32];
 } fb = {.fd = -1, .map = MAP_FAILED};
+
+// The board's own panel, as opposed to a screen plugged into a socket.
+static bool connector_internal(uint32_t type) {
+    switch (type) {
+        case DRM_MODE_CONNECTOR_DSI:
+        case DRM_MODE_CONNECTOR_LVDS:
+        case DRM_MODE_CONNECTOR_eDP:
+        case DRM_MODE_CONNECTOR_DPI:
+        case DRM_MODE_CONNECTOR_SPI:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static void connector_name(const drmModeConnector *connector, char *out, size_t size) {
+    const char *type = drmModeGetConnectorTypeName(connector->connector_type);
+    snprintf(out, size, "%s-%u", type ? type : "Unknown", connector->connector_type_id);
+}
 
 static void linuxfb_cleanup(void) {
     if (fb.map != MAP_FAILED) {
@@ -72,9 +100,11 @@ static void linuxfb_check_open(void) {
 }
 
 static mp_obj_t linuxfb_open(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_path };
+    enum { ARG_path, ARG_connector, ARG_mode };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_path, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_connector, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_mode, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
@@ -93,20 +123,66 @@ static mp_obj_t linuxfb_open(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
     if (!fb.resources) {
         linuxfb_raise(-1);
     }
-    for (int i = 0; i < fb.resources->count_connectors; ++i) {
-        drmModeConnector *connector = drmModeGetConnector(fb.fd, fb.resources->connectors[i]);
-        if (connector && connector->connection == DRM_MODE_CONNECTED && connector->count_modes > 0) {
-            fb.connector = connector;
-            break;
-        }
-        if (connector) {
-            drmModeFreeConnector(connector);
+    const char *wanted = args[ARG_connector].u_obj == mp_const_none || !*mp_obj_str_get_str(args[ARG_connector].u_obj)
+        ? NULL : mp_obj_str_get_str(args[ARG_connector].u_obj);
+    // Two passes without a name: external screens first, then the board's panel.
+    for (int pass = 0; pass < 2 && !fb.connector; ++pass) {
+        for (int i = 0; i < fb.resources->count_connectors && !fb.connector; ++i) {
+            drmModeConnector *connector = drmModeGetConnector(fb.fd, fb.resources->connectors[i]);
+            if (!connector) {
+                continue;
+            }
+            char name[sizeof(fb.name)];
+            connector_name(connector, name, sizeof(name));
+            bool usable = connector->connection == DRM_MODE_CONNECTED && connector->count_modes > 0
+                && connector->connector_type != DRM_MODE_CONNECTOR_WRITEBACK;
+            bool chosen = wanted ? !strcmp(name, wanted) : connector_internal(connector->connector_type) == (pass == 1);
+            if (usable && chosen) {
+                fb.connector = connector;
+                memcpy(fb.name, name, sizeof(fb.name));
+            } else {
+                drmModeFreeConnector(connector);
+            }
         }
     }
     if (!fb.connector) {
         linuxfb_raise(-ENODEV);
     }
-    drmModeModeInfo mode = fb.connector->modes[0];
+    // The preferred mode, or the one asked for; the kernel lists only modes the controller can drive.
+    int chosen_mode = 0;
+    int want_width = 0, want_height = 0;
+    if (args[ARG_mode].u_obj != mp_const_none && *mp_obj_str_get_str(args[ARG_mode].u_obj)) {
+        if (sscanf(mp_obj_str_get_str(args[ARG_mode].u_obj), "%dx%d", &want_width, &want_height) != 2) {
+            linuxfb_cleanup();
+            mp_raise_ValueError(MP_ERROR_TEXT("linuxfb: mode must be WIDTHxHEIGHT"));
+        }
+    }
+    bool found = false;
+    for (int i = fb.connector->count_modes - 1; i >= 0; --i) {
+        const drmModeModeInfo *candidate = &fb.connector->modes[i];
+        if (want_width ? candidate->hdisplay == want_width && candidate->vdisplay == want_height
+            : (candidate->type & DRM_MODE_TYPE_PREFERRED) != 0) {
+            chosen_mode = i;
+            found = true;
+        }
+    }
+    // No preferred mode among those left: the monitor's own may be beyond the controller (1080p60
+    // on the STM32MP157, which then offers 1080p at 30 and 24 Hz, refused by many monitors). The
+    // largest mode at 50 Hz or more, then.
+    for (int i = 0; !want_width && !found && i < fb.connector->count_modes; ++i) {
+        const drmModeModeInfo *candidate = &fb.connector->modes[i];
+        const drmModeModeInfo *best = &fb.connector->modes[chosen_mode];
+        if (candidate->vrefresh >= 50 && (best->vrefresh < 50
+            || (uint32_t)candidate->hdisplay * candidate->vdisplay > (uint32_t)best->hdisplay * best->vdisplay)) {
+            chosen_mode = i;
+        }
+    }
+    if (want_width && (fb.connector->modes[chosen_mode].hdisplay != want_width
+        || fb.connector->modes[chosen_mode].vdisplay != want_height)) {
+        linuxfb_cleanup();
+        mp_raise_ValueError(MP_ERROR_TEXT("linuxfb: the screen has no such mode"));
+    }
+    drmModeModeInfo mode = fb.connector->modes[chosen_mode];
     uint32_t crtc_id = 0;
     if (fb.connector->encoder_id) {
         drmModeEncoder *encoder = drmModeGetEncoder(fb.fd, fb.connector->encoder_id);
@@ -252,6 +328,16 @@ static mp_obj_t linuxfb_blit_rotated(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(linuxfb_blit_rotated_obj, 6, 6, linuxfb_blit_rotated);
 
+static mp_obj_t linuxfb_connector(void) {
+    linuxfb_check_open();
+    mp_obj_t info[] = {
+        mp_obj_new_str(fb.name, strlen(fb.name)),
+        mp_obj_new_bool(connector_internal(fb.connector->connector_type)),
+    };
+    return mp_obj_new_tuple(MP_ARRAY_SIZE(info), info);
+}
+static MP_DEFINE_CONST_FUN_OBJ_0(linuxfb_connector_obj, linuxfb_connector);
+
 static mp_obj_t linuxfb_close(void) {
     linuxfb_cleanup();
     return mp_const_none;
@@ -263,6 +349,7 @@ static const mp_rom_map_elem_t linuxfb_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_open), MP_ROM_PTR(&linuxfb_open_obj) },
     { MP_ROM_QSTR(MP_QSTR_blit), MP_ROM_PTR(&linuxfb_blit_obj) },
     { MP_ROM_QSTR(MP_QSTR_blit_rotated), MP_ROM_PTR(&linuxfb_blit_rotated_obj) },
+    { MP_ROM_QSTR(MP_QSTR_connector), MP_ROM_PTR(&linuxfb_connector_obj) },
     { MP_ROM_QSTR(MP_QSTR_close), MP_ROM_PTR(&linuxfb_close_obj) },
 };
 static MP_DEFINE_CONST_DICT(linuxfb_module_globals, linuxfb_module_globals_table);

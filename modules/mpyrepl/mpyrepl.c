@@ -67,7 +67,22 @@ static void exec_self(void) {
     if (linuxproc_kill_all) {
         linuxproc_kill_all();
     }
-    char *const argv[] = { "micropython", MPYREPL_LAUNCHER, NULL };
+    // The same command line again (options such as -X heapsize from the unit included), or the
+    // launcher alone if it cannot be read.
+    static char line[1024];
+    char *argv[32] = { "micropython", MPYREPL_LAUNCHER, NULL };
+    int fd = open("/proc/self/cmdline", O_RDONLY | O_CLOEXEC);
+    if (fd >= 0) {
+        ssize_t length = read(fd, line, sizeof(line) - 1);
+        close(fd);
+        if (length > 0 && line[length - 1] == 0) {
+            size_t count = 0;
+            for (ssize_t at = 0; at < length && count < MP_ARRAY_SIZE(argv) - 1; at += strlen(line + at) + 1) {
+                argv[count++] = line + at;
+            }
+            argv[count] = NULL;
+        }
+    }
     close_range(STDERR_FILENO + 1, UINT_MAX, 0);
     execve("/proc/self/exe", argv, environ);
 }

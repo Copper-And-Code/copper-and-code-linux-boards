@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: MIT
 # A keyboard plugged into the board types into the REPL: a virtual one (uinput) types on the
 # shell of the screen while the TCP REPL watches the echo. Checks letters, shift, Caps Lock, the
-# symbols of the layout the board uses (us or it, AltGr included), the cursor keys and Ctrl-C.
+# symbols of the layout the board uses (us or it, AltGr included), the cursor keys, Ctrl-C and the
+# home key.
 #
 #   tests/hil/test_keyboard.sh [BOARD]      (default 192.168.7.1; MPY_SSH_ALIAS as for deploy.sh)
 #
@@ -77,6 +78,14 @@ sleep 1
 on_board "/tmp/keyboard_typer ctrl+u e c h o space shift+k b 1 space capslock a b capslock enter \
     ctrl+u e c h o space $QUOTE $SYMBOLS $QUOTE enter \
     ctrl+u up up x enter \
-    ctrl+u s l e e p space 2 0 enter; sleep 1; /tmp/keyboard_typer ctrl+c; rm /tmp/keyboard_typer"
+    ctrl+u s l e e p space 2 0 enter; sleep 1; /tmp/keyboard_typer ctrl+c"
 wait $WATCH
+
+# The home key: the Windows key alone and the Menu key count (the menu opens, then closes), the
+# Windows key with another key does not.
+COUNTS=$(on_board 'cat /run/mpy-home-key 2>/dev/null || echo 0; /tmp/keyboard_typer meta meta+e menu ctrl+u >/dev/null;
+    sleep 0.5; cat /run/mpy-home-key; rm /tmp/keyboard_typer')
+read -r BEFORE AFTER <<<"$(echo $COUNTS)"
+[[ $((AFTER - BEFORE)) == 2 ]] || { echo "FAIL: home key counted $BEFORE -> $AFTER"; exit 1; }
+echo "PASS: home key"
 echo "PASS: keyboard"

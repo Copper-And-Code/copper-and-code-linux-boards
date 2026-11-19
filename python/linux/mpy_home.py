@@ -8,6 +8,10 @@
 #
 #   {"home": {"apps": [{"name": "Weather", "path": "/lms_apps/app_09a333ec182f/app_main.py"}]}}
 #
+# The home key of a keyboard plugged into the board (the Windows key alone, or the Menu key; the
+# REPL hub counts it in /run/mpy-home-key) does what a tap does: on the shell it opens the menu,
+# and closes it again; in an app it brings the shell back, as the home button.
+#
 # LVGL MPY Studio and mpremote take the board as usual: the shell leaves on their Ctrl-A, and
 # after a soft reset from the raw REPL main.py does not run.
 
@@ -18,6 +22,7 @@ import lvgl as lv
 import mpy_settings
 import mpyrepl
 
+HOME_KEY = "/run/mpy-home-key"
 NEXT = "/run/mpy-home-next"  # the app to run after the restart; in RAM, so a reboot forgets it
 LINUX_SHELL = "linux-shell"  # NEXT for the Linux shell instead of an app
 BACK = 0x121820
@@ -63,11 +68,45 @@ def _tile(parent, text, color, callback):
     return b
 
 
-def menu():
-    # The app menu, over the shell. The shell keeps running behind it.
+_menu = None  # the menu's screen, while it is built
+
+
+def _home_key_count():
+    try:
+        with open(HOME_KEY) as source:
+            return source.read()
+    except OSError:
+        return None
+
+
+def _watch_home_key(action):
+    # The hub writes the file; a timer of LVGL, which runs in the display's thread, reads it.
+    seen = [_home_key_count()]
+
+    def check(_timer):
+        count = _home_key_count()
+        if count != seen[0]:
+            seen[0] = count
+            action()
+
+    lv.timer_create(check, 200, None)
+
+
+def _toggle_menu():
     import ansiterm
 
-    screen = lv.obj()
+    if _menu is not None and lv.screen_active() == _menu:
+        ansiterm.term.show()
+    else:
+        menu()
+
+
+def menu():
+    # The app menu, over the shell. The shell keeps running behind it.
+    global _menu
+    import ansiterm
+
+    screen = _menu = lv.obj()
     screen.set_style_bg_color(lv.color_hex(BACK), 0)
     screen.set_style_pad_all(12, 0)
     _label(screen, "Apps", 24, 0xFFFFFF).set_pos(4, 0)
@@ -155,6 +194,7 @@ def run_app(path):
         code = source.read()
     exec(code, {"__name__": "__main__", "__file__": path})
     _home_button()
+    _watch_home_key(go_home)
 
 
 def main():
@@ -173,7 +213,10 @@ def main():
     import ansiterm
     import shell_linux
 
+    import display_driver  # LVGL first, then its timer
+
     ansiterm.on_screen = _on_terminal
+    _watch_home_key(_toggle_menu)
     startup = None
     if path == LINUX_SHELL:
         # The system's own shell, full screen; its `exit` leaves the MicroPython shell. While it

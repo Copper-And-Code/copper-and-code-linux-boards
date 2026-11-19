@@ -91,10 +91,12 @@ need the internet, set up once with the Settings app.
 | STM32MP157C-DK2 (800×480, with a Cortex-M4) | Working: the same build, examples, Wi-Fi, sound; `machine.I2C`, `ADC`, `PWM`, `SPI`, `UART` and `Timer` served by the Cortex-M4 over RPMsg ([notes](docs/stm32mp157c-dk2.md)) |
 | Other Linux boards | The Linux parts are generic; a port needs a build for its CPU (see below) |
 
-What a Linux board needs: a panel the kernel drives through DRM (RGB565 dumb buffer), a touchscreen
-through evdev, and a USB device port for the serial REPL (or only the network for the TCP REPL).
-The display driver takes the resolution from DRM and finds the first touchscreen and the first
-backlight by itself; `MPY_TOUCH_NAME`, `MPY_TOUCH_RANGE` and `MPY_BACKLIGHT` override them. A new
+What a Linux board needs: a panel or a monitor the kernel drives through DRM (RGB565 dumb buffer),
+a touchscreen or a mouse through evdev, and a USB device port for the serial REPL (or only the
+network for the TCP REPL). The display driver takes the resolution from DRM, prefers a monitor
+connected at start (HDMI, DisplayPort) to the board's panel, and finds the first touchscreen, mouse
+and backlight by itself; `MPY_DISPLAY_CONNECTOR`, `MPY_DISPLAY_MODE`, `MPY_TOUCH_NAME`,
+`MPY_TOUCH_RANGE` and `MPY_BACKLIGHT` override them. A new
 board then needs a unix variant in `boards/unix/` built with its toolchain, and its install script.
 
 ## Quick start (STM32MP135F-DK)

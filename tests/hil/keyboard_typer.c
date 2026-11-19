@@ -3,7 +3,8 @@
 // and turn its keys into text as it does for a real one.
 //
 //   keyboard_typer KEY...     KEY is a key name, optionally with modifiers: a  shift+2
-//                             altgr+leftbrace  ctrl+c  enter  up  kp5
+//                             altgr+leftbrace  ctrl+c  enter  up  kp5  meta  menu
+//   keyboard_typer --mouse STEP...   a virtual mouse instead: STEP is DX,DY (a move) or click
 #include <fcntl.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
@@ -32,7 +33,7 @@ static const struct {
     {"102nd", KEY_102ND}, {"up", KEY_UP}, {"down", KEY_DOWN}, {"left", KEY_LEFT},
     {"right", KEY_RIGHT}, {"home", KEY_HOME}, {"end", KEY_END}, {"delete", KEY_DELETE},
     {"f1", KEY_F1}, {"f5", KEY_F5}, {"kp5", KEY_KP5}, {"kp8", KEY_KP8}, {"numlock", KEY_NUMLOCK},
-    {"shift", KEY_LEFTSHIFT}, {"ctrl", KEY_LEFTCTRL}, {"alt", KEY_LEFTALT}, {"altgr", KEY_RIGHTALT},
+    {"meta", KEY_LEFTMETA}, {"menu", KEY_COMPOSE}, {"shift", KEY_LEFTSHIFT}, {"ctrl", KEY_LEFTCTRL}, {"alt", KEY_LEFTALT}, {"altgr", KEY_RIGHTALT},
 };
 
 static int lookup(const char *name, size_t length) {
@@ -70,17 +71,45 @@ int main(int argc, char **argv) {
         perror("keyboard_typer: /dev/uinput");
         return 1;
     }
+    int mouse = argc > 1 && !strcmp(argv[1], "--mouse");
     ioctl(fd, UI_SET_EVBIT, EV_KEY);
-    for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); ++i) {
-        ioctl(fd, UI_SET_KEYBIT, names[i].code);
+    if (mouse) {
+        ioctl(fd, UI_SET_EVBIT, EV_REL);
+        ioctl(fd, UI_SET_RELBIT, REL_X);
+        ioctl(fd, UI_SET_RELBIT, REL_Y);
+        ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
+    } else {
+        for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); ++i) {
+            ioctl(fd, UI_SET_KEYBIT, names[i].code);
+        }
     }
     struct uinput_setup setup = {.id = {.bustype = BUS_VIRTUAL, .vendor = 1, .product = 1}};
-    strcpy(setup.name, "mpy test keyboard");
+    strcpy(setup.name, mouse ? "mpy test mouse" : "mpy test keyboard");
     if (ioctl(fd, UI_DEV_SETUP, &setup) < 0 || ioctl(fd, UI_DEV_CREATE) < 0) {
         perror("keyboard_typer: create");
         return 1;
     }
-    pause_ms(2500); // the hub looks for new keyboards every second
+    pause_ms(2500); // the hub looks for new keyboards every second, MicroPython for mice every two
+    if (mouse) {
+        pause_ms(1000);
+        for (int a = 2; a < argc; ++a) {
+            int dx, dy;
+            if (!strcmp(argv[a], "click")) {
+                press(fd, BTN_LEFT, 1);
+                pause_ms(80);
+                press(fd, BTN_LEFT, 0);
+            } else if (sscanf(argv[a], "%d,%d", &dx, &dy) == 2) {
+                emit(fd, EV_REL, REL_X, dx);
+                emit(fd, EV_REL, REL_Y, dy);
+                emit(fd, EV_SYN, SYN_REPORT, 0);
+            }
+            pause_ms(100);
+        }
+        pause_ms(500);
+        ioctl(fd, UI_DEV_DESTROY);
+        close(fd);
+        return 0;
+    }
     for (int a = 1; a < argc; ++a) {
         int held[4], count = 0;
         const char *rest = argv[a], *plus;
