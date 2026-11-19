@@ -905,6 +905,10 @@ on the ST wiki.</p>
 <td>On the USB-A ports: it types into the shell and the REPL; layout in the Settings app. The Windows key alone, or the Menu key, opens the app menu as a tap does, and leaves an app as its home button. In the menu the arrows, Tab, Home and End move between the buttons, Enter or Space presses one, Esc goes back to the shell</td>
 </tr>
 <tr>
+<td>Gamepads</td>
+<td>USB, and Bluetooth with limits. OpenSTLinux's kernel lacks the drivers: <code>scripts/build_kmods.sh</code> builds <code>xpad</code> (X-input), <code>hid-nintendo</code> (Switch mode), <code>uhid</code> and <code>hidp</code> (Bluetooth input) from ST's kernel at the image's tag with the board's own configuration, and <code>deploy.sh</code> installs them. A gamepad's Home button opens the app menu; in the menu and the Games list the d-pad, hat or stick move, A, B or Start press, Select goes back. Settings → Controllers pairs Bluetooth controllers. Tried with an 8BitDo SN30 Pro+: over USB it works; over Bluetooth in Switch mode it works after pairing but not when it connects again by itself (hid-nintendo gets no answer to its first commands), and in D-input mode it pairs without bonding, which BlueZ refuses for input devices (<code>ClassicBondedOnly</code>, kept on against keystroke injection)</td>
+</tr>
+<tr>
 <td>USB mouse</td>
 <td>The pointer, with a cursor that shows once it moves: on a monitor, which has no touch, and on the panel too</td>
 </tr>
