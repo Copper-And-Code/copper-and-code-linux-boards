@@ -34,6 +34,7 @@ case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
         AUDIO_SINK=""                # GStreamer's default (a USB audio adapter, for example)
         AUDIO_SINK_MONITOR=""        # no HDMI
         M4_FIRMWARE=""               # no Cortex-M4
+        REALTIME=""                  # one core: a Python loop at real-time priority would starve Linux
         HOSTNAME_DEFAULT=mp135-mpy ;;
     *st,stm32mp157c-dk2*)
         BOARD="STM32MP157C-DK2"
@@ -47,6 +48,12 @@ case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
         # On a monitor the sound goes with the picture: HDMI audio, the SiI9022A's I2S input.
         AUDIO_SINK_MONITOR="alsasink device=plughw:0,2"
         M4_FIRMWARE=mpy_m4.elf       # machine.I2C and machine.ADC; mpy_m4 starts it when needed
+        # Real-time priority, low among real-time tasks (the kernel's interrupt threads run at 50):
+        # busy Linux programs no longer delay the GUI and the requests to the Cortex-M4 (measured
+        # with two busy processes: the slowest 1% of requests from 8 ms to about 1.5 ms). The kernel
+        # keeps 5% of every second for normal tasks (sched_rt_runtime_us), the second core stays
+        # free for Linux, and the programs MicroPython starts (linuxproc) run at normal priority.
+        REALTIME=10
         HOSTNAME_DEFAULT=mp157-mpy ;;
     *) die "not an STM32MP135F-DK or STM32MP157C-DK2" ;;
 esac
@@ -111,12 +118,14 @@ put "$SOURCE/mpy-usb-composite.service" "$UNITS/mpy-usb-composite.service" 0644
 put "$SOURCE/mpy-repl.service" "$UNITS/mpy-repl.service" 0644
 # The board's own settings of the service, in a drop-in.
 install -d "$UNITS/mpy-repl.service.d"
-if [ "$ROTATION" != 0 ] || [ -n "$AUDIO_SINK" ] || [ -n "$AUDIO_SINK_MONITOR" ]; then
+if [ "$ROTATION" != 0 ] || [ -n "$AUDIO_SINK" ] || [ -n "$AUDIO_SINK_MONITOR" ] || [ -n "$REALTIME" ]; then
     {
         printf '[Service]\n'
         [ "$ROTATION" != 0 ] && printf 'Environment=MPY_DISPLAY_ROTATION=%s\n' "$ROTATION"
         [ -n "$AUDIO_SINK" ] && printf 'Environment="MPY_AUDIO_SINK=%s"\n' "$AUDIO_SINK"
         [ -n "$AUDIO_SINK_MONITOR" ] && printf 'Environment="MPY_AUDIO_SINK_MONITOR=%s"\n' "$AUDIO_SINK_MONITOR"
+        [ -n "$REALTIME" ] && printf 'CPUSchedulingPolicy=fifo\nCPUSchedulingPriority=%s\n' "$REALTIME"
+        :  # the last test may be false: the block still succeeds
     } > "$SOURCE/board.conf"
     put "$SOURCE/board.conf" "$UNITS/mpy-repl.service.d/board.conf" 0644
 elif [ -e "$UNITS/mpy-repl.service.d/board.conf" ]; then

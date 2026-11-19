@@ -30,14 +30,8 @@ ExecStartPre=-/bin/rm -f /run/mpy-repl-mode
 ExecStart=/usr/local/mpy/bin/mpy-repl-hub --tty /dev/ttyGS0 --listen ${MPY_REPL_TCP} --keyboard ${MPY_KEYBOARD} -- /usr/local/mpy/bin/micropython -X heapsize=8M /usr/local/mpy/lib/mpy_launcher.py
 Restart=always
 RestartSec=0
-# Real-time priority, low among real-time tasks (the kernel's interrupt threads run at 50): busy
-# Linux programs no longer delay the GUI and the requests to a Cortex-M4 (measured with two busy
-# processes: the slowest 1% of requests from 8 ms to about 1.5 ms). The kernel keeps 5% of every
-# second for normal tasks (sched_rt_runtime_us), so a Python loop that never sleeps cannot freeze
-# Linux, and the programs MicroPython starts (linuxproc: gst-play, shells) run at normal priority.
-# To go without it: a drop-in with CPUSchedulingPolicy=other.
-CPUSchedulingPolicy=fifo
-CPUSchedulingPriority=10
+# Real-time priority comes from the board's drop-in (board.conf, written by install.sh), on boards
+# with more than one core only: see there.
 
 [Install]
 WantedBy=multi-user.target

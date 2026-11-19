@@ -101,8 +101,9 @@ Linux (system calls, the M4's interrupt, waking Python up) and about 70 us `mpy_
 What brought these numbers down, measured one step at a time:
 
 - `mpy_m4` reads a whole answer in one `poll()` and one `read()`: about 10%.
-- `mpy-repl.service` runs MicroPython at real-time priority (`SCHED_FIFO` 10; the programs it starts
-  through `linuxproc` at normal priority): under load the slowest 1% went from 8 ms to under 0.6 ms.
+- `mpy-repl.service` runs MicroPython at real-time priority (`SCHED_FIFO` 10, in the drop-in
+  `board.conf` that `install.sh` writes for this board only: the STM32MP135F-DK has one core; the
+  programs it starts through `linuxproc` at normal priority): under load the slowest 1% went from 8 ms to under 0.6 ms.
 - The raw channel goes around Linux's tty layer and its worker thread: 25 us less a request through
   `mpy_m4`, and a slowest 0.1% three to four times shorter when idle.
 
