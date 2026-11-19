@@ -8,6 +8,8 @@
 # Environment:
 #   MICROPYTHON, HUB, DTB  files in dist/ (default: the newest of each; the DTB the board's)
 #   M4_ELF                 the Cortex-M4 firmware for the STM32MP157C-DK2 (scripts/build_m4.sh)
+#   dist/retro/            the games frontend and its cores, installed when present
+#                          (scripts/build_retro.sh)
 #   MPY_SSH_ALIAS          name to check the board's SSH host key against, for boards that share
 #                          an address (both answer at 192.168.7.1), for example stm32mp157c-dk2
 #   MPY_HOSTNAME, MPY_AUTOSTART  passed to install.sh when set
@@ -56,10 +58,16 @@ for file in mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.se
     cp "$REPO/linux/$file" "$STAGE/$file"
 done
 cp "$REPO/examples/shell-linux/edit.py" "$REPO/examples/shell-linux/vi.py" "$STAGE/"
+# The games frontend and its cores, when built (scripts/build_retro.sh).
+if [[ -f $REPO/dist/retro/mpy-retro ]]; then
+    stage "$REPO/dist/retro/mpy-retro" mpy-retro
+    mkdir -p "$STAGE/retro-cores"
+    cp "$REPO"/dist/retro/cores/*_libretro.so "$STAGE/retro-cores/"
+fi
 
 echo "deploy: ${COMPATIBLE%% *}: $(basename "$MICROPYTHON"), $(basename "$HUB"), $(basename "$DTB") -> $BOARD"
 on_board 'rm -rf /tmp/mpy-install && mkdir -p /tmp/mpy-install'
-scp -q "${SSH_OPTIONS[@]}" "$STAGE"/* "root@$BOARD:/tmp/mpy-install/"
+scp -q -r "${SSH_OPTIONS[@]}" "$STAGE"/* "root@$BOARD:/tmp/mpy-install/"
 ENVIRONMENT=""
 [[ -n ${MPY_HOSTNAME+set} ]] && ENVIRONMENT+="MPY_HOSTNAME='$MPY_HOSTNAME' "
 [[ -n ${MPY_AUTOSTART:-} ]] && ENVIRONMENT+="MPY_AUTOSTART='$MPY_AUTOSTART' "

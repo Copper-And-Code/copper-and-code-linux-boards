@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Games",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "c60f99843f684c40a60ba2b417d33108",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "87450da01585408e939cd4ab1c2de3cb",
+          "name": "header",
+          "type": "label",
+          "props": {
+            "x": 13,
+            "y": 11,
+            "width": 400,
+            "height": 49,
+            "text": "Games",
+            "textColor": "#FFFFFF",
+            "fontSize": 40,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b0468e3dba624f14b59178bfa7ac2c24",
+          "name": "status",
+          "type": "label",
+          "props": {
+            "x": 13,
+            "y": 67,
+            "width": 773,
+            "height": 32,
+            "text": "",
+            "textColor": "#9AA6B8",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_DOTS",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c447dbd336b94693afd742a11db33334",
+          "name": "game_list",
+          "type": "list",
+          "props": {
+            "x": 10,
+            "y": 106,
+            "width": 500,
+            "height": 364,
+            "items": "",
+            "bgColor": "#1E2633",
+            "textColor": "#E6EAF0",
+            "selectedColor": "#2F6FDE",
+            "fontSize": 24
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "48ee8d110275402ab16c8ddca329e317",
+          "name": "controls",
+          "type": "label",
+          "props": {
+            "x": 530,
+            "y": 106,
+            "width": 260,
+            "height": 364,
+            "text": "",
+            "textColor": "#C8D0DC",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import games_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "games_app.start(ui)"
+      }
+    }
+  },
+  "currentPageId": "c60f99843f684c40a60ba2b417d33108",
+  "assets": {},
+  "variables": [],
+  "projectId": "b379877b9f8943c1af406a0be61a61a6",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "6d6941df05a84aa18e4414e7e8ab60e0",
+      "name": "games_app",
+      "source": "# SPDX-License-Identifier: MIT\n# Games: the games in /usr/local/mpy/fs/games, played full screen through libretro cores\n# (mpy_retro, the mpy-retro frontend in C). Choose one with the arrows and Enter of a keyboard\n# plugged into the board (mpy_keys), the mouse or a tap. The game has the screen, the sound and the\n# keyboard until it ends; then this list comes back.\n#\n# In the LVGL MPY Studio simulator there are no games: three demo names are shown.\n\nimport lvgl as lv\n\ntry:\n    import mpy_keys\n    import mpy_retro\nexcept ImportError:\n    mpy_keys = mpy_retro = None\n\nROW = lv.color_hex(0x1E2633)\nCHOSEN = lv.color_hex(0x2F6FDE)\nDEMO = [(\"Demo game one\", \"/demo/one.smc\"), (\"Demo game two\", \"/demo/two.sfc\"), (\"Demo game three\", \"/demo/three.smc\")]\nSYSTEM_NAMES = {\"smc\": \"SNES\", \"sfc\": \"SNES\", \"fig\": \"SNES\", \"swc\": \"SNES\"}\nCONTROLS = (\n    \"Choose: arrows and Enter, the mouse or a tap.\\n\\n\"\n    \"In the game, keyboard:\\n\"\n    \"arrows  d-pad\\nX  A    Z  B\\nS  X    A  Y\\nQ  L    W  R\\nEnter  Start\\nShift  Select\\n\\n\"\n    \"Gamepad: by position.\\n\\n\"\n    \"Back here: Esc, the Windows key, or Select + Start.\"\n)\n\n_ui = None\n_rows = []\n_paths = []\n_chosen = 0\n\n\ndef _font():\n    height = lv.display_get_default().get_vertical_resolution()\n    return lv.font_montserrat_24 if height >= 400 else lv.font_montserrat_14\n\n\ndef _say(text):\n    _ui.status.set_text(text)\n\n\ndef start(ui):\n    global _ui\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    ui.game_list.set_style_border_width(0, 0)\n    ui.game_list.set_style_radius(10, 0)\n    ui.game_list.set_style_pad_all(4, 0)\n    ui.game_list.set_style_pad_row(4, 0)\n    ui.controls.set_text(CONTROLS)\n    _fill()\n    if mpy_keys is not None:\n        mpy_keys.listen(_key)\n\n\ndef _fill():\n    global _rows, _paths\n    found = mpy_retro.games() if mpy_retro is not None else DEMO\n    _ui.game_list.clean()\n    _rows, _paths = [], []\n    for name, path in found:\n        row = lv.button(_ui.game_list)\n        row.set_width(lv.pct(100))\n        row.set_style_bg_color(ROW, 0)\n        row.set_style_shadow_width(0, 0)\n        label = lv.label(row)\n        system = SYSTEM_NAMES.get(path.rsplit(\".\", 1)[-1].lower(), \"\")\n        label.set_text(\"%s %s\\n%s\" % (lv.SYMBOL.PLAY, name, system))\n        label.set_style_text_font(_font(), 0)\n        label.set_long_mode(lv.label.LONG_MODE.DOTS)\n        label.set_width(lv.pct(100))\n        index = len(_rows)\n        row.add_event_cb(lambda e, i=index: _play(i), lv.EVENT.CLICKED, None)\n        _rows.append(row)\n        _paths.append(path)\n    if not _rows:\n        _say(\"No games: copy yours into /usr/local/mpy/fs/games\")\n        return\n    _say(\"%d games\" % len(_rows) if mpy_retro is not None else \"Demo games (simulator)\")\n    _select(0)\n\n\ndef _select(index):\n    global _chosen\n    if not _rows:\n        return\n    _rows[_chosen].set_style_bg_color(ROW, 0)\n    _chosen = max(0, min(index, len(_rows) - 1))\n    _rows[_chosen].set_style_bg_color(CHOSEN, 0)\n    _rows[_chosen].scroll_to_view(True)\n\n\ndef _key(key):\n    if key in (mpy_keys.DOWN, mpy_keys.NEXT, mpy_keys.RIGHT):\n        _select(_chosen + 1)\n    elif key in (mpy_keys.UP, mpy_keys.PREV, mpy_keys.LEFT):\n        _select(_chosen - 1)\n    elif key == mpy_keys.HOME:\n        _select(0)\n    elif key == mpy_keys.END:\n        _select(len(_rows) - 1)\n    elif key == mpy_keys.ENTER and _rows:\n        _play(_chosen)\n\n\ndef _play(index):\n    _select(index)\n    name = _rows[index].get_child(0).get_text().split(\"\\n\")[0]\n    if mpy_retro is None:\n        _say(\"Simulator: the game would start here\")\n        return\n    try:\n        status, output = mpy_retro.play(_paths[index])\n    except (OSError, ValueError) as error:\n        _say(\"Cannot start it: %s\" % error)\n        return\n    if status:\n        lines = [line for line in output.replace(\"\\r\", \"\").split(\"\\n\") if line.strip()]\n        _say(\"It stopped: %s\" % (lines[-1] if lines else \"status %d\" % status))\n    else:\n        _say(\"Back from %s\" % name.split(\" \", 1)[-1])\n"
+    }
+  ]
+}

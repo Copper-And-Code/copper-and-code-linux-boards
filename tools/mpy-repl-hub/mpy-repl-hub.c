@@ -261,7 +261,7 @@ int main(int argc, char **argv) {
 
     unsigned char input[CHUNK];
     size_t input_offset = 0, input_length = 0;
-    long long serial_retry_ms = 0, keyboard_scan_ms = 0, started_ms = now_ms(), respawn_ms = 0;
+    long long serial_retry_ms = 0, keyboard_scan_ms = 0, keyboard_lend_ms = 0, started_ms = now_ms(), respawn_ms = 0;
     pid_t child = spawn(slave, program);
     notify("READY=1");
     // WatchdogSec= in the unit: the hub's loop pings at a third of the period. It shows that the
@@ -294,6 +294,10 @@ int main(int argc, char **argv) {
         if (tty_path && serial_client.fd < 0 && now >= serial_retry_ms) {
             serial_open(tty_path);
             serial_retry_ms = now + RETRY_MS;
+        }
+        if (now - keyboard_lend_ms >= 100) {
+            keyboard_lend();
+            keyboard_lend_ms = now;
         }
         if (now >= keyboard_scan_ms) {
             keyboard_scan();

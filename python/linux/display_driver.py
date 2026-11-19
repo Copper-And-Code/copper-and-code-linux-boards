@@ -255,6 +255,38 @@ def running():
     return _running
 
 
+_stopped_by_release = False
+
+
+def release():
+    """Lets another program (an emulator) have the screen: LVGL stops drawing and DRM is closed.
+    From an LVGL callback, the display's thread simply waits in it until resume()."""
+    global _stopped_by_release
+    _stopped_by_release = _thread.get_ident() != _service_id and _running
+    if _stopped_by_release:
+        stop()
+    linuxfb.close()
+
+
+def resume():
+    """Takes the screen back after release() and draws all of it again. If the screen changed
+    meanwhile (a monitor plugged in), MicroPython starts again on the new one."""
+    global _stopped_by_release
+    try:
+        size = linuxfb.open(connector=CONNECTOR, mode="%dx%d" % (_drm_width, _drm_height))
+    except (OSError, ValueError):
+        size = None
+    if size is None or linuxfb.connector()[0] != CONNECTOR or _monitor_connected() != _MONITOR_AT_START:
+        import mpyrepl
+
+        mpyrepl.restart()
+    for layer in (lv.screen_active(), lv.layer_top(), lv.layer_sys()):
+        layer.invalidate()
+    if _stopped_by_release:
+        _stopped_by_release = False
+        start()
+
+
 def backlight(percent=None):
     # Without a backlight in sysfs the panel is always on: 100, and setting does nothing. On a
     # monitor too: the panel's backlight is not the monitor's (its own buttons set it).

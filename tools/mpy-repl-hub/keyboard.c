@@ -16,6 +16,9 @@
 // End, Enter, Space, Esc) go to it as LVGL key codes, one datagram each on /run/mpy-keys, and not
 // to the shell, whatever program reads the terminal behind the menu.
 //
+// A program that wants the keyboards for itself (mpy-retro, an emulator) writes its pid in
+// /run/mpy-keyboard-lent: the hub lets them go until the file is gone or the process ended.
+//
 // The layout is the one of settings.json ({"keyboard": {"layout": "it"}}, written by the Settings
 // app through mpy_settings), read again whenever the file changes; without it, --keyboard's.
 #define _GNU_SOURCE
@@ -29,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -41,6 +45,7 @@
 #define HOME_KEY_FILE "/run/mpy-home-key"
 #define MENU_FILE "/run/mpy-menu"
 #define MENU_SOCKET "/run/mpy-keys"
+#define LENT_FILE "/run/mpy-keyboard-lent"
 
 struct keyboard {
     int fd;
@@ -229,8 +234,42 @@ static void keyboard_close(struct keyboard *keyboard, const char *why) {
     shift_left = shift_right = ctrl_left = ctrl_right = alt = altgr = false; // keys held when it went
 }
 
-void keyboard_scan(void) {
+static bool lent_out;
+
+// The pid in LENT_FILE, when that process lives; a file left by a process that died goes.
+static bool borrowed(void) {
+    FILE *file = fopen(LENT_FILE, "r");
+    if (!file) {
+        return false;
+    }
+    int pid = 0;
+    bool alive = fscanf(file, "%d", &pid) == 1 && pid > 0 && (kill(pid, 0) == 0 || errno == EPERM);
+    fclose(file);
+    if (!alive) {
+        unlink(LENT_FILE);
+    }
+    return alive;
+}
+
+void keyboard_lend(void) {
     if (!enabled) {
+        return;
+    }
+    bool now = borrowed();
+    if (now && !lent_out) {
+        for (size_t i = 0; i < KEYBOARD_MAX; ++i) {
+            if (keyboards[i].fd >= 0) {
+                keyboard_close(&keyboards[i], "lent");
+            }
+        }
+    } else if (!now && lent_out) {
+        fprintf(stderr, "mpy-repl-hub: keyboards back\n");  // the next scan opens them
+    }
+    lent_out = now;
+}
+
+void keyboard_scan(void) {
+    if (!enabled || lent_out) {
         return;
     }
     static bool started;

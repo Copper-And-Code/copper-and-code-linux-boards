@@ -13,6 +13,9 @@
 bool keyboard_layout(const char *name);
 // The settings.json whose "keyboard" section chooses the layout, instead of keyboard_layout's.
 void keyboard_settings(const char *path);
+// Lets the keyboards go while another program borrows them (/run/mpy-keyboard-lent), and notes
+// when they come back; cheap enough to call at every turn of the loop.
+void keyboard_lend(void);
 // Opens the keyboards plugged in since the last call; cheap enough to call every second.
 void keyboard_scan(void);
 // Adds the open keyboards to fds; returns how many.

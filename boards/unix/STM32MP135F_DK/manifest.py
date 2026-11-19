@@ -15,3 +15,5 @@ module("ansifont.py", base_path="$(BOARDS_DIR)/examples/shell-linux")
 # machine: MicroPython's own, and I2C and ADC served by a Cortex-M4 where there is one (mpy_m4).
 module("machine.py", base_path="$(BOARDS_DIR)/python/linux")
 module("mpy_m4.py", base_path="$(BOARDS_DIR)/python/linux")
+module("mpy_retro.py", base_path="$(BOARDS_DIR)/python/linux")
+module("mpy_keys.py", base_path="$(BOARDS_DIR)/python/linux")

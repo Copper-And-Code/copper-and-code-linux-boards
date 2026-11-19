@@ -54,6 +54,17 @@ editors, Python programs and Linux programs on a pseudo-terminal, with a USB key
 board or the keyboard of the serial or TCP terminal. A tap opens the app menu.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/shell-linux)
 
+## Games
+
+![Games](images/games.png)
+
+Your games, full screen, through libretro cores: the list is LVGL, the game is `mpy-retro`, a
+frontend in C that has the screen, the sound and the keyboard while it runs, then gives them back.
+SNES (Snes9x2005) at full speed on the STM32MP157C-DK2, on its panel or a monitor. Arrows and Enter,
+the mouse or a tap choose; Esc, the Windows key or Select + Start come back. See
+[Games: mpy-retro](retro.md).
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/games)
+
 ## machine: the hardware
 
 Apps that show MicroPython's `machine` API on a Linux board, in

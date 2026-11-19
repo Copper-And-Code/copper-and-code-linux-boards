@@ -87,6 +87,14 @@ install -d "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/fs/lib" "$PREFIX/fs/bin"
 put "$SOURCE/micropython" "$PREFIX/bin/micropython" 0755
 put "$SOURCE/mpy-repl-hub" "$PREFIX/bin/mpy-repl-hub" 0755
 put "$SOURCE/mpy-screenshot" "$PREFIX/bin/mpy-screenshot" 0755
+# The games frontend and its libretro cores, when deploy.sh brought them.
+if [ -f "$SOURCE/mpy-retro" ]; then
+    put "$SOURCE/mpy-retro" "$PREFIX/bin/mpy-retro" 0755
+    install -d "$PREFIX/retro/cores" "$PREFIX/fs/games"
+    for core in "$SOURCE"/retro-cores/*_libretro.so; do
+        [ -f "$core" ] && put "$core" "$PREFIX/retro/cores/$(basename "$core")" 0644
+    done
+fi
 put "$SOURCE/mpy-usb-composite.sh" "$PREFIX/bin/mpy-usb-composite" 0755
 put "$SOURCE/mpy_launcher.py" "$PREFIX/lib/mpy_launcher.py" 0644
 put "$SOURCE/mpy_tap.py" "$PREFIX/lib/mpy_tap.py" 0644

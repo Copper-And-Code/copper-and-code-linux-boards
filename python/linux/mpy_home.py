@@ -11,8 +11,8 @@
 # The home key of a keyboard plugged into the board (the Windows key alone, or the Menu key; the
 # REPL hub counts it in /run/mpy-home-key) does what a tap does: on the shell it opens the menu,
 # and closes it again; in an app it brings the shell back, as the home button. In the menu the
-# arrows, Tab, Home and End move between the buttons, Enter or Space presses one, Esc goes back:
-# while the menu is shown /run/mpy-menu exists, and the hub sends those keys to /run/mpy-keys.
+# arrows, Tab, Home and End move between the buttons, Enter or Space presses one, Esc goes back
+# (mpy_keys).
 #
 # LVGL MPY Studio and mpremote take the board as usual: the shell leaves on their Ctrl-A, and
 # after a soft reset from the raw REPL main.py does not run.
@@ -21,14 +21,12 @@ import os
 import sys
 
 import lvgl as lv
+import mpy_keys
 import mpy_settings
 import mpyrepl
 
 HOME_KEY = "/run/mpy-home-key"
-MENU_FLAG = "/run/mpy-menu"
-MENU_KEYS = "/run/mpy-keys"
-KEY_UP, KEY_DOWN, KEY_RIGHT, KEY_LEFT, KEY_ESC = 17, 18, 19, 20, 27
-KEY_ENTER, KEY_NEXT, KEY_PREV, KEY_HOME, KEY_END = 10, 9, 11, 2, 3
+
 NEXT = "/run/mpy-home-next"  # the app to run after the restart; in RAM, so a reboot forgets it
 LINUX_SHELL = "linux-shell"  # NEXT for the Linux shell instead of an app
 BACK = 0x121820
@@ -78,21 +76,6 @@ _menu = None  # the menu's screen, while it is built
 _choices = []  # the buttons the keyboard moves between: the tiles, or those of a question
 _chosen = 0
 _back = None  # what Esc does
-_flag = None  # whether /run/mpy-menu exists
-
-
-def _set_flag(on):
-    global _flag
-    if on == _flag:
-        return
-    _flag = on
-    try:
-        if on:
-            open(MENU_FLAG, "w").close()
-        else:
-            os.remove(MENU_FLAG)
-    except OSError:
-        pass
 
 
 def _choose(buttons, back, index=0):
@@ -128,51 +111,26 @@ def _vertical(step):
 
 
 def _menu_key(code):
-    if code in (KEY_RIGHT, KEY_NEXT):
+    if code in (mpy_keys.RIGHT, mpy_keys.NEXT):
         _select(_chosen + 1)
-    elif code in (KEY_LEFT, KEY_PREV):
+    elif code in (mpy_keys.LEFT, mpy_keys.PREV):
         _select(_chosen - 1)
-    elif code == KEY_DOWN:
+    elif code == mpy_keys.DOWN:
         _vertical(1)
-    elif code == KEY_UP:
+    elif code == mpy_keys.UP:
         _vertical(-1)
-    elif code == KEY_HOME:
+    elif code == mpy_keys.HOME:
         _select(0)
-    elif code == KEY_END:
+    elif code == mpy_keys.END:
         _select(len(_choices) - 1)
-    elif code == KEY_ENTER and _choices:
+    elif code == mpy_keys.ENTER and _choices:
         _choices[_chosen].send_event(lv.EVENT.CLICKED, None)
-    elif code == KEY_ESC and _back is not None:
+    elif code == mpy_keys.ESC and _back is not None:
         _back()
 
 
 def _watch_menu_keys():
-    # The keys come from the hub as datagrams of one byte; a timer of LVGL reads them, and keeps
-    # /run/mpy-menu while the menu is the screen shown.
-    import socket
-    import struct
-
-    try:
-        os.remove(MENU_KEYS)
-    except OSError:
-        pass
-    keys = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    keys.bind(struct.pack("H", socket.AF_UNIX) + MENU_KEYS.encode() + b"\0")
-    keys.setblocking(False)
-    _set_flag(False)
-
-    def check(_timer):
-        shown = _menu is not None and lv.screen_active() == _menu
-        _set_flag(shown)
-        while True:
-            try:
-                data = keys.recv(16)
-            except OSError:
-                return
-            if shown and data:
-                _menu_key(data[0])
-
-    lv.timer_create(check, 40, None)
+    mpy_keys.listen(_menu_key, wanted=lambda: _menu is not None and lv.screen_active() == _menu)
 
 
 def _home_key_count():
@@ -330,6 +288,7 @@ def run_app(path):
 
 def main():
     os.unsetenv("MPY_APP_SIZE")  # an app's size, from before the soft reset: the shell has the whole screen
+    mpy_keys.stop()  # a menu open before the soft reset no longer wants the keys
     try:
         with open(NEXT) as source:
             path = source.read().strip()
