@@ -4,11 +4,13 @@
 
 Your games, full screen, through libretro cores. The list is an LVGL app made with LVGL MPY Studio
 and its MCP tools; the game is `mpy-retro`, a frontend in C, which has the screen, the sound and the
-keyboard while it runs. When the game ends the list comes back. For now on the STM32MP157C-DK2
-(800×480): SNES through Snes9x2005 and the C64 through the core of `cores/c64`, at full speed with
-every frame drawn; Neo Geo and arcade through FBNeo (romsets as FBNeo names them, the Neo Geo BIOS
-`neogeo.zip` next to the games), most of them at full speed, the heaviest with a frame skipped now
-and then (see the frontend's notes).
+keyboard while it runs. When the game ends the list comes back. On the STM32MP157C-DK2 (800×480,
+`project-800x480.json`): SNES through Snes9x2005 and the C64 through the core of `cores/c64`, at
+full speed with every frame drawn; Neo Geo and arcade through FBNeo (romsets as FBNeo names them,
+the Neo Geo BIOS `neogeo.zip` next to the games), most of them at full speed, the heaviest with a
+frame skipped now and then (see the frontend's notes). On the STM32MP135F-DK (480×272,
+`project.json`, the keys in short beside the list) SNES games run with room to spare, about three
+times the speed they need; those with a Super FX chip, the heaviest, now and then a little late.
 
 ## Setting up
 
@@ -40,7 +42,8 @@ keypad 8 4 6 2 and 0; Select moves it to port 1), and the Windows key comes back
 and runs by itself, a `.prg` BASIC program runs, a `.crt` cartridge starts. The panel on the right of
 the list shows the keys of the system of the chosen game.
 
-The sound goes to the headphone jack, or to HDMI on a monitor. The save RAM is kept next to the game,
+The sound goes to the headphone jack, or to HDMI on a monitor; on the STM32MP135F-DK, which has no
+sound of its own, to a USB audio adapter. The save RAM is kept next to the game,
 as `GAME.srm`. A keyboard or a gamepad plugged in during the game works at once.
 
 ## How it works
