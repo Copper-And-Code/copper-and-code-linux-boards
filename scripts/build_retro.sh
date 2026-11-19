@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
-# Build the games frontend (mpy-retro) and its libretro cores for the STM32MP1 boards.
+# Build the games frontend (mpy-retro) and its libretro cores for the STM32MP1 boards: Snes9x2005,
+# fetched, and the C64 core of cores/c64.
 #
 #   scripts/build_retro.sh
 #
@@ -49,6 +50,12 @@ for entry in "${CORES[@]}"; do
     cp "$src/${name}_libretro.so" "$OUT/cores/"
     [[ -z $LIBRETRO_H ]] && LIBRETRO_H=$(dirname "$(find "$src" -name libretro.h -path '*libretro-common/include/*' | head -1)")
 done
+
+log "core c64 (cores/c64, in this repository)"
+# shellcheck disable=SC2086
+$CC $CFLAGS -O2 -fPIC -shared -std=gnu11 -Wall -Wextra -Werror -I"$LIBRETRO_H" -I"$REPO/cores/c64" \
+    -o "$OUT/cores/c64_libretro.so" "$REPO/cores/c64/libretro.c" "$REPO"/cores/c64/core/{c64,c1541,crt,sid,vic_render}.c \
+    $LDFLAGS -Wl,--no-undefined -lm
 
 log "frontend"
 # shellcheck disable=SC2086

@@ -22,8 +22,24 @@ reach the screen: the panel is switched to its 60 Hz mode (it prefers 50), the s
 frame takes 3.6 ms to draw, and three buffers keep a frame that comes while another waits for the
 blank (the few missing come from 60.04 Hz of the SNES against 60.00 of the panel).
 
-The C64 core of the same projects runs 3.3 times faster than real time on one Cortex-A7: it is the
-next core to wrap.
+## The C64
+
+The C64 core of the same STM32H743 and RP2350 projects, in this repository as a libretro core
+([cores/c64](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64)): 6510, CIAs,
+VIC-II, SID, the emulated 1541 and cartridges. `.prg`, `.d64` (loaded and run by itself) and `.crt`
+files start from the Games list. On the STM32MP157C-DK2 it runs at 50.1 emulated and 49.9 shown
+frames a second (the panel switched to 50 Hz), 5.4 ms to draw a frame; while a disk loads, three
+frames run for each one shown, about 2.5 times real speed.
+
+The whole keyboard is the C64's, by position (as VICE's positional map): Esc RUN/STOP, Tab CTRL,
+left Ctrl C=, Home CLR/HOME, Insert £, Page Up ↑, the backquote ←, F2 F4 F6 F8 as the shifted
+function keys. The joystick is in port 2: a gamepad, or the keypad's 8 4 6 2 and 0; the gamepad's
+Select moves it to port 1. The Windows key, or Select and Start together, come back to the list.
+
+The Commodore ROMs are the user's, in `/usr/local/mpy/retro/system/c64/` (see
+[the core's notes](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64)). The
+demo used to check it, [Nine](https://www.linusakesson.net/scene/nine/) by Linus Åkesson, comes
+from its author's page.
 
 ## The frontend
 
@@ -32,8 +48,10 @@ next core to wrap.
 | Screen | DRM/KMS: the screen `display_driver` would choose (a monitor before the panel), at the refresh nearest the game's, three buffers flipped on the vertical blank. A second thread scales the frame to the largest size with the core's aspect, and turns it with the panel (`MPY_DISPLAY_ROTATION`) |
 | Sound | ALSA, the device of `MPY_AUDIO_SINK` (the headphone jack, or HDMI on a monitor). Writing the samples paces the game; without a sound card a clock does |
 | Input | evdev keyboards and gamepads as player 1's RetroPad, also those plugged in during the game. The REPL hub lends the keyboards while `/run/mpy-keyboard-lent` names the frontend's live process |
-| Leaving | Esc, the Windows key, Select and Start together, the gamepad's home button, SIGTERM |
+| Keyboard | A core that reads the keyboard (the C64) gets all of it: then it is no RetroPad and Esc is the core's. A key pressed and released between two polls still counts once |
+| Leaving | Esc (unless the core has the keyboard), the Windows key, Select and Start together, the gamepad's home button, SIGTERM |
 | Saves | The core's save RAM next to the game, as `GAME.srm` |
+| ROMs | The cores' system folder: `/usr/local/mpy/retro/system` (`MPY_RETRO_SYSTEM`) |
 
 ```sh
 mpy-retro /usr/local/mpy/retro/cores/snes9x2005_libretro.so "/usr/local/mpy/fs/games/snes/My game.sfc"
@@ -48,13 +66,13 @@ scripts/build_retro.sh      # the cores at a fixed commit, and the frontend, wit
 scripts/deploy.sh           # installs dist/retro/ when present
 ```
 
-The cores are fetched and built in `work/`; their sources and licenses stay theirs and are not part of
-this repository (Snes9x has non-commercial terms: see its `copyright` file). The frontend and
-`libretro.h` are MIT. No game comes with the board or this repository.
+Snes9x2005 is fetched and built in `work/`; its sources and license stay its own and are not part
+of this repository (Snes9x has non-commercial terms: see its `copyright` file). The C64 core is in
+`cores/c64`, MIT. The frontend and `libretro.h` are MIT. No game, demo or ROM comes with the board
+or this repository.
 
 ## Next
 
-- The C64 core of the STM32H743 port as a libretro core, with its keyboard and joystick.
 - More cores, each measured the same way before it is listed: NES, Game Boy, Mega Drive, PC Engine,
   Game Boy Advance, arcade, PlayStation.
 - A real C64 joystick or SNES pad on the Arduino connector, read by the Cortex-M4.

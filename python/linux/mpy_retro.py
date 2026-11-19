@@ -8,7 +8,8 @@
 #   mpy_retro.play(path)                 # (exit status, the frontend's last messages)
 #
 # The core comes from the game's extension (SYSTEMS); MPY_GAMES names another games folder. The
-# games are the user's own files: none comes with the board.
+# games, and the ROMs some cores need (the C64's, in /usr/local/mpy/retro/system/c64), are the
+# user's own files: none comes with the board.
 
 import os
 import time
@@ -21,6 +22,9 @@ SYSTEMS = {
     "sfc": "snes9x2005",
     "fig": "snes9x2005",
     "swc": "snes9x2005",
+    "prg": "c64",
+    "d64": "c64",
+    "crt": "c64",
 }
 
 

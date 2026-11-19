@@ -90,7 +90,7 @@ put "$SOURCE/mpy-screenshot" "$PREFIX/bin/mpy-screenshot" 0755
 # The games frontend and its libretro cores, when deploy.sh brought them.
 if [ -f "$SOURCE/mpy-retro" ]; then
     put "$SOURCE/mpy-retro" "$PREFIX/bin/mpy-retro" 0755
-    install -d "$PREFIX/retro/cores" "$PREFIX/fs/games"
+    install -d "$PREFIX/retro/cores" "$PREFIX/retro/system" "$PREFIX/fs/games"
     for core in "$SOURCE"/retro-cores/*_libretro.so; do
         [ -f "$core" ] && put "$core" "$PREFIX/retro/cores/$(basename "$core")" 0644
     done

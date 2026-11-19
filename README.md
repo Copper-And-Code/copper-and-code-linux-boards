@@ -77,7 +77,7 @@ stations" to an app running on the board.
 | [weather](examples/weather) | Open-Meteo forecast for five days with drawn icons; settings page with night dimming |
 | [mp3-player](examples/mp3-player) | Track list with ID3 titles, play, pause, next, volume: GStreamer driven from the GUI |
 | [web-radio](examples/web-radio) | Internet radio stations, the same player for `http://` streams |
-| [games](examples/games) | Your games full screen through libretro cores (SNES for now), chosen from an LVGL list: [mpy-retro](docs/retro.md) |
+| [games](examples/games) | Your games full screen through libretro cores (SNES, C64), chosen from an LVGL list: [mpy-retro](docs/retro.md) |
 | [shell-linux](examples/shell-linux) | A terminal on the screen: shell, `vi`, `edit` and Linux programs on a pseudo-terminal |
 | [stm32mp135f-dk](examples/stm32mp135f-dk) | The smallest Studio project: a button that answers to touch |
 
@@ -152,7 +152,7 @@ board then needs a unix variant in `boards/unix/` built with its toolchain, and 
 | REPL hub | `tools/mpy-repl-hub/` |
 | Cortex-M4 firmware (STM32MP157C-DK2) | `mcu/stm32mp157c-dk2/` |
 | systemd units, USB gadget, install scripts | `linux/` |
-| Games frontend (libretro) | `tools/mpy-retro/`, `scripts/build_retro.sh` |
+| Games frontend (libretro), C64 core | `tools/mpy-retro/`, `cores/c64/`, `scripts/build_retro.sh` |
 | Build and deploy | `scripts/` |
 | Tests on the board, run from the PC | `tests/hil/` |
 | Measurements and validation logs | `docs/`, `docs/log/` |

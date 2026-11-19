@@ -5,7 +5,8 @@
 Your games, full screen, through libretro cores. The list is an LVGL app made with LVGL MPY Studio
 and its MCP tools; the game is `mpy-retro`, a frontend in C, which has the screen, the sound and the
 keyboard while it runs. When the game ends the list comes back. For now on the STM32MP157C-DK2
-(800×480): SNES through Snes9x2005, at full speed with every frame drawn.
+(800×480): SNES through Snes9x2005, and the C64 through the core of `cores/c64`, both at full speed
+with every frame drawn.
 
 ## Setting up
 
@@ -17,7 +18,8 @@ keyboard while it runs. When the game ends the list comes back. For now on the S
    mpremote connect /dev/ttyACM1 cp "My game.sfc" :games/snes/
    ```
 
-   No game comes with the board or this repository: use dumps of cartridges you own.
+   No game comes with the board or this repository: use dumps of cartridges you own. The C64 also
+   needs its ROMs, yours too, in `/usr/local/mpy/retro/system/c64/` (see `cores/c64/README.md`).
 3. Upload this project from the Studio and add it to the home menu (`settings.json`, section `home`).
 
 ## Playing
@@ -30,6 +32,11 @@ keyboard while it runs. When the game ends the list comes back. For now on the S
 | L, R | Q, W | shoulders |
 | Start, Select | Enter, Shift | Start, Select |
 | Back to the list | Esc or the Windows key | Select and Start together, or the home button |
+
+On the C64 the keyboard is the C64's (Esc is RUN/STOP), the joystick is in port 2 (gamepad, or
+keypad 8 4 6 2 and 0; Select moves it to port 1), and the Windows key comes back. A `.d64` disk loads
+and runs by itself, a `.prg` BASIC program runs, a `.crt` cartridge starts. The panel on the right of
+the list shows the keys of the system of the chosen game.
 
 The sound goes to the headphone jack, or to HDMI on a monitor. The save RAM is kept next to the game,
 as `GAME.srm`. A keyboard or a gamepad plugged in during the game works at once.

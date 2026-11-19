@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT
 # mpy-retro on the board: one game for 15 seconds, full screen, with the board's own environment
-# (rotation, sound device). Passes when the core keeps its speed and nearly every frame is shown.
+# (rotation, sound device). Passes when the core keeps its own speed (60 frames a second for the
+# SNES, 50 for the PAL C64) and nearly every frame is shown.
 #
 #   tests/hil/test_retro.sh GAME_ON_THE_BOARD [CORE] [BOARD]
 #   MPY_SSH_ALIAS=stm32mp157c-dk2 tests/hil/test_retro.sh "/usr/local/mpy/fs/games/snes/My game.sfc"
@@ -28,10 +29,13 @@ python3 - "$OUTPUT" <<'EOF'
 import re, sys
 text = sys.argv[1]
 match = re.search(r"([\d.]+) fps, ([\d.]+) shown a second", text)
-if not match:
+target = re.search(r"mpy-retro: .*, ([\d.]+) fps\n", text)  # the core's own rate: 60 SNES, 50 C64
+if not match or not target:
     sys.exit("FAIL: no frame counts")
-fps, shown = float(match.group(1)), float(match.group(2))
-print(("PASS" if fps >= 59 else "FAIL") + ": %.2f emulated frames a second" % fps)
-print(("PASS" if shown >= 57 else "FAIL") + ": %.2f shown a second" % shown)
-sys.exit(0 if fps >= 59 and shown >= 57 else 1)
+fps, shown, wanted = float(match.group(1)), float(match.group(2)), float(target.group(1))
+fast = fps >= wanted * 0.98
+smooth = shown >= wanted * 0.95
+print(("PASS" if fast else "FAIL") + ": %.2f emulated frames a second of %.2f" % (fps, wanted))
+print(("PASS" if smooth else "FAIL") + ": %.2f shown a second" % shown)
+sys.exit(0 if fast and smooth else 1)
 EOF

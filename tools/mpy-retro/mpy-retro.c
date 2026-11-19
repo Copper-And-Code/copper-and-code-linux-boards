@@ -18,8 +18,12 @@
 // position (south B, east A, west Y, north X), shoulders L and R, Select, Start, d-pad, hat or
 // left stick. The REPL hub lends the keyboards while /run/mpy-keyboard-lent names a live process.
 //
-// Leaving: Esc, the Windows key, Select and Start together, the gamepad's home button, SIGTERM or
-// SIGINT. The save RAM is kept next to the game, as GAME.srm.
+// A core that reads the keyboard (RETRO_DEVICE_KEYBOARD, a computer such as the C64) gets all of
+// it: then the keys are no RetroPad, and Esc is the core's.
+//
+// Leaving: Esc (unless the core reads the keyboard), the Windows key, Select and Start together,
+// the gamepad's home button, SIGTERM or SIGINT. The save RAM is kept next to the game, as GAME.srm;
+// the cores' ROMs are in /usr/local/mpy/retro/system (MPY_RETRO_SYSTEM).
 
 #define _GNU_SOURCE
 #include <dirent.h>
@@ -124,7 +128,8 @@ static void load_core(const char *path) {
 }
 
 static enum retro_pixel_format pixel_format = RETRO_PIXEL_FORMAT_0RGB1555;
-static char system_dir[512] = ".";
+static char system_dir[512] = "/usr/local/mpy/retro/system";  // the cores' ROMs (MPY_RETRO_SYSTEM)
+static char save_dir[512] = ".";  // next to the game
 static float aspect;  // the core's, width over height; 0: its pixels are square
 static double fps = 60;  // the core's frames a second
 
@@ -151,8 +156,10 @@ static bool environment(unsigned command, void *data) {
             return true;
         }
         case RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY:
-        case RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY:
             *(const char **)data = system_dir;
+            return true;
+        case RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY:
+            *(const char **)data = save_dir;
             return true;
         case RETRO_ENVIRONMENT_GET_LOG_INTERFACE:
             ((struct retro_log_callback *)data)->log = core_log;
@@ -618,6 +625,41 @@ static bool key_held[16];     // the keyboard's share
 static bool button_held[16];  // the gamepads' share
 static int hat[2], stick[2];
 static bool lent;
+static bool key_down[KEY_CNT];  // the keyboards' keys, for cores that read a keyboard
+static bool key_tapped[KEY_CNT];  // pressed since the last poll: a key down and up between two polls
+                                  // still counts once
+static bool core_keyboard;     // the core reads the keyboard: it is no RetroPad, and Esc is the core's
+
+// libretro's keys by evdev code, for RETRO_DEVICE_KEYBOARD.
+static const struct {
+    unsigned short code;
+    unsigned key;
+} retro_keys[] = {
+    {KEY_A, RETROK_a}, {KEY_B, RETROK_b}, {KEY_C, RETROK_c}, {KEY_D, RETROK_d}, {KEY_E, RETROK_e},
+    {KEY_F, RETROK_f}, {KEY_G, RETROK_g}, {KEY_H, RETROK_h}, {KEY_I, RETROK_i}, {KEY_J, RETROK_j},
+    {KEY_K, RETROK_k}, {KEY_L, RETROK_l}, {KEY_M, RETROK_m}, {KEY_N, RETROK_n}, {KEY_O, RETROK_o},
+    {KEY_P, RETROK_p}, {KEY_Q, RETROK_q}, {KEY_R, RETROK_r}, {KEY_S, RETROK_s}, {KEY_T, RETROK_t},
+    {KEY_U, RETROK_u}, {KEY_V, RETROK_v}, {KEY_W, RETROK_w}, {KEY_X, RETROK_x}, {KEY_Y, RETROK_y},
+    {KEY_Z, RETROK_z}, {KEY_1, RETROK_1}, {KEY_2, RETROK_2}, {KEY_3, RETROK_3}, {KEY_4, RETROK_4},
+    {KEY_5, RETROK_5}, {KEY_6, RETROK_6}, {KEY_7, RETROK_7}, {KEY_8, RETROK_8}, {KEY_9, RETROK_9},
+    {KEY_0, RETROK_0}, {KEY_ENTER, RETROK_RETURN}, {KEY_ESC, RETROK_ESCAPE}, {KEY_BACKSPACE, RETROK_BACKSPACE},
+    {KEY_TAB, RETROK_TAB}, {KEY_SPACE, RETROK_SPACE}, {KEY_MINUS, RETROK_MINUS}, {KEY_EQUAL, RETROK_EQUALS},
+    {KEY_LEFTBRACE, RETROK_LEFTBRACKET}, {KEY_RIGHTBRACE, RETROK_RIGHTBRACKET}, {KEY_BACKSLASH, RETROK_BACKSLASH},
+    {KEY_102ND, RETROK_LESS}, {KEY_SEMICOLON, RETROK_SEMICOLON}, {KEY_APOSTROPHE, RETROK_QUOTE},
+    {KEY_GRAVE, RETROK_BACKQUOTE}, {KEY_COMMA, RETROK_COMMA}, {KEY_DOT, RETROK_PERIOD}, {KEY_SLASH, RETROK_SLASH},
+    {KEY_CAPSLOCK, RETROK_CAPSLOCK}, {KEY_F1, RETROK_F1}, {KEY_F2, RETROK_F2}, {KEY_F3, RETROK_F3},
+    {KEY_F4, RETROK_F4}, {KEY_F5, RETROK_F5}, {KEY_F6, RETROK_F6}, {KEY_F7, RETROK_F7}, {KEY_F8, RETROK_F8},
+    {KEY_F9, RETROK_F9}, {KEY_F10, RETROK_F10}, {KEY_F11, RETROK_F11}, {KEY_F12, RETROK_F12},
+    {KEY_INSERT, RETROK_INSERT}, {KEY_HOME, RETROK_HOME}, {KEY_PAGEUP, RETROK_PAGEUP}, {KEY_DELETE, RETROK_DELETE},
+    {KEY_END, RETROK_END}, {KEY_PAGEDOWN, RETROK_PAGEDOWN}, {KEY_RIGHT, RETROK_RIGHT}, {KEY_LEFT, RETROK_LEFT},
+    {KEY_DOWN, RETROK_DOWN}, {KEY_UP, RETROK_UP}, {KEY_KP0, RETROK_KP0}, {KEY_KP1, RETROK_KP1},
+    {KEY_KP2, RETROK_KP2}, {KEY_KP3, RETROK_KP3}, {KEY_KP4, RETROK_KP4}, {KEY_KP5, RETROK_KP5},
+    {KEY_KP6, RETROK_KP6}, {KEY_KP7, RETROK_KP7}, {KEY_KP8, RETROK_KP8}, {KEY_KP9, RETROK_KP9},
+    {KEY_KPDOT, RETROK_KP_PERIOD}, {KEY_KPSLASH, RETROK_KP_DIVIDE}, {KEY_KPASTERISK, RETROK_KP_MULTIPLY},
+    {KEY_KPMINUS, RETROK_KP_MINUS}, {KEY_KPPLUS, RETROK_KP_PLUS}, {KEY_KPENTER, RETROK_KP_ENTER},
+    {KEY_LEFTSHIFT, RETROK_LSHIFT}, {KEY_RIGHTSHIFT, RETROK_RSHIFT}, {KEY_LEFTCTRL, RETROK_LCTRL},
+    {KEY_RIGHTCTRL, RETROK_RCTRL}, {KEY_LEFTALT, RETROK_LALT}, {KEY_RIGHTALT, RETROK_RALT},
+};
 
 static int keyboard_button(int code) {
     switch (code) {
@@ -749,6 +791,7 @@ static void forget_input(int i) {
 }
 
 static void input_poll(void) {
+    memset(key_tapped, 0, sizeof(key_tapped));
     if (now_us() - looked_us > 1000000) {
         open_inputs();
     }
@@ -763,8 +806,12 @@ static void input_poll(void) {
                 const struct input_event *ev = &events[e];
                 if (ev->type == EV_KEY && ev->value != 2) {
                     bool down = ev->value != 0;
-                    if (down && (ev->code == KEY_ESC || ev->code == KEY_LEFTMETA || ev->code == KEY_RIGHTMETA
-                            || ev->code == BTN_MODE)) {
+                    if (inputs[i].keyboard && ev->code < KEY_CNT) {
+                        key_down[ev->code] = down;
+                        key_tapped[ev->code] |= down;
+                    }
+                    if (down && ((ev->code == KEY_ESC && !core_keyboard) || ev->code == KEY_LEFTMETA
+                            || ev->code == KEY_RIGHTMETA || ev->code == BTN_MODE)) {
                         quit = 1;
                     }
                     int button = inputs[i].keyboard ? keyboard_button(ev->code) : gamepad_button(ev->code);
@@ -788,7 +835,7 @@ static void input_poll(void) {
         }
     }
     for (int b = 0; b < 16; ++b) {
-        pad[b] = key_held[b] || button_held[b];
+        pad[b] = (key_held[b] && !core_keyboard) || button_held[b];
     }
     pad[RETRO_DEVICE_ID_JOYPAD_LEFT] |= hat[0] < 0 || stick[0] < 0;
     pad[RETRO_DEVICE_ID_JOYPAD_RIGHT] |= hat[0] > 0 || stick[0] > 0;
@@ -801,6 +848,15 @@ static void input_poll(void) {
 
 static int16_t input_state(unsigned port, unsigned device, unsigned index, unsigned id) {
     (void)index;
+    if (device == RETRO_DEVICE_KEYBOARD) {
+        core_keyboard = true;
+        for (size_t i = 0; i < sizeof(retro_keys) / sizeof(retro_keys[0]); ++i) {
+            if (retro_keys[i].key == id) {
+                return key_down[retro_keys[i].code] || key_tapped[retro_keys[i].code];
+            }
+        }
+        return 0;
+    }
     if (port != 0 || device != RETRO_DEVICE_JOYPAD) {
         return 0;
     }
@@ -868,7 +924,10 @@ int main(int argc, char **argv) {
     signal(SIGINT, on_signal);
     const char *game_path = argv[2];
     const char *slash = strrchr(game_path, '/');
-    snprintf(system_dir, sizeof(system_dir), "%.*s", slash ? (int)(slash - game_path) : 1, slash ? game_path : ".");
+    snprintf(save_dir, sizeof(save_dir), "%.*s", slash ? (int)(slash - game_path) : 1, slash ? game_path : ".");
+    if (getenv("MPY_RETRO_SYSTEM")) {
+        snprintf(system_dir, sizeof(system_dir), "%s", getenv("MPY_RETRO_SYSTEM"));
+    }
 
     load_core(argv[1]);
     core.set_environment(environment);
