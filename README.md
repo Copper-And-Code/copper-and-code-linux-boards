@@ -78,6 +78,7 @@ stations" to an app running on the board.
 | [mp3-player](examples/mp3-player) | Track list with ID3 titles, play, pause, next, volume: GStreamer driven from the GUI |
 | [web-radio](examples/web-radio) | Internet radio stations, the same player for `http://` streams |
 | [games](examples/games) | Your games full screen through libretro cores (SNES, C64, Neo Geo and arcade), chosen from an LVGL list: [mpy-retro](docs/retro.md) |
+| [ftp-server](examples/ftp-server) | The SD card for FileZilla, WinSCP or a file manager: an FTP server in MicroPython, polled from the GUI's timer |
 | [shell-linux](examples/shell-linux) | A terminal on the screen: shell, `vi`, `edit` and Linux programs on a pseudo-terminal |
 | [stm32mp135f-dk](examples/stm32mp135f-dk) | The smallest Studio project: a button that answers to touch |
 

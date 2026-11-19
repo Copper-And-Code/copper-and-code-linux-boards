@@ -66,6 +66,17 @@ the mouse or a tap choose; Esc, the Windows key or Select + Start come back. See
 [Games: mpy-retro](retro.md).
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/games)
 
+## FTP Server
+
+![FTP Server](images/ftp-server.png)
+
+The board's files for a PC on the network: the whole SD card, the MicroPython folder or the Studio
+apps, with FileZilla, WinSCP, Windows Explorer or a file manager. The screen shows the address, the
+user and the password (kept in `settings.json`), who is connected and what moves. A MicroPython
+server polled from the GUI's timer: files move in pieces, so the screen never waits; about 4 MB/s
+to the card over the USB network. Plain FTP: for your own network.
+[Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/ftp-server)
+
 ## machine: the hardware
 
 Apps that show MicroPython's `machine` API on a Linux board, in
