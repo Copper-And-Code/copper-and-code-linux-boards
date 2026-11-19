@@ -31,7 +31,9 @@ case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
         BOARD="STM32MP135F-DK"
         DTB_NAME=stm32mp135f-dk.dtb  # with the USB FIFOs of the composite gadget and B1 on PA14
         ROTATION=0
-        AUDIO_SINK=""                # GStreamer's default (a USB audio adapter, for example)
+        # No sound of its own: a USB audio adapter, the first card. Named: GStreamer's own choice
+        # tries PulseAudio and then plays to nothing, and ALSA's "default" is PipeWire, not running.
+        AUDIO_SINK="alsasink device=sysdefault"
         AUDIO_SINK_MONITOR=""        # no HDMI
         M4_FIRMWARE=""               # no Cortex-M4
         REALTIME=""                  # one core: a Python loop at real-time priority would starve Linux
