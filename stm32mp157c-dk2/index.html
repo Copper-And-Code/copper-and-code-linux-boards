@@ -867,7 +867,11 @@ on the ST wiki.</p>
 </tr>
 <tr>
 <td>USB</td>
-<td><code>dwc2</code> OTG port (USB-C CN7): the composite serial and network gadget, with TX FIFOs set by a device tree overlay</td>
+<td><code>dwc2</code> OTG port (USB-C CN7): the composite serial and network gadget, with TX FIFOs set by a device tree overlay. On the PC the REPL is the second <code>ttyACM</code> (<code>usb-Copper-And-Code_MicroPython_LVGL_MP157*</code> in <code>/dev/serial/by-id/</code>); the first is the ST-LINK console. A PC with ModemManager needs the board's udev rule (<a href="../stm32mp135f-dk-install/#connect-and-test">Connect and test</a>)</td>
+</tr>
+<tr>
+<td>USB keyboard</td>
+<td>On the USB-A ports: it types into the shell and the REPL; layout in the Settings app</td>
 </tr>
 <tr>
 <td>Audio</td>
