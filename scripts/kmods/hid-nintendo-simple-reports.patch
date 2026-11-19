@@ -1,0 +1,136 @@
+diff --git a/drivers/hid/hid-nintendo.c b/drivers/hid/hid-nintendo.c
+index 4850e915a..3864500fe 100644
+--- a/drivers/hid/hid-nintendo.c
++++ b/drivers/hid/hid-nintendo.c
+@@ -34,6 +34,7 @@
+ #include <linux/module.h>
+ #include <linux/power_supply.h>
+ #include <linux/spinlock.h>
++#include <linux/string_helpers.h>
+ 
+ /*
+  * Reference the url below for the following HID report defines:
+@@ -422,6 +423,7 @@ struct joycon_ctlr {
+ 	u8 mac_addr[6];
+ 	char *mac_addr_str;
+ 	enum joycon_ctlr_type ctlr_type;
++	bool simple; /* no answer to subcommands: the simple 0x3F reports */
+ 
+ 	/* The following members are used for synchronous sends/receives */
+ 	enum joycon_msg_type msg_type;
+@@ -2140,6 +2142,7 @@ static int joycon_init(struct hid_device *hdev)
+ 	mutex_lock(&ctlr->output_mutex);
+ 	/* if handshake command fails, assume ble pro controller */
+ 	if ((jc_type_is_procon(ctlr) || jc_type_is_chrggrip(ctlr)) &&
++	    hdev->bus != BUS_BLUETOOTH && /* no USB handshake over the air */
+ 	    !joycon_send_usb(ctlr, JC_USB_CMD_HANDSHAKE, HZ)) {
+ 		hid_dbg(hdev, "detected USB controller\n");
+ 		/* set baudrate for improved latency */
+@@ -2165,6 +2168,19 @@ static int joycon_init(struct hid_device *hdev)
+ 		goto out_unlock;
+ 	}
+ 
++	/*
++	 * Some third-party Pro Controllers (an 8BitDo SN30 Pro+) answer no
++	 * subcommand when they reconnect by themselves: they send the simple
++	 * 0x3F reports, and stop sending anything once told to switch to full
++	 * reports. One read first: without an answer, no further command, and
++	 * the probe falls back to the simple reports.
++	 */
++	if (hdev->bus == BUS_BLUETOOTH && jc_type_is_procon(ctlr) &&
++	    joycon_check_for_cal_magic(ctlr, JC_CAL_USR_LEFT_MAGIC_ADDR) == -ETIMEDOUT) {
++		ret = -ETIMEDOUT;
++		goto out_unlock;
++	}
++
+ 	/* get controller calibration data, and parse it */
+ 	ret = joycon_request_calibration(ctlr);
+ 	if (ret) {
+@@ -2211,10 +2227,59 @@ static int joycon_init(struct hid_device *hdev)
+ 	return ret;
+ }
+ 
++/*
++ * The simple report a Pro Controller sends before it is set to full reports
++ * (0x3F): buttons B A Y X L R ZL ZR, then - + LS RS Home Capture, a hat
++ * (0 up, clockwise, 8 centred) and four 16-bit sticks, centred near 0x8000.
++ */
++#define JC_INPUT_SIMPLE 0x3F
++
++static s32 joycon_simple_stick(const u8 *data)
++{
++	s32 value = (s32)get_unaligned_le16(data) - 0x8000;
++
++	return clamp(value, (s32)-JC_MAX_STICK_MAG, (s32)JC_MAX_STICK_MAG);
++}
++
++static void joycon_parse_simple_report(struct joycon_ctlr *ctlr, u8 *data)
++{
++	static const s8 hat_x[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
++	static const s8 hat_y[8] = { -1, -1, 0, 1, 1, 1, 0, -1 };
++	struct input_dev *dev = ctlr->input;
++	u8 hat = data[3];
++
++	input_report_key(dev, BTN_SOUTH, data[1] & BIT(0));
++	input_report_key(dev, BTN_EAST, data[1] & BIT(1));
++	input_report_key(dev, BTN_WEST, data[1] & BIT(2));
++	input_report_key(dev, BTN_NORTH, data[1] & BIT(3));
++	input_report_key(dev, BTN_TL, data[1] & BIT(4));
++	input_report_key(dev, BTN_TR, data[1] & BIT(5));
++	input_report_key(dev, BTN_TL2, data[1] & BIT(6));
++	input_report_key(dev, BTN_TR2, data[1] & BIT(7));
++	input_report_key(dev, BTN_SELECT, data[2] & BIT(0));
++	input_report_key(dev, BTN_START, data[2] & BIT(1));
++	input_report_key(dev, BTN_THUMBL, data[2] & BIT(2));
++	input_report_key(dev, BTN_THUMBR, data[2] & BIT(3));
++	input_report_key(dev, BTN_MODE, data[2] & BIT(4));
++	input_report_key(dev, BTN_Z, data[2] & BIT(5));
++	input_report_abs(dev, ABS_HAT0X, hat < 8 ? hat_x[hat] : 0);
++	input_report_abs(dev, ABS_HAT0Y, hat < 8 ? hat_y[hat] : 0);
++	input_report_abs(dev, ABS_X, joycon_simple_stick(data + 4));
++	input_report_abs(dev, ABS_Y, joycon_simple_stick(data + 6));
++	input_report_abs(dev, ABS_RX, joycon_simple_stick(data + 8));
++	input_report_abs(dev, ABS_RY, joycon_simple_stick(data + 10));
++	input_sync(dev);
++}
++
+ /* Common handler for parsing inputs */
+ static int joycon_ctlr_read_handler(struct joycon_ctlr *ctlr, u8 *data,
+ 							      int size)
+ {
++	if (ctlr->simple) {
++		if (data[0] == JC_INPUT_SIMPLE && size >= 12)
++			joycon_parse_simple_report(ctlr, data);
++		return 0;
++	}
+ 	if (data[0] == JC_INPUT_SUBCMD_REPLY || data[0] == JC_INPUT_IMU_DATA ||
+ 	    data[0] == JC_INPUT_MCU_DATA) {
+ 		if (size >= 12) /* make sure it contains the input report */
+@@ -2343,6 +2408,27 @@ static int nintendo_hid_probe(struct hid_device *hdev,
+ 	hid_device_io_start(hdev);
+ 
+ 	ret = joycon_init(hdev);
++	if (ret == -ETIMEDOUT && hdev->bus == BUS_BLUETOOTH &&
++	    jc_type_is_procon(ctlr)) {
++		/* See joycon_init: the simple reports, no command sent */
++		hid_warn(hdev, "no answer to subcommands: simple input reports\n");
++		ctlr->simple = true;
++		ctlr->ctlr_type = JOYCON_CTLR_TYPE_PRO;
++		ctlr->mac_addr_str = devm_kasprintf(&hdev->dev, GFP_KERNEL,
++						    "%s", hdev->uniq);
++		if (!ctlr->mac_addr_str) {
++			ret = -ENOMEM;
++			goto err_close;
++		}
++		string_upper(ctlr->mac_addr_str, ctlr->mac_addr_str);
++		ret = joycon_input_create(ctlr);
++		if (ret) {
++			hid_err(hdev, "Failed to create input device; ret=%d\n", ret);
++			goto err_close;
++		}
++		ctlr->ctlr_state = JOYCON_CTLR_STATE_READ;
++		return 0;
++	}
+ 	if (ret) {
+ 		hid_err(hdev, "Failed to initialize controller; ret=%d\n", ret);
+ 		goto err_close;

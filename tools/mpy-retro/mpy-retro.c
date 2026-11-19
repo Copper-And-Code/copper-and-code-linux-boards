@@ -583,6 +583,7 @@ static void *video_thread(void *unused) {
 // ---- Audio ----
 
 static snd_pcm_t *pcm;
+static unsigned long xruns;  // times the sound ran dry
 static double sample_rate = 48000;
 static long long next_frame_us;
 static bool bench;  // as fast as it goes: no sound, no pacing, to measure the headroom
@@ -617,6 +618,9 @@ static size_t audio_batch(const int16_t *data, size_t frames) {
     size_t done = 0;
     while (done < frames && !quit) {
         snd_pcm_sframes_t written = snd_pcm_writei(pcm, data + done * 2, frames - done);
+        if (written == -EPIPE) {
+            ++xruns;
+        }
         if (written < 0) {
             if (snd_pcm_recover(pcm, (int)written, 1) < 0) {
                 break;
@@ -1045,11 +1049,19 @@ int main(int argc, char **argv) {
     pthread_create(&video, NULL, video_thread, NULL);
 
     long long started = now_us();
-    unsigned long frames = 0;
+    unsigned long frames = 0, slow = 0;  // slow: the core took longer than a frame lasts
+    long long run_us = 0, run_max = 0, period_us = (long long)(1000000 / fps);
     while (!quit && (!max_frames || frames < max_frames)) {
         skip_video = !skip_video && behind();
         frames_skipped += skip_video;
+        long long before = now_us();
         core.run();
+        long long took = now_us() - before;
+        if (frames >= 60) {  // not the start, which loads
+            run_us += took;
+            run_max = took > run_max ? took : run_max;
+            slow += took > period_us;
+        }
         pace();
         ++frames;
     }
@@ -1058,6 +1070,8 @@ int main(int argc, char **argv) {
         frames / seconds, frames_shown / seconds);
     fprintf(stderr, "mpy-retro: drawing %.2f ms a frame, %lu frames not drawn to keep time\n",
         draws ? draw_us / 1000.0 / draws : 0.0, frames_skipped);
+    fprintf(stderr, "mpy-retro: the core %.2f ms a frame (at most %.1f; %.1f ms to keep time), %lu frames longer, %lu sound underruns\n",
+        frames > 60 ? run_us / 1000.0 / (frames - 60) : 0.0, run_max / 1000.0, period_us / 1000.0, slow, xruns);
 
     quit = 1;
     pthread_cond_signal(&frame.ready);

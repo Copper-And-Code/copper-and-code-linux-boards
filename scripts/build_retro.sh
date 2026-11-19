@@ -48,6 +48,16 @@ for entry in "${CORES[@]}"; do
     [[ -d $src/.git ]] || git clone -q --filter=blob:none "$url" "$src"
     git -C "$src" fetch -q --depth 1 origin "$commit" 2>/dev/null || true
     git -C "$src" checkout -q "$commit"
+    # Our changes (scripts/retro/NAME-*.patch), once
+    for patch in "$REPO"/scripts/retro/"$name"-*.patch; do
+        [[ -f $patch ]] || continue
+        if git -C "$src" apply --check "$patch" 2>/dev/null; then
+            log "patch $(basename "$patch")"
+            git -C "$src" apply "$patch"
+        elif ! git -C "$src" apply --reverse --check "$patch" 2>/dev/null; then
+            die "patch does not apply: $patch"
+        fi
+    done
     make -C "$src/$folder" platform="$platform" clean >/dev/null 2>&1 || true
     make -C "$src/$folder" platform="$platform" CC="$CC" CXX="$CXX" -j"$JOBS" >/dev/null
     # Without the debugging symbols: FBNeo goes from 187 MB to 61.

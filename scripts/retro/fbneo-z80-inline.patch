@@ -1,0 +1,72 @@
+diff --git a/src/cpu/z80/z80.cpp b/src/cpu/z80/z80.cpp
+index 3e5e45e..64fc1ff 100644
+--- a/src/cpu/z80/z80.cpp
++++ b/src/cpu/z80/z80.cpp
+@@ -128,7 +128,7 @@ static Z80ReadOpArgHandler Z80CPUReadOpArg;
+ #define BUSY_LOOP_HACKS     0
+ 
+ // SpecZ80
+-static void eat_cycles(int type, int cycles);
++static void eat_cycles_full(int type, int cycles);
+ static void capture_opcode_history_start(UINT16 reg_bc, UINT16 reg_ir);
+ static void capture_opcode_history_finish();
+ static void parse_script(const char *script_desc, CM_SCRIPT_BREAKDOWN *breakdown);
+@@ -138,7 +138,7 @@ static int  get_ula_delay();
+ static void make_ula_delay_lut();
+ static int  get_memory_access_delay(UINT16 pc_address);
+ static int  get_memory_is_contended(UINT16 pc_address);
+-static UINT8 store_rwinfo(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg);
++static UINT8 store_rwinfo_full(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg);
+ 
+ static int		m_ula_variant;			// ULA_VARIANT_SINCLAIR  | ULA_VARIANT_AMSTRAD
+ static const char*	m_ula_delay_sequence;		// "654321200"           | "10765432"
+@@ -224,6 +224,31 @@ static int Z80lastop; // for snow effect
+ #define HALT Z80.halt
+ 
+ static Z80_Regs Z80;
++
++// Without the ZX Spectrum's memory contention (ULA_VARIANT_NONE: every other machine) store_rwinfo
++// does nothing and eat_cycles only counts the cycles; they are called at every memory access and
++// every opcode, so these fast paths are inline: the same work, without a call (lvgl-mpy-linux).
++static inline void eat_cycles(int type, int cycles)
++{
++	if (m_ula_variant != ULA_VARIANT_NONE || type == CYCLES_UNCONTENDED) {
++		eat_cycles_full(type, cycles);
++		return;
++	}
++	Z80.ICount -= cycles;
++	m_tstate_counter += cycles;
++	if (m_insn_cb) m_insn_cb(cycles);
++	if (m_tstate_counter >= m_cycles_per_frame) {
++		m_raster_cb(m_cycles_per_frame); // end frame
++		m_raster_cb(-1); // notify start next frame
++		m_tstate_counter -= m_cycles_per_frame;
++	}
++}
++
++static inline UINT8 store_rwinfo(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg)
++{
++	if (m_ula_variant == ULA_VARIANT_NONE) return 0;
++	return store_rwinfo_full(addr, val, flags, dbg);
++}
+ #define EA Z80.EA
+ 
+ void (*z80edfe_callback)(Z80_Regs *Regs) = NULL;
+@@ -5034,7 +5059,7 @@ static int get_memory_is_contended(UINT16 pc_address)
+ 	return 0;
+ }
+ 
+-static void eat_cycles(int type, int cycles)
++static void eat_cycles_full(int type, int cycles)
+ {
+ 	// When this function is called and type CYCLES_CONTENDED or CYCLES_UNCONTENDED is set,
+ 	// it means the run_script function is processing the opcode history and that cycles are
+@@ -5080,7 +5105,7 @@ static void eat_cycles(int type, int cycles)
+ }
+ 
+ 
+-static UINT8 store_rwinfo(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg)
++static UINT8 store_rwinfo_full(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg)
+ {
+ 	RWINFO *rw;
+ 	UINT8 retval = 0xff;

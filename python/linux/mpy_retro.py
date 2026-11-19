@@ -70,6 +70,9 @@ def games(folder=GAMES):
     return found
 
 
+LOG = "/run/mpy-retro.log"
+
+
 def play(path, core=None):
     """Runs the game full screen and waits for it. Returns (exit status, the last messages)."""
     import display_driver
@@ -93,4 +96,9 @@ def play(path, core=None):
             output = (output + data)[-2000:]
     finally:
         display_driver.resume()
+    try:
+        with open(LOG, "wb") as log:  # the last game's messages, timings included
+            log.write(output)
+    except OSError:
+        pass
     return status, output.decode("utf-8", "replace")

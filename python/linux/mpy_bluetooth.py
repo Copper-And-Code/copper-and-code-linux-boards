@@ -15,10 +15,8 @@
 # D-input) or Y held (Switch), then the pair button. The kernel needs hidp and uhid
 # (scripts/build_kmods.sh) for a Bluetooth controller to become an input device.
 #
-# Known limits with an 8BitDo SN30 Pro+: in Switch mode it works after pairing, but when it
-# connects again by itself hid-nintendo gets no answer to its first commands and drops it; in
-# D-input mode it pairs without bonding, which BlueZ refuses for input devices (ClassicBondedOnly,
-# kept on: it guards against keystroke injection). Over USB it works.
+# An 8BitDo SN30 Pro+ in Switch mode, once paired, connects again by itself when switched on: it
+# then answers no command, and our hid-nintendo (scripts/kmods/) reads its simple reports.
 
 import time
 

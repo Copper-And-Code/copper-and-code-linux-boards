@@ -4,6 +4,10 @@
 # default of many controllers, 8BitDo's included), hid-nintendo (Switch mode), uhid and hidp
 # (Bluetooth controllers, through BlueZ).
 #
+# hid-nintendo carries a change (scripts/kmods/hid-nintendo-simple-reports.patch): a Pro Controller
+# on Bluetooth that answers no subcommand (an 8BitDo SN30 Pro+ when it reconnects by itself) is
+# read from its simple 0x3F reports instead of being dropped.
+#
 #   scripts/build_kmods.sh [BOARD_CONFIG]
 #
 # The kernel is ST's at the tag of the image (6.6.129: v6.6-stm32mp-r3.1), configured with the
@@ -51,6 +55,15 @@ if [[ ! -d $SRC ]]; then
     log "kernel $KERNEL_TAG"
     git clone -q --depth 1 --branch "$KERNEL_TAG" "$KERNEL_URL" "$SRC"
 fi
+# Our changes to the modules (scripts/kmods/*.patch), once
+for patch in "$REPO"/scripts/kmods/*.patch; do
+    if git -C "$SRC" apply --check "$patch" 2>/dev/null; then
+        log "patch $(basename "$patch")"
+        git -C "$SRC" apply "$patch"
+    elif ! git -C "$SRC" apply --reverse --check "$patch" 2>/dev/null; then
+        die "patch does not apply: $patch"
+    fi
+done
 K=(make -C "$SRC" ARCH=arm CROSS_COMPILE="$CROSS_COMPILE" LOCALVERSION= -j"$JOBS")
 
 log "configuration"

@@ -26,9 +26,9 @@ and then (see the frontend's notes).
 
 ## Playing
 
-| | Keyboard | Gamepad (USB) |
+| | Keyboard | Gamepad (USB or Bluetooth) |
 |---|---|---|
-| Choose a game | arrows and Enter, or the mouse, or a tap | |
+| Choose a game | left and right change system, up and down and Enter; or the mouse, or a tap | the same with the d-pad, A to play; the shoulders change system too |
 | D-pad | arrows | d-pad, hat or left stick |
 | A, B, X, Y | X, Z, S, A | east, south, north, west buttons |
 | L, R | Q, W | shoulders |

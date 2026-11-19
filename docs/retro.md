@@ -44,7 +44,8 @@ from its author's page.
 ## Neo Geo and the arcade: FBNeo
 
 FBNeo, the libretro core of reference for the Neo Geo, built for our CPU (`platform=rpi2`: Cortex-A7
-with NEON) with Cyclone, its 68000 in ARM assembly. The full build, which also brings CPS1, CPS2,
+with NEON) with Cyclone, its 68000 in ARM assembly, which `options.cfg` turns on (FBNeo leaves it
+off by default, for savestates that match other platforms'; mpy-retro makes none). The full build, which also brings CPS1, CPS2,
 Sega System 16 and the other arcade systems FBNeo knows; romsets are FBNeo's (`.zip`), the BIOS
 `neogeo.zip` goes next to the Neo Geo games and is not listed. The Neo Geo runs at 59.19 frames a
 second; measured on the STM32MP157C-DK2:
@@ -58,7 +59,7 @@ second; measured on the STM32MP157C-DK2:
 | A fighting game, 1997 | 59.4 | 54.4; with its 68000 at 85 %: 59.1, 45.8 |
 | A fighting game, 1999 | 56.7 | 55.0; with its 68000 at 85 %: 59.0, 46.3 |
 
-(As fast as it goes: the first four over their first 15 seconds, mostly the BIOS screen and
+(Measured before Cyclone was on; see below for what it changes.) (As fast as it goes: the first four over their first 15 seconds, mostly the BIOS screen and
 the demo; the two fighting games over a minute, with the sound interpolation off. With the sound: a
 minute each; the emulated frames count the second a game takes to start.)
 
@@ -68,6 +69,20 @@ a row), and a game's own options can lower the emulated 68000's clock, as FBNeo 
 `GAME.opt` next to `GAME.zip` with `fbneo-cpu-speed-adjust = "85%"`. Then the 1999 fighting game keeps 59.0 frames
 a second, about four in five of them drawn. `options.cfg` turns FBNeo's sound interpolation off for
 all games (it costs what those games need).
+
+Two changes take a third off the time of a frame. Cyclone instead of FBNeo's 68000 in C; and FBNeo's
+Z80, which at every memory access and opcode called two functions that only the ZX Spectrum's memory
+contention needs, now has them inline (`scripts/retro/fbneo-z80-inline.patch`, applied by
+`build_retro.sh`). A fighting game of 1992, the core's time a frame (`perf` showed where it went):
+
+| | Its demo, as fast as it goes | A minute of fights, with the sound: emulated, shown a second |
+|---|---:|---:|
+| Before | 14.4 ms | 54.7, 40.9 (77 times the sound ran dry) |
+| Cyclone | 10.1 ms | |
+| Cyclone and the Z80 inline | 9.3 ms | 59.1, 58.9 (the sound never ran dry) |
+
+mpy-retro prints these figures when a game ends; the Games app keeps the last game's in
+`/run/mpy-retro.log`.
 
 FBNeo is fetched at a fixed commit and built in `work/`; it has non-commercial terms. The BIOS and
 the games are the user's.

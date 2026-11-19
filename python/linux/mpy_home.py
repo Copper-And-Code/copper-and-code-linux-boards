@@ -282,6 +282,9 @@ def run_app(path):
     with open(path) as source:
         code = source.read()
     exec(code, {"__name__": "__main__", "__file__": path})
+    # Once the app made its screen (LVGL and the display are up): keyboard and gamepad move in it,
+    # unless it took the keys itself
+    mpy_keys.navigate()
     _home_button()
     _watch_home_key(go_home)
 
