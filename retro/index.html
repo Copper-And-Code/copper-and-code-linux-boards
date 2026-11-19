@@ -468,6 +468,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-c64" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The C64
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-frontend" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -627,6 +638,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-c64" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The C64
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-frontend" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -719,8 +741,21 @@ a second on a 1280×720 monitor and on the turned 800×480 panel. On the panel, 
 reach the screen: the panel is switched to its 60 Hz mode (it prefers 50), the scaled and turned
 frame takes 3.6 ms to draw, and three buffers keep a frame that comes while another waits for the
 blank (the few missing come from 60.04 Hz of the SNES against 60.00 of the panel).</p>
-<p>The C64 core of the same projects runs 3.3 times faster than real time on one Cortex-A7: it is the
-next core to wrap.</p>
+<h2 id="the-c64">The C64<a class="headerlink" href="#the-c64" title="Permanent link">&para;</a></h2>
+<p>The C64 core of the same STM32H743 and RP2350 projects, in this repository as a libretro core
+(<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64">cores/c64</a>): 6510, CIAs,
+VIC-II, SID, the emulated 1541 and cartridges. <code>.prg</code>, <code>.d64</code> (loaded and run by itself) and <code>.crt</code>
+files start from the Games list. On the STM32MP157C-DK2 it runs at 50.1 emulated and 49.9 shown
+frames a second (the panel switched to 50 Hz), 5.4 ms to draw a frame; while a disk loads, three
+frames run for each one shown, about 2.5 times real speed.</p>
+<p>The whole keyboard is the C64's, by position (as VICE's positional map): Esc RUN/STOP, Tab CTRL,
+left Ctrl C=, Home CLR/HOME, Insert £, Page Up ↑, the backquote ←, F2 F4 F6 F8 as the shifted
+function keys. The joystick is in port 2: a gamepad, or the keypad's 8 4 6 2 and 0; the gamepad's
+Select moves it to port 1. The Windows key, or Select and Start together, come back to the list.</p>
+<p>The Commodore ROMs are the user's, in <code>/usr/local/mpy/retro/system/c64/</code> (see
+<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64">the core's notes</a>). The
+demo used to check it, <a href="https://www.linusakesson.net/scene/nine/">Nine</a> by Linus Åkesson, comes
+from its author's page.</p>
 <h2 id="the-frontend">The frontend<a class="headerlink" href="#the-frontend" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -743,12 +778,20 @@ next core to wrap.</p>
 <td>evdev keyboards and gamepads as player 1's RetroPad, also those plugged in during the game. The REPL hub lends the keyboards while <code>/run/mpy-keyboard-lent</code> names the frontend's live process</td>
 </tr>
 <tr>
+<td>Keyboard</td>
+<td>A core that reads the keyboard (the C64) gets all of it: then it is no RetroPad and Esc is the core's. A key pressed and released between two polls still counts once</td>
+</tr>
+<tr>
 <td>Leaving</td>
-<td>Esc, the Windows key, Select and Start together, the gamepad's home button, SIGTERM</td>
+<td>Esc (unless the core has the keyboard), the Windows key, Select and Start together, the gamepad's home button, SIGTERM</td>
 </tr>
 <tr>
 <td>Saves</td>
 <td>The core's save RAM next to the game, as <code>GAME.srm</code></td>
+</tr>
+<tr>
+<td>ROMs</td>
+<td>The cores' system folder: <code>/usr/local/mpy/retro/system</code> (<code>MPY_RETRO_SYSTEM</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -759,12 +802,12 @@ next core to wrap.</p>
 <div class="highlight"><pre><span></span><code>scripts/build_retro.sh<span class="w">      </span><span class="c1"># the cores at a fixed commit, and the frontend, with the board's SDK</span>
 scripts/deploy.sh<span class="w">           </span><span class="c1"># installs dist/retro/ when present</span>
 </code></pre></div>
-<p>The cores are fetched and built in <code>work/</code>; their sources and licenses stay theirs and are not part of
-this repository (Snes9x has non-commercial terms: see its <code>copyright</code> file). The frontend and
-<code>libretro.h</code> are MIT. No game comes with the board or this repository.</p>
+<p>Snes9x2005 is fetched and built in <code>work/</code>; its sources and license stay its own and are not part
+of this repository (Snes9x has non-commercial terms: see its <code>copyright</code> file). The C64 core is in
+<code>cores/c64</code>, MIT. The frontend and <code>libretro.h</code> are MIT. No game, demo or ROM comes with the board
+or this repository.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
-<li>The C64 core of the STM32H743 port as a libretro core, with its keyboard and joystick.</li>
 <li>More cores, each measured the same way before it is listed: NES, Game Boy, Mega Drive, PC Engine,
   Game Boy Advance, arcade, PlayStation.</li>
 <li>A real C64 joystick or SNES pad on the Arduino connector, read by the Cortex-M4.</li>
