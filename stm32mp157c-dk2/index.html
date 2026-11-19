@@ -871,11 +871,11 @@ on the ST wiki.</p>
 </tr>
 <tr>
 <td>HDMI</td>
-<td>The SiI9022A transmitter, fed by the same display controller (LTDC) as the panel: one screen at a time, up to about 1280×720 at 60 Hz (the controller's pixel clock), audio over I2S (ALSA card 0, device 2). A monitor connected at start is used instead of the panel, with no rotation; plugging it in or unplugging it later starts MicroPython again on the other screen, both ways (tried with a 1080p monitor). The mode is the monitor's preferred one when the controller can drive it; otherwise the largest at 50 Hz or more: a 1080p monitor gets 1280×720 at 60 Hz, since the kernel offers 1080p only at 30 and 24 Hz, which many monitors refuse. <code>MPY_DISPLAY_MODE=1920x1080</code> asks for another. At 1280×720 LVGL draws an eighth of the screen at a time, and MicroPython's heap is 8 MB (<code>-X heapsize=8M</code> in the unit) for the terminal's 1.8 MB canvas</td>
+<td>The SiI9022A transmitter, fed by the same display controller (LTDC) as the panel: one screen at a time, up to about 1280×720 at 60 Hz (the controller's pixel clock), audio over I2S (ALSA card 0, device 2): on a monitor the apps' sound goes there (<code>MPY_AUDIO_SINK_MONITOR=alsasink device=plughw:0,2</code>, set by <code>install.sh</code>), and back to the headphone jack on the panel. A monitor connected at start is used instead of the panel, with no rotation; plugging it in or unplugging it later starts MicroPython again on the other screen, both ways (tried with a 1080p monitor). The mode is the monitor's preferred one when the controller can drive it; otherwise the largest at 50 Hz or more: a 1080p monitor gets 1280×720 at 60 Hz, since the kernel offers 1080p only at 30 and 24 Hz, which many monitors refuse. <code>MPY_DISPLAY_MODE=1920x1080</code> asks for another. An app made in the Studio for 800×480 runs at that size in the middle of the monitor, on black. At 1280×720 LVGL draws an eighth of the screen at a time, and MicroPython's heap is 8 MB (<code>-X heapsize=8M</code> in the unit) for the terminal's 1.8 MB canvas</td>
 </tr>
 <tr>
 <td>USB keyboard</td>
-<td>On the USB-A ports: it types into the shell and the REPL; layout in the Settings app. The Windows key alone, or the Menu key, opens the app menu as a tap does, and leaves an app as its home button</td>
+<td>On the USB-A ports: it types into the shell and the REPL; layout in the Settings app. The Windows key alone, or the Menu key, opens the app menu as a tap does, and leaves an app as its home button. In the menu the arrows, Tab, Home and End move between the buttons, Enter or Space presses one, Esc goes back to the shell</td>
 </tr>
 <tr>
 <td>USB mouse</td>
