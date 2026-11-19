@@ -1326,7 +1326,9 @@ serial port. One plugged in later is found within a second. The hub grabs it (<c
 kernel's console would otherwise get the keys too, and the login prompt on tty1, which nobody sees,
 would take them as a user name. Layouts: <code>us</code> and <code>it</code> (AltGr included), chosen in the Settings app
 (<code>{"keyboard": {"layout": "it"}}</code> in <code>settings.json</code>, read again when it changes) or, without it, by
-<code>MPY_KEYBOARD</code> in the unit; <code>none</code> leaves the keyboards alone. The shell on the screen draws ASCII
+<code>MPY_KEYBOARD</code> in the unit; <code>none</code> leaves the keyboards alone. The Windows key alone, or the Menu
+key, is the home key: the hub counts it in <code>/run/mpy-home-key</code>, and <code>mpy_home</code> opens the app menu
+over the shell (and closes it again), or leaves an app as its home button does. The shell on the screen draws ASCII
 only: accented letters and the euro reach the programs, but show as <code>?</code>. On the STM32MP157C-DK2
 <code>tests/hil/test_keyboard.sh</code> checks both layouts with a virtual keyboard (uinput): letters, Caps
 Lock, the symbols, cursor keys and history, Ctrl-C.</p>
