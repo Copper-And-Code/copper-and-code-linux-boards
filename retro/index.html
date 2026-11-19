@@ -479,6 +479,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#neo-geo-and-the-arcade-fbneo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neo Geo and the arcade: FBNeo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-frontend" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -649,6 +660,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#neo-geo-and-the-arcade-fbneo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neo Geo and the arcade: FBNeo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-frontend" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -716,27 +738,27 @@ emulates, every frame drawn, 600 frames after 1800 of warm-up (its benchmark bui
 </thead>
 <tbody>
 <tr>
-<td>Super Mario World</td>
+<td>A platform game, 1990</td>
 <td style="text-align: right;">9.2 ms</td>
 <td style="text-align: right;">16.7 ms</td>
 <td style="text-align: right;">24.0 ms</td>
 </tr>
 <tr>
-<td>F-Zero</td>
+<td>A racing game in Mode 7, 1990</td>
 <td style="text-align: right;">13.1 ms (slowest 16.1)</td>
 <td style="text-align: right;">16.7 ms</td>
 <td style="text-align: right;">24.9 ms</td>
 </tr>
 <tr>
-<td>Zelda: A Link to the Past</td>
+<td>An action adventure, 1991</td>
 <td style="text-align: right;">11.3 ms</td>
 <td style="text-align: right;">16.7 ms</td>
 <td style="text-align: right;">26.1 ms</td>
 </tr>
 </tbody>
 </table>
-<p>The final image of Super Mario World matches the PC build's bit for bit. Through the frontend, with
-the sound pacing it and the scaling on the other CPU, Super Mario World runs at 60.0 emulated frames
+<p>The final image of the platform game matches the PC build's bit for bit. Through the frontend, with
+the sound pacing it and the scaling on the other CPU, the platform game runs at 60.0 emulated frames
 a second on a 1280×720 monitor and on the turned 800×480 panel. On the panel, 59.8 of them a second
 reach the screen: the panel is switched to its 60 Hz mode (it prefers 50), the scaled and turned
 frame takes 3.6 ms to draw, and three buffers keep a frame that comes while another waits for the
@@ -756,6 +778,64 @@ Select moves it to port 1. The Windows key, or Select and Start together, come b
 <a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64">the core's notes</a>). The
 demo used to check it, <a href="https://www.linusakesson.net/scene/nine/">Nine</a> by Linus Åkesson, comes
 from its author's page.</p>
+<h2 id="neo-geo-and-the-arcade-fbneo">Neo Geo and the arcade: FBNeo<a class="headerlink" href="#neo-geo-and-the-arcade-fbneo" title="Permanent link">&para;</a></h2>
+<p>FBNeo, the libretro core of reference for the Neo Geo, built for our CPU (<code>platform=rpi2</code>: Cortex-A7
+with NEON) with Cyclone, its 68000 in ARM assembly. The full build, which also brings CPS1, CPS2,
+Sega System 16 and the other arcade systems FBNeo knows; romsets are FBNeo's (<code>.zip</code>), the BIOS
+<code>neogeo.zip</code> goes next to the Neo Geo games and is not listed. The Neo Geo runs at 59.19 frames a
+second; measured on the STM32MP157C-DK2:</p>
+<table>
+<thead>
+<tr>
+<th>Game</th>
+<th style="text-align: right;">As fast as it goes (no sound, no pacing)</th>
+<th style="text-align: right;">With the sound pacing it: emulated, shown</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A puzzle game, 1994</td>
+<td style="text-align: right;">74.5</td>
+<td style="text-align: right;">58.8, 58.1</td>
+</tr>
+<tr>
+<td>An action platformer, 1990</td>
+<td style="text-align: right;">71.5</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>A shoot-'em-up, 1998</td>
+<td style="text-align: right;">66.8</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>A shoot-'em-up, 1995</td>
+<td style="text-align: right;">66.6</td>
+<td style="text-align: right;">58.7, 57.7</td>
+</tr>
+<tr>
+<td>A fighting game, 1997</td>
+<td style="text-align: right;">59.4</td>
+<td style="text-align: right;">54.4; with its 68000 at 85 %: 59.1, 45.8</td>
+</tr>
+<tr>
+<td>A fighting game, 1999</td>
+<td style="text-align: right;">56.7</td>
+<td style="text-align: right;">55.0; with its 68000 at 85 %: 59.0, 46.3</td>
+</tr>
+</tbody>
+</table>
+<p>(As fast as it goes: the first four over their first 15 seconds, mostly the BIOS screen and
+the demo; the two fighting games over a minute, with the sound interpolation off. With the sound: a
+minute each; the emulated frames count the second a game takes to start.)</p>
+<p>Most games keep their speed as they are. The heaviest ones (the fighting games of the late 1990s) have scenes beyond a
+Cortex-A7 at 650 MHz: there the frontend skips drawing a frame when the sound runs low (never two in
+a row), and a game's own options can lower the emulated 68000's clock, as FBNeo allows:
+<code>GAME.opt</code> next to <code>GAME.zip</code> with <code>fbneo-cpu-speed-adjust = "85%"</code>. Then the 1999 fighting game keeps 59.0 frames
+a second, about four in five of them drawn. <code>options.cfg</code> turns FBNeo's sound interpolation off for
+all games (it costs what those games need).</p>
+<p>FBNeo is fetched at a fixed commit and built in <code>work/</code>; it has non-commercial terms. The BIOS and
+the games are the user's.</p>
 <h2 id="the-frontend">The frontend<a class="headerlink" href="#the-frontend" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -793,6 +873,14 @@ from its author's page.</p>
 <td>ROMs</td>
 <td>The cores' system folder: <code>/usr/local/mpy/retro/system</code> (<code>MPY_RETRO_SYSTEM</code>)</td>
 </tr>
+<tr>
+<td>Options</td>
+<td><code>key = "value"</code> lines as in RetroArch: <code>GAME.opt</code> next to a game, then <code>/usr/local/mpy/retro/options.cfg</code> (<code>MPY_RETRO_OPTIONS</code>)</td>
+</tr>
+<tr>
+<td>Keeping time</td>
+<td>When the sound buffer runs low the next frame is emulated but not drawn (never two in a row); <code>--bench</code> runs without sound or pacing, to measure the headroom</td>
+</tr>
 </tbody>
 </table>
 <div class="highlight"><pre><span></span><code>mpy-retro<span class="w"> </span>/usr/local/mpy/retro/cores/snes9x2005_libretro.so<span class="w"> </span><span class="s2">"/usr/local/mpy/fs/games/snes/My game.sfc"</span>
@@ -802,14 +890,14 @@ from its author's page.</p>
 <div class="highlight"><pre><span></span><code>scripts/build_retro.sh<span class="w">      </span><span class="c1"># the cores at a fixed commit, and the frontend, with the board's SDK</span>
 scripts/deploy.sh<span class="w">           </span><span class="c1"># installs dist/retro/ when present</span>
 </code></pre></div>
-<p>Snes9x2005 is fetched and built in <code>work/</code>; its sources and license stay its own and are not part
-of this repository (Snes9x has non-commercial terms: see its <code>copyright</code> file). The C64 core is in
+<p>Snes9x2005 and FBNeo are fetched and built in <code>work/</code>; their sources and licenses stay their own
+and are not part of this repository (both have non-commercial terms). The C64 core is in
 <code>cores/c64</code>, MIT. The frontend and <code>libretro.h</code> are MIT. No game, demo or ROM comes with the board
 or this repository.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
 <li>More cores, each measured the same way before it is listed: NES, Game Boy, Mega Drive, PC Engine,
-  Game Boy Advance, arcade, PlayStation.</li>
+  Game Boy Advance, PlayStation.</li>
 <li>A real C64 joystick or SNES pad on the Arduino connector, read by the Cortex-M4.</li>
 </ul>
 
