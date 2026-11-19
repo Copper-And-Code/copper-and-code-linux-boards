@@ -59,7 +59,7 @@ case $(tr '\0' ' ' < /proc/device-tree/compatible 2>/dev/null) in
 esac
 HOSTNAME_WANTED=${MPY_HOSTNAME-$HOSTNAME_DEFAULT}
 say "board $BOARD"
-files="micropython mpy-repl-hub mpy-screenshot mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.service
+files="micropython mpy-repl-hub mpy-screenshot mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.service bluetooth-main.conf
     mpy-repl.service usbotg.default journald-volatile.conf edit.py vi.py $DTB_NAME $M4_FIRMWARE"
 for file in $files; do
     [ -f "$SOURCE/$file" ] || die "missing $SOURCE/$file"
@@ -87,6 +87,30 @@ install -d "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/fs/lib" "$PREFIX/fs/bin"
 put "$SOURCE/micropython" "$PREFIX/bin/micropython" 0755
 put "$SOURCE/mpy-repl-hub" "$PREFIX/bin/mpy-repl-hub" 0755
 put "$SOURCE/mpy-screenshot" "$PREFIX/bin/mpy-screenshot" 0755
+# Kernel modules for gamepads (xpad, hid-nintendo, uhid, hidp), built for this kernel by
+# scripts/build_kmods.sh; the kernel loads them when a controller appears.
+if [ -d "$SOURCE/kmods" ]; then
+    MODULES_DIR=/lib/modules/$(uname -r)/updates/mpy
+    install -d "$MODULES_DIR"
+    modules_changed=""
+    for module in "$SOURCE"/kmods/*.ko; do
+        if ! cmp -s "$module" "$MODULES_DIR/$(basename "$module")"; then
+            put "$module" "$MODULES_DIR/$(basename "$module")" 0644
+            modules_changed=yes
+        fi
+    done
+    if [ -n "$modules_changed" ]; then
+        depmod -a
+        # BlueZ looks for hidp and uhid when it starts.
+        systemctl try-restart bluetooth.service 2>/dev/null || true
+    fi
+fi
+# Bluetooth on at start (BlueZ's default here leaves it off): paired controllers come back by
+# themselves. Only where the image has no configuration of its own.
+if [ -d /etc/bluetooth ] && [ ! -e /etc/bluetooth/main.conf ]; then
+    put "$SOURCE/bluetooth-main.conf" /etc/bluetooth/main.conf 0644
+    systemctl try-restart bluetooth.service 2>/dev/null || true
+fi
 # The games frontend and its libretro cores, when deploy.sh brought them.
 if [ -f "$SOURCE/mpy-retro" ]; then
     put "$SOURCE/mpy-retro" "$PREFIX/bin/mpy-retro" 0755

@@ -5,6 +5,8 @@
 //   keyboard_typer KEY...     KEY is a key name, optionally with modifiers: a  shift+2
 //                             altgr+leftbrace  ctrl+c  enter  up  kp5  meta  menu
 //   keyboard_typer --mouse STEP...   a virtual mouse instead: STEP is DX,DY (a move) or click
+//   keyboard_typer --pad BUTTON...   a virtual gamepad: south east west north start select mode
+//                                    tl tr up down left right (d-pad), or hat:X,Y
 #include <fcntl.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
@@ -72,8 +74,24 @@ int main(int argc, char **argv) {
         return 1;
     }
     int mouse = argc > 1 && !strcmp(argv[1], "--mouse");
+    int pad = argc > 1 && !strcmp(argv[1], "--pad");
+    static const struct {
+        const char *name;
+        int code;
+    } buttons[] = {
+        {"south", BTN_SOUTH}, {"east", BTN_EAST}, {"west", BTN_WEST}, {"north", BTN_NORTH},
+        {"start", BTN_START}, {"select", BTN_SELECT}, {"mode", BTN_MODE}, {"tl", BTN_TL}, {"tr", BTN_TR},
+        {"up", BTN_DPAD_UP}, {"down", BTN_DPAD_DOWN}, {"left", BTN_DPAD_LEFT}, {"right", BTN_DPAD_RIGHT},
+    };
     ioctl(fd, UI_SET_EVBIT, EV_KEY);
-    if (mouse) {
+    if (pad) {
+        for (size_t i = 0; i < sizeof(buttons) / sizeof(buttons[0]); ++i) {
+            ioctl(fd, UI_SET_KEYBIT, buttons[i].code);
+        }
+        ioctl(fd, UI_SET_EVBIT, EV_ABS);
+        ioctl(fd, UI_SET_ABSBIT, ABS_HAT0X);
+        ioctl(fd, UI_SET_ABSBIT, ABS_HAT0Y);
+    } else if (mouse) {
         ioctl(fd, UI_SET_EVBIT, EV_REL);
         ioctl(fd, UI_SET_RELBIT, REL_X);
         ioctl(fd, UI_SET_RELBIT, REL_Y);
@@ -84,12 +102,48 @@ int main(int argc, char **argv) {
         }
     }
     struct uinput_setup setup = {.id = {.bustype = BUS_VIRTUAL, .vendor = 1, .product = 1}};
-    strcpy(setup.name, mouse ? "mpy test mouse" : "mpy test keyboard");
+    strcpy(setup.name, pad ? "mpy test gamepad" : mouse ? "mpy test mouse" : "mpy test keyboard");
+    if (pad) {
+        for (int axis = ABS_HAT0X; axis <= ABS_HAT0Y; ++axis) {
+            struct uinput_abs_setup abs = {.code = axis, .absinfo = {.minimum = -1, .maximum = 1}};
+            ioctl(fd, UI_ABS_SETUP, &abs);
+        }
+    }
     if (ioctl(fd, UI_DEV_SETUP, &setup) < 0 || ioctl(fd, UI_DEV_CREATE) < 0) {
         perror("keyboard_typer: create");
         return 1;
     }
     pause_ms(2500); // the hub looks for new keyboards every second, MicroPython for mice every two
+    if (pad) {
+        for (int a = 2; a < argc; ++a) {
+            int x, y, code = -1;
+            if (sscanf(argv[a], "hat:%d,%d", &x, &y) == 2) {
+                emit(fd, EV_ABS, ABS_HAT0X, x);
+                emit(fd, EV_ABS, ABS_HAT0Y, y);
+                emit(fd, EV_SYN, SYN_REPORT, 0);
+                pause_ms(60);
+                emit(fd, EV_ABS, ABS_HAT0X, 0);
+                emit(fd, EV_ABS, ABS_HAT0Y, 0);
+                emit(fd, EV_SYN, SYN_REPORT, 0);
+            } else {
+                for (size_t i = 0; i < sizeof(buttons) / sizeof(buttons[0]); ++i) {
+                    code = !strcmp(buttons[i].name, argv[a]) ? buttons[i].code : code;
+                }
+                if (code < 0) {
+                    fprintf(stderr, "keyboard_typer: unknown button %s\n", argv[a]);
+                    return 2;
+                }
+                press(fd, code, 1);
+                pause_ms(60);
+                press(fd, code, 0);
+            }
+            pause_ms(150);
+        }
+        pause_ms(300);
+        ioctl(fd, UI_DEV_DESTROY);
+        close(fd);
+        return 0;
+    }
     if (mouse) {
         pause_ms(1000);
         for (int a = 2; a < argc; ++a) {

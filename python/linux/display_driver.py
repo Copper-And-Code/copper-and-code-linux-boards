@@ -280,6 +280,10 @@ def resume():
         import mpyrepl
 
         mpyrepl.restart()
+    # Touches and clicks made meanwhile (on the game) are not for the screen coming back.
+    if touch is not None:
+        touch.flush()
+    mouse.flush()
     for layer in (lv.screen_active(), lv.layer_top(), lv.layer_sys()):
         layer.invalidate()
     if _stopped_by_release:

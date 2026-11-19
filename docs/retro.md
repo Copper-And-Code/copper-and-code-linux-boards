@@ -47,7 +47,7 @@ from its author's page.
 |---|---|
 | Screen | DRM/KMS: the screen `display_driver` would choose (a monitor before the panel), at the refresh nearest the game's, three buffers flipped on the vertical blank. A second thread scales the frame to the largest size with the core's aspect, and turns it with the panel (`MPY_DISPLAY_ROTATION`) |
 | Sound | ALSA, the device of `MPY_AUDIO_SINK` (the headphone jack, or HDMI on a monitor). Writing the samples paces the game; without a sound card a clock does |
-| Input | evdev keyboards and gamepads as player 1's RetroPad, also those plugged in during the game. The REPL hub lends the keyboards while `/run/mpy-keyboard-lent` names the frontend's live process |
+| Input | evdev keyboards and gamepads as player 1's RetroPad, also those plugged in during the game (gamepad drivers: `scripts/build_kmods.sh`). The REPL hub lends the keyboards while `/run/mpy-keyboard-lent` names the frontend's live process |
 | Keyboard | A core that reads the keyboard (the C64) gets all of it: then it is no RetroPad and Esc is the core's. A key pressed and released between two polls still counts once |
 | Leaving | Esc (unless the core has the keyboard), the Windows key, Select and Start together, the gamepad's home button, SIGTERM |
 | Saves | The core's save RAM next to the game, as `GAME.srm` |

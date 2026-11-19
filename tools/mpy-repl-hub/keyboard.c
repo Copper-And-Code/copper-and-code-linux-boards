@@ -5,6 +5,9 @@
 // within a second. The hub grabs it (EVIOCGRAB): the kernel's console would otherwise get the
 // keys too, and a login prompt that nobody sees, on tty1, would take them as a user name.
 //
+// Gamepads are opened too, not grabbed (the games read them): their home button is the home key,
+// and they move in the menu (see gamepad_event).
+//
 // Keys become what a terminal sends: UTF-8 text from the layout, Ctrl-letter as control
 // characters (Ctrl-C reaches the line discipline, so it interrupts as from the serial port),
 // Alt as an ESC prefix, VT100 sequences for the cursor, editing and function keys. Layouts: us
@@ -49,7 +52,9 @@
 
 struct keyboard {
     int fd;
-    int number; // N of /dev/input/eventN
+    int number;    // N of /dev/input/eventN
+    bool gamepad;  // a gamepad, not grabbed: the home button, and moving in the menu
+    int axis_min[2], axis_max[2], stick[2], hat[2];
 };
 
 // The keys whose text depends on the layout: no shift, shift, AltGr, AltGr with shift.
@@ -117,7 +122,7 @@ static const struct layout *layout = &us, *default_layout = &us;
 static bool enabled = true;
 static const char *settings_path;
 static struct timespec settings_time; // of the settings.json read last
-static struct keyboard keyboards[KEYBOARD_MAX] = {{-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}};
+static struct keyboard keyboards[KEYBOARD_MAX] = {[0 ... KEYBOARD_MAX - 1] = {.fd = -1, .number = -1}};
 static uint64_t checked; // event devices looked at: keyboards open, the others skipped
 static bool shift_left, shift_right, ctrl_left, ctrl_right, alt, altgr, caps_lock, num_lock = true;
 static bool meta_alone; // the Windows key is down and no other key was pressed with it
@@ -204,7 +209,7 @@ static void read_settings(void) {
 
 static void set_leds(void) {
     for (size_t i = 0; i < KEYBOARD_MAX; ++i) {
-        if (keyboards[i].fd < 0) {
+        if (keyboards[i].fd < 0 || keyboards[i].gamepad) {
             continue;
         }
         struct input_event events[3] = {
@@ -224,6 +229,14 @@ static bool is_keyboard(int fd) {
         return false;
     }
     return TEST_BIT(KEY_A, keys) && TEST_BIT(KEY_Z, keys) && TEST_BIT(KEY_ENTER, keys) && TEST_BIT(KEY_SPACE, keys);
+}
+
+static bool is_gamepad(int fd) {
+    unsigned long keys[KEY_CNT / BITS_PER_LONG + 1] = {0};
+    if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(keys)), keys) < 0) {
+        return false;
+    }
+    return TEST_BIT(BTN_SOUTH, keys) || TEST_BIT(BTN_JOYSTICK, keys);
 }
 
 static void keyboard_close(struct keyboard *keyboard, const char *why) {
@@ -315,19 +328,29 @@ void keyboard_scan(void) {
             continue; // udev may not have set it up yet: tried again at the next scan
         }
         checked |= 1ULL << number;
-        if (!is_keyboard(fd)) {
+        bool gamepad = !is_keyboard(fd) && is_gamepad(fd);
+        if (!gamepad && !is_keyboard(fd)) {
             close(fd);
             continue;
         }
-        if (ioctl(fd, EVIOCGRAB, 1) < 0) {
+        // A keyboard is ours alone; a gamepad is shared (games read it too, the console does not).
+        if (!gamepad && ioctl(fd, EVIOCGRAB, 1) < 0) {
             fprintf(stderr, "mpy-repl-hub: keyboard %s: cannot grab it: %s\n", path, strerror(errno));
         }
         char name[128] = "?";
         ioctl(fd, EVIOCGNAME(sizeof(name)), name);
-        fprintf(stderr, "mpy-repl-hub: keyboard event%ld: %s, layout %s\n", number, name, layout->name);
-        slot->fd = fd;
-        slot->number = (int)number;
-        set_leds();
+        fprintf(stderr, "mpy-repl-hub: %s event%ld: %s%s%s\n", gamepad ? "gamepad" : "keyboard", number, name,
+            gamepad ? "" : ", layout ", gamepad ? "" : layout->name);
+        *slot = (struct keyboard){.fd = fd, .number = (int)number, .gamepad = gamepad};
+        for (int axis = 0; axis < 2; ++axis) {
+            struct input_absinfo info = {0};
+            ioctl(fd, EVIOCGABS(axis ? ABS_Y : ABS_X), &info);
+            slot->axis_min[axis] = info.minimum;
+            slot->axis_max[axis] = info.maximum;
+        }
+        if (!gamepad) {
+            set_leds();
+        }
     }
     closedir(dir);
     checked &= present; // a device that went away is looked at again when its number comes back
@@ -421,23 +444,70 @@ static unsigned char menu_code(unsigned short code, bool shift) {
     }
 }
 
+static void send_menu_key(unsigned char lv_key) {
+    static int fd = -1;
+    if (fd < 0) {
+        fd = socket(AF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
+    }
+    struct sockaddr_un address = {.sun_family = AF_UNIX, .sun_path = MENU_SOCKET};
+    if (fd >= 0 && lv_key) {
+        sendto(fd, &lv_key, 1, 0, (struct sockaddr *)&address, sizeof(address));
+    }
+}
+
 // True when the key went to the open menu.
 static bool menu_key(unsigned short code) {
     if (access(MENU_FILE, F_OK) != 0) {
         return false;
     }
-    unsigned char lv_key = menu_code(code, shift_left || shift_right);
-    if (lv_key) {
-        static int fd = -1;
-        if (fd < 0) {
-            fd = socket(AF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
+    send_menu_key(menu_code(code, shift_left || shift_right));
+    return true; // other keys do nothing while the menu is open
+}
+
+// A gamepad: its home button is the home key; while a screen wants the moving keys, the d-pad,
+// hat or left stick move, A, B or Start press, Select goes back, the shoulders are Tab.
+static void gamepad_event(struct keyboard *pad, const struct input_event *ev) {
+    if (ev->type == EV_KEY && ev->value == 1 && ev->code == BTN_MODE) {
+        home_key();
+        return;
+    }
+    if (access(MENU_FILE, F_OK) != 0) {
+        return;
+    }
+    if (ev->type == EV_KEY && ev->value == 1) {
+        switch (ev->code) {
+            case BTN_DPAD_UP: send_menu_key(17); break;
+            case BTN_DPAD_DOWN: send_menu_key(18); break;
+            case BTN_DPAD_RIGHT: send_menu_key(19); break;
+            case BTN_DPAD_LEFT: send_menu_key(20); break;
+            case BTN_SOUTH: case BTN_EAST: case BTN_START: case BTN_TRIGGER: send_menu_key(10); break;
+            case BTN_SELECT: send_menu_key(27); break;
+            case BTN_TL: send_menu_key(11); break;
+            case BTN_TR: send_menu_key(9); break;
         }
-        struct sockaddr_un address = {.sun_family = AF_UNIX, .sun_path = MENU_SOCKET};
-        if (fd >= 0) {
-            sendto(fd, &lv_key, 1, 0, (struct sockaddr *)&address, sizeof(address));
+    } else if (ev->type == EV_ABS) {
+        // A step each time the hat or the stick leaves the middle.
+        int axis, now;
+        if (ev->code == ABS_HAT0X || ev->code == ABS_HAT0Y) {
+            axis = ev->code == ABS_HAT0Y;
+            now = ev->value < 0 ? -1 : ev->value > 0;
+            if (now && now != pad->hat[axis]) {
+                send_menu_key(axis ? (now < 0 ? 17 : 18) : (now < 0 ? 20 : 19));
+            }
+            pad->hat[axis] = now;
+        } else if (ev->code == ABS_X || ev->code == ABS_Y) {
+            axis = ev->code == ABS_Y;
+            int low = pad->axis_min[axis], high = pad->axis_max[axis], quarter = (high - low) / 4;
+            if (high <= low) {
+                return;
+            }
+            now = ev->value < low + quarter ? -1 : ev->value > high - quarter;
+            if (now && now != pad->stick[axis]) {
+                send_menu_key(axis ? (now < 0 ? 17 : 18) : (now < 0 ? 20 : 19));
+            }
+            pad->stick[axis] = now;
         }
     }
-    return true; // other keys do nothing while the menu is open
 }
 
 static size_t key(unsigned short code, int value, unsigned char *out, size_t length, size_t size) {
@@ -517,7 +587,9 @@ size_t keyboard_read(const struct pollfd *fds, size_t count, unsigned char *out,
             continue;
         }
         for (size_t i = 0; i < (size_t)got / sizeof(events[0]); ++i) {
-            if (events[i].type == EV_KEY) {
+            if (keyboard->gamepad) {
+                gamepad_event(keyboard, &events[i]);
+            } else if (events[i].type == EV_KEY) {
                 length = key(events[i].code, events[i].value, out, length, size);
             }
         }

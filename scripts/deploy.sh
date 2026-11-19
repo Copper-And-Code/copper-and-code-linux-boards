@@ -9,6 +9,7 @@
 #   MICROPYTHON, HUB, DTB  files in dist/ (default: the newest of each; the DTB the board's)
 #   M4_ELF                 the Cortex-M4 firmware for the STM32MP157C-DK2 (scripts/build_m4.sh)
 #   dist/retro/            the games frontend and its cores, installed when present
+#   dist/kmods/            gamepad kernel modules (STM32MP157C-DK2), installed when present
 #                          (scripts/build_retro.sh)
 #   MPY_SSH_ALIAS          name to check the board's SSH host key against, for boards that share
 #                          an address (both answer at 192.168.7.1), for example stm32mp157c-dk2
@@ -53,11 +54,16 @@ stage "$HUB" mpy-repl-hub
 stage "$SHOT" mpy-screenshot
 stage "$DTB" "$DTB_NAME"
 [[ -n ${M4_ELF:-} ]] && stage "$M4_ELF" mpy_m4.elf
-for file in mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.service mpy-repl.service \
+for file in mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.service mpy-repl.service bluetooth-main.conf \
     usbotg.default journald-volatile.conf install.sh uninstall.sh; do
     cp "$REPO/linux/$file" "$STAGE/$file"
 done
 cp "$REPO/examples/shell-linux/edit.py" "$REPO/examples/shell-linux/vi.py" "$STAGE/"
+# Kernel modules for gamepads, when built for this board's kernel (scripts/build_kmods.sh).
+if [[ -d $REPO/dist/kmods && $COMPATIBLE == *st,stm32mp157c-dk2* ]]; then
+    mkdir -p "$STAGE/kmods"
+    cp "$REPO"/dist/kmods/*.ko "$STAGE/kmods/"
+fi
 # The games frontend and its cores, when built (scripts/build_retro.sh).
 if [[ -f $REPO/dist/retro/mpy-retro ]]; then
     stage "$REPO/dist/retro/mpy-retro" mpy-retro

@@ -264,7 +264,11 @@ key, is the home key: the hub counts it in `/run/mpy-home-key`, and `mpy_home` o
 over the shell (and closes it again), or leaves an app as its home button does. While the menu is
 shown (`/run/mpy-menu`), the hub sends its keys (arrows, Tab, Home, End, Enter, Space, Esc) to
 `mpy_home` as LVGL key codes on the datagram socket `/run/mpy-keys`, not to the terminal: they move
-between the buttons and press one whatever program runs in the shell behind the menu. The shell on the screen draws ASCII
+between the buttons and press one whatever program runs in the shell behind the menu. Gamepads are opened too, not grabbed (games read them): their
+Home button is the home key, and in the menu the d-pad, hat or stick, A, B, Start and Select move
+and press. While a program borrows the keyboards (`/run/mpy-keyboard-lent` with its pid, as
+`mpy-retro` does), the hub lets them go and takes them back when the file is gone or the process
+ended. The shell on the screen draws ASCII
 only: accented letters and the euro reach the programs, but show as `?`. On the STM32MP157C-DK2
 `tests/hil/test_keyboard.sh` checks both layouts with a virtual keyboard (uinput): letters, Caps
 Lock, the symbols, cursor keys and history, Ctrl-C.

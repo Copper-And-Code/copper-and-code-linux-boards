@@ -26,6 +26,16 @@ if [ -e /lib/firmware/mpy_m4.elf ]; then
     say "removed the Cortex-M4 firmware"
 fi
 
+if grep -q "lvgl-mpy-linux" /etc/bluetooth/main.conf 2>/dev/null; then
+    rm -f /etc/bluetooth/main.conf
+    say "removed the Bluetooth configuration"
+fi
+if [ -d "/lib/modules/$(uname -r)/updates/mpy" ]; then
+    rm -rf "/lib/modules/$(uname -r)/updates/mpy"
+    depmod -a
+    say "removed the gamepad kernel modules"
+fi
+
 for unit in mpy-repl.service mpy-usb-composite.service mpy-repl-tcp.socket; do
     systemctl disable --now "$unit" >/dev/null 2>&1 || true
 done

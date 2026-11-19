@@ -168,6 +168,15 @@ class TouchEvdev:
         self.poll()
         return self.x, self.y, self.pressed
 
+    def flush(self):
+        """Drops the events waiting: touches made while another program had the screen."""
+        while self.poller.poll(0):
+            if not self.file.read(EVENT_SIZE):
+                break
+        self._pending = b""
+        self.pressed = False
+        self._dropping = False
+
     def close(self):
         if self.file is not None:
             self.poller.unregister(self.fd)

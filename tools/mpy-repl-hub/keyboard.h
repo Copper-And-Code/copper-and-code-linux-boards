@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define KEYBOARD_MAX 4
+#define KEYBOARD_MAX 8
 
 // Chooses the layout: "us", "it", or "none" for no keyboards. False for an unknown name.
 bool keyboard_layout(const char *name);

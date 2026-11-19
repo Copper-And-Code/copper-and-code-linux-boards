@@ -71,6 +71,16 @@ class MouseEvdev:
         self.file = self.poller = None
         self.pressed = False
 
+    def flush(self):
+        """Drops the events waiting: clicks made while another program had the screen."""
+        try:
+            while self.file is not None and self.poller.poll(0):
+                if not self.file.read(EVENT_SIZE):
+                    break
+        except OSError:
+            self._close()
+        self.pressed = False
+
     def state(self):
         """(x, y, pressed) after the events waiting; looks for a mouse while there is none."""
         if self.file is None:
