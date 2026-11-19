@@ -46,7 +46,9 @@ import shell_linux
 shell_linux.main()
 ```
 
-Use `exit` or Ctrl-D to return to the REPL. `linux/install.sh` starts the shell at power-on through
+Use `exit` or Ctrl-D to return to the MicroPython REPL, which stays on the display (a keyboard
+plugged into the board goes on typing there); Ctrl-D in the REPL starts the shell again. When a
+tool enters the raw REPL the terminal leaves the display. `linux/install.sh` starts the shell at power-on through
 `mpy_home` (a `main.py` it writes when there is none), with an app menu on a tap; the shell,
 `ansiterm` and `ansifont` are frozen in the firmware and the editors installed in `fs/bin`. Ctrl-A on
 an empty line hands the board over to the raw REPL, which is what LVGL MPY Studio and mpremote ask

@@ -29,6 +29,8 @@ import display_driver
 from ansifont import FONT
 
 CELL_W, CELL_H = 8, 16
+RAW_BANNER = b"raw REPL; CTRL-B to exit"
+_STDIN = sys.stdin.buffer if sys.platform == "linux" else None
 # A new line also goes back to the first column, as a Linux terminal does with onlcr. On the MCU
 # ports MicroPython sends "\r\n" itself; the unix port leaves that to the terminal, so programs
 # that print "\n" would otherwise step across the screen.
@@ -197,6 +199,11 @@ class Terminal(io.IOBase):
         # be inside the try, and so must the last one: hence the `if` at the end.
         n = len(buf)
         mine = False  # this call set busy, so it clears it
+        if RAW_BANNER in buf:
+            # A tool (mpremote, LVGL MPY Studio) entered the raw REPL: its bytes are not for the
+            # display, and drawing them would slow it down. The next start() shows us again.
+            os.dupterm(None)
+            return n
         try:
             if self.busy:  # printing from a callback that interrupted a write
                 return n
@@ -234,7 +241,10 @@ class Terminal(io.IOBase):
 
     def read(self, size=-1):
         if not self.replies:
-            return None
+            # MicroPython's unix port reads the REPL's keys only from its dupterm while there is
+            # one, and asks again at once on None: it would spin and never see a key. There the
+            # keys come from stdin, the pseudo-terminal: wait for one, the GIL released.
+            return _STDIN.read(1) if _STDIN else None
         if size < 0:
             size = len(self.replies)
         data = bytes(self.replies[:size])

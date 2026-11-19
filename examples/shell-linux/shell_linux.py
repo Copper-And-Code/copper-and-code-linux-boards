@@ -43,6 +43,7 @@ term = None  # the terminal on the display, if there is one
 WIDTH = 80  # columns: the line being typed scrolls sideways inside them
 history = []
 last_ctrl_c = None  # when Ctrl-C was pressed on an empty line
+raw_requested = False  # the shell ends because a tool asked for the raw REPL
 out = None  # where the running command writes: the terminal, a file or the next command
 pipe = None  # what the previous command of a pipeline wrote
 
@@ -985,6 +986,7 @@ def second_ctrl_c():
 
 
 def read_line():
+    global raw_requested
     line, pos = "", 0
     back = len(history)  # position in the history, the end being the new line
     last_crlf = False
@@ -1029,6 +1031,7 @@ def read_line():
         elif k == "\x01" and not line:
             # Ctrl-A on an empty line is a tool (mpremote, LVGL MPY Studio) asking for the raw
             # REPL: leave, and let the REPL start in raw mode.
+            raw_requested = True
             try:
                 import mpyrepl
 
@@ -1130,8 +1133,12 @@ def main(startup=None):
         pass
     finally:
         micropython.kbd_intr(3)
-        if screen:
-            screen.stop()
+        if screen and raw_requested:
+            screen.stop()  # the raw REPL is for the tool: its bytes stay off the display
+        elif screen:
+            # The MicroPython REPL comes next: it stays on the display, so a keyboard plugged
+            # into the board can go on with it.
+            print("MicroPython REPL; Ctrl-D starts the shell again")
 
 
 if __name__ == "__main__":
