@@ -41,7 +41,7 @@
           "props": {
             "x": 216,
             "y": 16,
-            "width": 258,
+            "width": 196,
             "height": 30,
             "text": "Web Radio",
             "textColor": "#FFFFFF",
@@ -212,6 +212,351 @@
           },
           "customStyles": {},
           "animations": []
+        },
+        {
+          "id": "ba924631c8054eaaa5d4c736642afffe",
+          "name": "find_button",
+          "type": "button",
+          "props": {
+            "x": 420,
+            "y": 8,
+            "width": 54,
+            "height": 44,
+            "text": "+",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "radius": 8
+          },
+          "events": {
+            "CLICKED": "find_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    },
+    {
+      "id": "c6e20d10422443ccb62ce82ab85a8cdd",
+      "name": "find",
+      "canvasSize": [
+        480,
+        272
+      ],
+      "widgets": [
+        {
+          "id": "53c4c81fe55147a48a1b76ec75439112",
+          "name": "find_title",
+          "type": "label",
+          "props": {
+            "x": 8,
+            "y": 6,
+            "width": 300,
+            "height": 28,
+            "text": "Find stations",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "8ea2188f90304e3cad3e1d20d5ee853a",
+          "name": "back_button",
+          "type": "button",
+          "props": {
+            "x": 384,
+            "y": 4,
+            "width": 90,
+            "height": 34,
+            "text": "Back",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "radius": 8
+          },
+          "events": {
+            "CLICKED": "back_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "3c8dbd5f62d34fd9bc29237728c9ac25",
+          "name": "country_caption",
+          "type": "label",
+          "props": {
+            "x": 8,
+            "y": 40,
+            "width": 228,
+            "height": 17,
+            "text": "COUNTRY",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "a9cc8eb88040458ab726c5dccef73f82",
+          "name": "country",
+          "type": "dropdown",
+          "props": {
+            "x": 8,
+            "y": 57,
+            "width": 228,
+            "height": 34,
+            "options": "Any country",
+            "selected": 0,
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {
+            "VALUE_CHANGED": "country_value_changed"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "6087b310cbff40daa47cde28d3f9a375",
+          "name": "region_caption",
+          "type": "label",
+          "props": {
+            "x": 244,
+            "y": 40,
+            "width": 228,
+            "height": 17,
+            "text": "REGION",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b35b3e3b59c046428c2e371adf3dae6c",
+          "name": "region",
+          "type": "dropdown",
+          "props": {
+            "x": 244,
+            "y": 57,
+            "width": 228,
+            "height": 34,
+            "options": "Any region",
+            "selected": 0,
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "8e63b8034fbb45a1adbdc49f896ab20c",
+          "name": "language_caption",
+          "type": "label",
+          "props": {
+            "x": 8,
+            "y": 96,
+            "width": 228,
+            "height": 17,
+            "text": "LANGUAGE",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "c890e8ad630a4dcdabebd2571fc8f772",
+          "name": "language",
+          "type": "dropdown",
+          "props": {
+            "x": 8,
+            "y": 113,
+            "width": 228,
+            "height": 34,
+            "options": "Any language",
+            "selected": 0,
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "8e51237cb34c4b748bec29253dd24ee2",
+          "name": "genre_caption",
+          "type": "label",
+          "props": {
+            "x": 244,
+            "y": 96,
+            "width": 228,
+            "height": 17,
+            "text": "GENRE",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "354cff2fcfce4ee184c69c55ca729fe6",
+          "name": "genre",
+          "type": "dropdown",
+          "props": {
+            "x": 244,
+            "y": 113,
+            "width": 228,
+            "height": 34,
+            "options": "Any genre",
+            "selected": 0,
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "dir": "LV_DIR_BOTTOM",
+            "symbol": "LV_SYMBOL_DOWN",
+            "highlightSelected": true
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "26bd61c63439491b8f22547ded29daf8",
+          "name": "search_button",
+          "type": "button",
+          "props": {
+            "x": 8,
+            "y": 158,
+            "width": 228,
+            "height": 42,
+            "text": "Search",
+            "bgColor": "#E0742F",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "radius": 8
+          },
+          "events": {
+            "CLICKED": "search_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "54bc91b2b74246769cea82709c108312",
+          "name": "find_status",
+          "type": "label",
+          "props": {
+            "x": 244,
+            "y": 156,
+            "width": 228,
+            "height": 46,
+            "text": "Choose, then Search",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "4f0ba8e4f9fa4f52bd80b6a157afbc23",
+          "name": "add_button",
+          "type": "button",
+          "props": {
+            "x": 8,
+            "y": 210,
+            "width": 228,
+            "height": 42,
+            "text": "Add to my list",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "radius": 8
+          },
+          "events": {
+            "CLICKED": "add_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "32c85081750a44b3bf39a9abdf005370",
+          "name": "replace_button",
+          "type": "button",
+          "props": {
+            "x": 244,
+            "y": 210,
+            "width": 228,
+            "height": 42,
+            "text": "Replace my list",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "radius": 8
+          },
+          "events": {
+            "CLICKED": "replace_button_clicked"
+          },
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "1ebdb005c16246aebdf91d088f9904f8",
+          "name": "find_note",
+          "type": "label",
+          "props": {
+            "x": 8,
+            "y": 255,
+            "width": 464,
+            "height": 17,
+            "text": "From radio-browser.info, the most listened first, at most 300.",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
         }
       ]
     }
@@ -253,6 +598,41 @@
         "widget": "tick",
         "event": "TICK",
         "body": "radio_app.tick()"
+      },
+      "find_screen_loaded": {
+        "widget": "find",
+        "event": "SCREEN_LOADED",
+        "body": "radio_app.start_find(ui)"
+      },
+      "find_button_clicked": {
+        "widget": "find_button",
+        "event": "CLICKED",
+        "body": "radio_app.open_find()"
+      },
+      "back_button_clicked": {
+        "widget": "back_button",
+        "event": "CLICKED",
+        "body": "radio_app.back()"
+      },
+      "country_value_changed": {
+        "widget": "country",
+        "event": "VALUE_CHANGED",
+        "body": "radio_app.country_changed()"
+      },
+      "search_button_clicked": {
+        "widget": "search_button",
+        "event": "CLICKED",
+        "body": "radio_app.search()"
+      },
+      "add_button_clicked": {
+        "widget": "add_button",
+        "event": "CLICKED",
+        "body": "radio_app.add_found()"
+      },
+      "replace_button_clicked": {
+        "widget": "replace_button",
+        "event": "CLICKED",
+        "body": "radio_app.replace_found()"
       }
     }
   },
@@ -311,7 +691,12 @@
     {
       "id": "54dff828ca2542ba905532c131ed10a0",
       "name": "radio_app",
-      "source": "# SPDX-License-Identifier: MIT\n# The web radio app: stations from stations.txt (or the built-in list), streams played by player.\n\nimport time\n\nimport lvgl as lv\n\nimport player\n\ntry:\n    import mpy_wifi  # on a Linux board; the network comes from settings.json (the Settings app)\nexcept ImportError:\n    mpy_wifi = None\n\nACCENT = lv.color_hex(0xE0742F)\nROW = lv.color_hex(0x1E2633)\n# Name and MP3 stream address. Your own list goes in stations.txt next to main.py (on a Linux board\n# /usr/local/mpy/fs/stations.txt), one station per line: Name|http://address\nSTATIONS = [\n    (\"Radio Paradise\", \"http://stream.radioparadise.com/mp3-128\"),\n    (\"Radio Swiss Jazz\", \"https://stream.srg-ssr.ch/m/rsj/mp3_128\"),\n    (\"FIP\", \"http://icecast.radiofrance.fr/fip-midfi.mp3\"),\n]\nSTATIONS_FILE = \"stations.txt\"\n\n_ui = None\n_player = player.Player(live=True)\n_stations = []\n_rows = []\n_shown = None\n_network_job = None\n_online = True\n_checked = 0\n\n\ndef _clock(seconds):\n    seconds = int(seconds)\n    return \"%d:%02d:%02d\" % (seconds // 3600, seconds // 60 % 60, seconds % 60)\n\n\ndef _row_font():\n    # List rows follow the screen: bigger letters on an 800x480 screen than on a 480x272 one.\n    height = lv.display_get_default().get_vertical_resolution()\n    return lv.font_montserrat_24 if height >= 400 else lv.font_montserrat_14\n\n\ndef _caption(button, text):\n    button.get_child(0).set_text(text)\n\n\ndef load_stations():\n    try:\n        with open(STATIONS_FILE) as source:\n            found = []\n            for line in source:\n                name, _, url = line.strip().partition(\"|\")\n                if name and url.startswith((\"http://\", \"https://\")):\n                    found.append((name.strip(), url.strip()))\n            if found:\n                return found\n    except OSError:\n        pass\n    return STATIONS\n\n\ndef start(ui):\n    global _ui, _stations, _network_job\n    _ui = ui\n    if mpy_wifi is not None:\n        try:\n            _network_job = mpy_wifi.ensure()  # connects to the Wi-Fi of settings.json if needed\n        except (OSError, ValueError) as error:\n            print(\"radio: Wi-Fi:\", error)\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    _caption(ui.prev_button, lv.SYMBOL.PREV)\n    _caption(ui.next_button, lv.SYMBOL.NEXT)\n    _caption(ui.play_button, lv.SYMBOL.PLAY)\n    _caption(ui.volume_down, lv.SYMBOL.VOLUME_MID)\n    _caption(ui.volume_up, lv.SYMBOL.VOLUME_MAX)\n    ui.station_list.set_style_border_width(0, 0)\n    ui.station_list.set_style_radius(10, 0)\n    ui.station_list.set_style_pad_all(4, 0)\n    ui.station_list.set_style_pad_row(4, 0)\n    _stations = load_stations()\n    ui.station_list.clean()\n    _rows.clear()\n    for index, (name, _url) in enumerate(_stations):\n        row = lv.button(ui.station_list)\n        row.set_width(lv.pct(100))\n        row.set_style_bg_color(ROW, 0)\n        row.set_style_shadow_width(0, 0)\n        label = lv.label(row)\n        label.set_text(lv.SYMBOL.AUDIO + \"  \" + name)\n        label.set_style_text_font(_row_font(), 0)\n        label.set_long_mode(lv.label.LONG_MODE.DOTS)\n        label.set_width(lv.pct(100))\n        row.add_event_cb(lambda e, i=index: tune(i), lv.EVENT.CLICKED, None)\n        _rows.append(row)\n    show()\n\n\ndef tune(index):\n    _player.play([url for _name, url in _stations], index)\n    show()\n\n\ndef toggle():\n    # A live stream is stopped, not paused: play starts it again from now.\n    if _player.playing:\n        _player.stop()\n    elif _stations:\n        tune(max(_player.index, 0))\n    show()\n\n\ndef next_station():\n    _player.next()\n    show()\n\n\ndef previous_station():\n    if _player.uris:\n        tune((_player.index - 1) % len(_player.uris))\n\n\ndef volume_up():\n    _player.volume_up()\n    show()\n\n\ndef volume_down():\n    _player.volume_down()\n    show()\n\n\ndef tick():\n    global _network_job, _online, _checked\n    if _network_job is not None and _network_job.poll() is not None:\n        _network_job = None\n    if mpy_wifi is not None and time.ticks_diff(time.ticks_ms(), _checked) >= 2000:\n        _checked = time.ticks_ms()\n        _online = mpy_wifi.online()\n    _player.update()\n    show()\n\n\ndef show():\n    global _shown\n    if _ui is None:\n        return\n    p = _player\n    if p.index != _shown and 0 <= p.index < len(_stations):\n        _shown = p.index\n        _ui.station.set_text(_stations[p.index][0])\n        for index, row in enumerate(_rows):\n            row.set_style_bg_color(ACCENT if index == p.index else ROW, 0)\n        _rows[p.index].scroll_to_view(True)\n    _caption(_ui.play_button, lv.SYMBOL.STOP if p.playing else lv.SYMBOL.PLAY)\n    if not _online and not p.playing:\n        _ui.status.set_text(\"No internet: connecting...\" if _network_job else \"No internet: set up Wi-Fi in Settings\")\n    elif p.error:\n        _ui.status.set_text(p.error)\n    elif p.playing and p.position > 0:\n        _ui.status.set_text(\"On air  \" + _clock(p.position))\n    elif p.playing:\n        _ui.status.set_text(\"Connecting...\")\n    elif p.index >= 0:\n        _ui.status.set_text(\"Stopped\")\n    _ui.volume.set_text(\"Volume %d%%\" % p.volume)\n"
+      "source": "# SPDX-License-Identifier: MIT\n# The web radio app: stations from stations.txt (or the built-in list), streams played by player.\n# The Find page fills stations.txt from the Radio Browser catalogue (radio_find): a country, one of\n# its regions, a language, a genre; the stations found are added to the list or replace it.\n\nimport time\n\nimport lvgl as lv\n\nimport player\nimport radio_find as find\n\ntry:\n    import mpy_wifi  # on a Linux board; the network comes from settings.json (the Settings app)\nexcept ImportError:\n    mpy_wifi = None\ntry:\n    import mpy_settings  # the last search, remembered in settings.json, section \"radio\"\nexcept ImportError:\n    mpy_settings = None\n\nACCENT = lv.color_hex(0xE0742F)\nROW = lv.color_hex(0x1E2633)\n# Name and MP3 stream address. Your own list goes in stations.txt next to main.py (on a Linux board\n# /usr/local/mpy/fs/stations.txt), one station per line: Name|http://address\nSTATIONS = [\n    (\"Radio Paradise\", \"http://stream.radioparadise.com/mp3-128\"),\n    (\"Radio Swiss Jazz\", \"https://stream.srg-ssr.ch/m/rsj/mp3_128\"),\n    (\"FIP\", \"http://icecast.radiofrance.fr/fip-midfi.mp3\"),\n]\nSTATIONS_FILE = \"stations.txt\"\nMAX_STATIONS = 500\n\n_ui = None\n_player = player.Player(live=True)\n_stations = []\n_rows = []\n_shown = None\n_network_job = None\n_online = True\n_checked = 0\n_started = False\n_saved = None  # the list saved by the Find page (also where the simulator keeps it)\n_listed = None  # the stations the list on the screen shows\n# The Find page\n_jobs = {}  # what is being downloaded: \"countries\", \"regions\", \"languages\", \"search\"\n_countries = []  # (name, code)\n_regions = []\n_languages = []\n_found = []\n_choice = {}\n\n\ndef _clock(seconds):\n    seconds = int(seconds)\n    return \"%d:%02d:%02d\" % (seconds // 3600, seconds // 60 % 60, seconds % 60)\n\n\ndef _row_font():\n    # List rows follow the screen: bigger letters on an 800x480 screen than on a 480x272 one.\n    height = lv.display_get_default().get_vertical_resolution()\n    return lv.font_montserrat_24 if height >= 400 else lv.font_montserrat_14\n\n\ndef _caption(button, text):\n    button.get_child(0).set_text(text)\n\n\ndef load_stations():\n    if _saved is not None:\n        return _saved\n    try:\n        with open(STATIONS_FILE) as source:\n            found = []\n            for line in source:\n                name, _, url = line.strip().partition(\"|\")\n                if name and url.startswith((\"http://\", \"https://\")):\n                    found.append((name.strip(), url.strip()))\n            if found:\n                return found\n    except OSError:\n        pass\n    return STATIONS\n\n\ndef save_stations(stations):\n    # Through a temporary file, so a power cut leaves either the old list or the new one.\n    import os\n\n    global _saved\n    _saved = list(stations) or STATIONS\n    with open(STATIONS_FILE + \".tmp\", \"w\") as target:\n        for name, url in stations:\n            target.write(\"%s|%s\\n\" % (name, url))\n    os.rename(STATIONS_FILE + \".tmp\", STATIONS_FILE)\n\n\ndef start(ui):\n    # The main page, at start and back from the Find page.\n    global _ui, _network_job, _started\n    _ui = ui\n    if not _started:\n        _started = True\n        if mpy_wifi is not None:\n            try:\n                _network_job = mpy_wifi.ensure()  # connects to the Wi-Fi of settings.json if needed\n            except (OSError, ValueError) as error:\n                print(\"radio: Wi-Fi:\", error)\n        lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n        _caption(ui.prev_button, lv.SYMBOL.PREV)\n        _caption(ui.next_button, lv.SYMBOL.NEXT)\n        _caption(ui.play_button, lv.SYMBOL.PLAY)\n        _caption(ui.volume_down, lv.SYMBOL.VOLUME_MID)\n        _caption(ui.volume_up, lv.SYMBOL.VOLUME_MAX)\n        _caption(ui.find_button, lv.SYMBOL.PLUS)\n        ui.station_list.set_style_border_width(0, 0)\n        ui.station_list.set_style_radius(10, 0)\n        ui.station_list.set_style_pad_all(4, 0)\n        ui.station_list.set_style_pad_row(4, 0)\n    _fill_list()\n\n\ndef _fill_list():\n    global _stations, _listed, _shown\n    _stations = load_stations()\n    if _stations == _listed:\n        return\n    _listed = _stations\n    _shown = None\n    # A new list while a station plays: the same station, at its new place, or silence.\n    urls = [url for _name, url in _stations]\n    if _player.uris:\n        current = _player.uris[_player.index] if 0 <= _player.index < len(_player.uris) else None\n        if current in urls:\n            _player.uris = urls\n            _player.index = urls.index(current)\n        else:\n            _player.stop()\n            _player.uris = urls\n            _player.index = -1\n    _ui.station_list.clean()\n    _rows.clear()\n    for index, (name, _url) in enumerate(_stations):\n        row = lv.button(_ui.station_list)\n        row.set_width(lv.pct(100))\n        row.set_style_bg_color(ROW, 0)\n        row.set_style_shadow_width(0, 0)\n        label = lv.label(row)\n        label.set_text(lv.SYMBOL.AUDIO + \"  \" + name)\n        label.set_style_text_font(_row_font(), 0)\n        label.set_long_mode(lv.label.LONG_MODE.DOTS)\n        label.set_width(lv.pct(100))\n        row.add_event_cb(lambda e, i=index: tune(i), lv.EVENT.CLICKED, None)\n        _rows.append(row)\n    show()\n\n\ndef tune(index):\n    _player.play([url for _name, url in _stations], index)\n    show()\n\n\ndef toggle():\n    # A live stream is stopped, not paused: play starts it again from now.\n    if _player.playing:\n        _player.stop()\n    elif _stations:\n        tune(max(_player.index, 0))\n    show()\n\n\ndef next_station():\n    _player.next()\n    show()\n\n\ndef previous_station():\n    if _player.uris:\n        tune((_player.index - 1) % len(_player.uris))\n\n\ndef volume_up():\n    _player.volume_up()\n    show()\n\n\ndef volume_down():\n    _player.volume_down()\n    show()\n\n\ndef tick():\n    global _network_job, _online, _checked\n    if _jobs:\n        _poll_jobs()\n    if _network_job is not None and _network_job.poll() is not None:\n        _network_job = None\n    if mpy_wifi is not None and time.ticks_diff(time.ticks_ms(), _checked) >= 2000:\n        _checked = time.ticks_ms()\n        _online = mpy_wifi.online()\n    _player.update()\n    show()\n\n\ndef show():\n    global _shown\n    if _ui is None:\n        return\n    p = _player\n    if p.index != _shown and 0 <= p.index < len(_stations):\n        _shown = p.index\n        _ui.station.set_text(_stations[p.index][0])\n        for index, row in enumerate(_rows):\n            row.set_style_bg_color(ACCENT if index == p.index else ROW, 0)\n        _rows[p.index].scroll_to_view(True)\n    _caption(_ui.play_button, lv.SYMBOL.STOP if p.playing else lv.SYMBOL.PLAY)\n    if not _online and not p.playing:\n        _ui.status.set_text(\"No internet: connecting...\" if _network_job else \"No internet: set up Wi-Fi in Settings\")\n    elif p.error:\n        _ui.status.set_text(p.error)\n    elif p.playing and p.position > 0:\n        _ui.status.set_text(\"On air  \" + _clock(p.position))\n    elif p.playing:\n        _ui.status.set_text(\"Connecting...\")\n    elif p.index >= 0:\n        _ui.status.set_text(\"Stopped\")\n    _ui.volume.set_text(\"Volume %d%%\" % p.volume)\n\n\n# --- The Find page: stations from the Radio Browser catalogue\n\n\ndef open_find():\n    _ui.load_page(_ui.PAGE_FIND)\n\n\ndef back():\n    _ui.load_page(_ui.PAGE_MAIN)\n\n\ndef _dark(dropdown):\n    dropdown.get_list().set_style_bg_color(lv.color_hex(0x1E2633), 0)\n    dropdown.get_list().set_style_text_color(lv.color_hex(0xFFFFFF), 0)\n    dropdown.get_list().set_style_max_height(lv.display_get_default().get_vertical_resolution() * 2 // 3, 0)\n\n\ndef _options(dropdown, first, names, chosen):\n    dropdown.set_options(\"\\n\".join([first] + names))\n    dropdown.set_selected(names.index(chosen) + 1 if chosen in names else 0)\n\n\ndef _say(text):\n    _ui.find_status.set_text(text)\n\n\ndef start_find(ui):\n    global _choice\n    if not _choice:\n        lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n        for dropdown in (ui.country, ui.region, ui.language, ui.genre):\n            _dark(dropdown)\n        _choice = dict((mpy_settings.get(\"radio\") if mpy_settings else None) or {})\n        _choice.setdefault(\"country\", \"\")\n    _options(ui.genre, find.GENRES[0], list(find.GENRES[1:]), _choice.get(\"genre\"))\n    if not _countries:\n        ui.country.set_options(\"Loading...\")\n        _jobs[\"countries\"] = find.countries()\n    if not _languages:\n        ui.language.set_options(\"Loading...\")\n        _jobs[\"languages\"] = find.languages()\n    if _countries and not _regions and _choice.get(\"country\"):\n        _start_regions()\n    if not _regions:\n        ui.region.set_options(find.ANY_REGION)\n    _show_found()\n\n\ndef _start_regions():\n    name = dict((code, n) for n, code in _countries).get(_choice.get(\"country\"))\n    _regions.clear()\n    _ui.region.set_options(find.ANY_REGION)\n    if name:\n        _ui.region.set_options(\"Loading...\")\n        _jobs[\"regions\"] = find.regions(name)\n\n\ndef _poll_jobs():\n    for kind in list(_jobs):\n        result = _jobs[kind].poll()\n        if result is None:\n            continue\n        del _jobs[kind]\n        data, error = result\n        if error:\n            _say(\"Catalogue: \" + error)\n            if kind == \"search\":\n                _ui.search_button.remove_state(lv.STATE.DISABLED)\n            continue\n        if kind == \"countries\":\n            _countries[:] = find.country_list(data)\n            codes = [code for _name, code in _countries]\n            _options(_ui.country, find.ANY_COUNTRY, [n for n, _c in _countries],\n                     _countries[codes.index(_choice[\"country\"])][0] if _choice[\"country\"] in codes else None)\n            if _choice[\"country\"] in codes:\n                _start_regions()\n        elif kind == \"regions\":\n            _regions[:] = find.region_list(data)\n            _options(_ui.region, find.ANY_REGION, _regions, _choice.get(\"region\"))\n        elif kind == \"languages\":\n            _languages[:] = find.language_list(data)\n            _options(_ui.language, find.ANY_LANGUAGE, _languages, _choice.get(\"language\"))\n        elif kind == \"search\":\n            _found[:] = find.station_list(data)\n            _ui.search_button.remove_state(lv.STATE.DISABLED)\n            _show_found()\n\n\ndef _show_found():\n    for button in (_ui.add_button, _ui.replace_button):\n        if _found:\n            button.remove_state(lv.STATE.DISABLED)\n        else:\n            button.add_state(lv.STATE.DISABLED)\n    if \"search\" in _jobs:\n        return\n    if _found:\n        _say(\"%d stations found, the most listened first\" % len(_found))\n    elif not _jobs:\n        _say(\"Choose, then Search\")\n\n\ndef country_changed():\n    index = _ui.country.get_selected()\n    if not _countries:\n        return\n    _choice[\"country\"] = _countries[index - 1][1] if index > 0 else \"\"\n    _choice[\"region\"] = \"\"\n    _start_regions()\n\n\ndef _selected(dropdown, names):\n    index = dropdown.get_selected()\n    return names[index - 1] if 0 < index <= len(names) else \"\"\n\n\ndef search():\n    _choice[\"region\"] = _selected(_ui.region, _regions)\n    _choice[\"language\"] = _selected(_ui.language, _languages)\n    _choice[\"genre\"] = _selected(_ui.genre, list(find.GENRES[1:]))\n    if mpy_settings:\n        try:\n            mpy_settings.update(\"radio\", _choice)\n        except OSError:\n            pass\n    _found.clear()\n    _jobs[\"search\"] = find.search(_choice[\"country\"], _choice[\"region\"], _choice[\"language\"],\n                                  _choice[\"genre\"])\n    _ui.search_button.add_state(lv.STATE.DISABLED)\n    _show_found()\n    _say(\"Searching...\")\n\n\ndef _keep(stations):\n    try:\n        save_stations(stations[:MAX_STATIONS])\n    except OSError as error:\n        print(\"radio: stations.txt:\", error)\n    _found.clear()\n    back()\n\n\ndef add_found():\n    # The stations found after those already in the list, each address once.\n    stations = list(load_stations())\n    known = set(url for _name, url in stations)\n    stations += [s for s in _found if s[1] not in known]\n    _keep(stations)\n\n\ndef replace_found():\n    _keep(list(_found))\n"
+    },
+    {
+      "id": "5a67519d4f154b9faac5e8412345ee10",
+      "name": "radio_find",
+      "source": "# SPDX-License-Identifier: MIT\n# Stations from Radio Browser (https://www.radio-browser.info): a free, open catalogue of tens of\n# thousands of internet radios, no account and no key. The countries, the regions of a country and\n# the languages come from it; a search returns the most listened stations that match, at most\n# LIMIT, those the board can play (MP3, AAC, Ogg).\n#\n# On a Linux board curl downloads in the background (mpy_wifi.Job): start a request, then call\n# poll() from a timer until it returns the data. In the Studio simulator demo data comes back.\n\nimport json\nimport os\n\ntry:\n    import mpy_wifi\nexcept ImportError:\n    mpy_wifi = None\n\nAPI = \"https://all.api.radio-browser.info/json/\"\nLIMIT = 300\nCODECS = (\"MP3\", \"AAC\", \"AAC+\", \"OGG\")\nGENRES = (\"Any genre\", \"pop\", \"rock\", \"jazz\", \"classical\", \"news\", \"talk\", \"dance\", \"electronic\",\n          \"oldies\", \"80s\", \"hits\", \"chillout\", \"lounge\", \"folk\", \"country\", \"sport\", \"christian\")\nANY_COUNTRY = \"Any country\"\nANY_REGION = \"Any region\"\nANY_LANGUAGE = \"Any language\"\n\nCURL_ERRORS = {\n    6: \"name not found: is the network up?\",\n    7: \"cannot connect to the catalogue\",\n    28: \"the catalogue did not answer in time\",\n    60: \"certificate refused: is the clock set?\",\n}\n\n# The board's fonts have ASCII only: accented letters lose the accent, other scripts are left out.\n_PLAIN = {}\nfor _letters, _plain in (\n        (\"àáâãäåāăą\", \"a\"), (\"ÀÁÂÃÄÅĀĂĄ\", \"A\"), (\"çćĉċč\", \"c\"), (\"ÇĆĈĊČ\", \"C\"), (\"ďđ\", \"d\"),\n        (\"ĎĐ\", \"D\"), (\"èéêëēĕėęě\", \"e\"), (\"ÈÉÊËĒĔĖĘĚ\", \"E\"), (\"ĝğġģ\", \"g\"), (\"ĜĞĠĢ\", \"G\"),\n        (\"ìíîïĩīĭįı\", \"i\"), (\"ÌÍÎÏĨĪĬĮİ\", \"I\"), (\"ĺļľŀł\", \"l\"), (\"ĹĻĽĿŁ\", \"L\"), (\"ñńņň\", \"n\"),\n        (\"ÑŃŅŇ\", \"N\"), (\"òóôõöøōŏő\", \"o\"), (\"ÒÓÔÕÖØŌŎŐ\", \"O\"), (\"ŕŗř\", \"r\"), (\"ŔŖŘ\", \"R\"),\n        (\"śŝşšș\", \"s\"), (\"ŚŜŞŠȘ\", \"S\"), (\"ţťŧț\", \"t\"), (\"ŢŤŦȚ\", \"T\"), (\"ùúûüũūŭůűų\", \"u\"),\n        (\"ÙÚÛÜŨŪŬŮŰŲ\", \"U\"), (\"ýÿ\", \"y\"), (\"ÝŸ\", \"Y\"), (\"źżž\", \"z\"), (\"ŹŻŽ\", \"Z\"),\n        (\"‘’´`\", \"'\"), (\"“”«»\", '\"'), (\"–—\", \"-\")):\n    for _c in _letters:\n        _PLAIN[_c] = _plain\n_PLAIN.update({\"ß\": \"ss\", \"æ\": \"ae\", \"Æ\": \"AE\", \"œ\": \"oe\", \"Œ\": \"OE\", \"…\": \"...\", \"|\": \"/\"})\n\n\ndef plain(text):\n    out = \"\"\n    dropped = 0\n    for c in text:\n        if c in _PLAIN:\n            out += _PLAIN[c]\n        elif \" \" <= c <= \"~\":\n            out += c\n        else:\n            dropped += 1\n    out = \" \".join(out.split())\n    # A name mostly in another script says nothing once its letters are gone.\n    return out if out and dropped <= len(out) // 2 else \"\"\n\n\ndef _quote(text):\n    out = \"\"\n    for byte in text.encode():\n        c = chr(byte)\n        out += c if (byte < 128 and (c.isalpha() or c.isdigit())) or c in \"-_.~\" else \"%%%02X\" % byte\n    return out\n\n\nclass Request:\n    # A download in the background, into a file (a search is a few hundred kilobytes: no need to\n    # pass them through the pseudo-terminal). poll(): None while it runs, then (data, error).\n    _count = 0\n\n    def __init__(self, path, demo):\n        self._demo = demo\n        self._job = None\n        Request._count += 1\n        self._file = \"/tmp/mpy-radio-%d.json\" % Request._count\n        if mpy_wifi:\n            self._job = mpy_wifi.Job([\"curl\", \"-s\", \"-f\", \"-L\", \"-m\", \"30\", \"-A\", \"lvgl-mpy-radio/1.0\",\n                                      \"-o\", self._file, API + path])\n\n    def poll(self):\n        if self._job is None:\n            return self._demo, None\n        if self._job.poll() is None:\n            return None\n        if self._job.status != 0:\n            return None, CURL_ERRORS.get(self._job.status, \"no answer (curl %d)\" % self._job.status)\n        try:\n            with open(self._file) as source:\n                return json.load(source), None\n        except (OSError, ValueError):\n            return None, \"bad answer from the catalogue\"\n        finally:\n            try:\n                os.remove(self._file)\n            except OSError:\n                pass\n\n\ndef countries():\n    return Request(\"countries?order=name&hidebroken=true\", DEMO_COUNTRIES)\n\n\ndef country_list(data):\n    # (name, code) of the countries with at least a few stations, by name.\n    found = [(plain(c[\"name\"]), c[\"iso_3166_1\"]) for c in data\n             if c.get(\"stationcount\", 0) >= 5 and c.get(\"iso_3166_1\")]\n    found = [c for c in found if c[0]]\n    found.sort(key=lambda c: c[0][4:] if c[0].startswith(\"The \") else c[0])\n    return found\n\n\ndef regions(country):\n    return Request(\"states/%s/?order=stationcount&reverse=true&hidebroken=true\" % _quote(country),\n                   DEMO_REGIONS)\n\n\ndef region_list(data):\n    # The regions (the catalogue's \"state\") with at least 3 stations, the biggest first. Their\n    # names are as the stations' owners wrote them: Lombardia and Lombardy may both appear.\n    found = []\n    for r in data:\n        name = r.get(\"name\", \"\")\n        if r.get(\"stationcount\", 0) >= 3 and plain(name) == name and name not in found:\n            found.append(name)\n    return found\n\n\ndef languages():\n    return Request(\"languages?order=stationcount&reverse=true&hidebroken=true&limit=80\", DEMO_LANGUAGES)\n\n\ndef language_list(data):\n    found = [l[\"name\"] for l in data if l.get(\"stationcount\", 0) >= 20 and plain(l[\"name\"]) == l[\"name\"]]\n    found.sort()\n    return found\n\n\ndef search(country_code=None, region=None, language=None, genre=None):\n    query = \"stations/search?hidebroken=true&order=clickcount&reverse=true&limit=%d\" % LIMIT\n    if country_code:\n        query += \"&countrycode=\" + country_code\n    if region:\n        query += \"&state=%s&stateExact=true\" % _quote(region)\n    if language:\n        query += \"&language=\" + _quote(language)\n    if genre:\n        query += \"&tag=\" + _quote(genre)\n    return Request(query, DEMO_STATIONS)\n\n\ndef station_list(data):\n    # (name, address) of the stations found that the board can play, each address once.\n    found = []\n    seen = set()\n    for s in data:\n        url = (s.get(\"url_resolved\") or s.get(\"url\") or \"\").strip()\n        name = plain(s.get(\"name\", \"\"))\n        if not name or not url.startswith((\"http://\", \"https://\")) or s.get(\"codec\") not in CODECS:\n            continue\n        if url in seen:\n            continue\n        seen.add(url)\n        found.append((name, url))\n    return found\n\n\nDEMO_COUNTRIES = [{\"name\": \"Demo Land\", \"iso_3166_1\": \"DL\", \"stationcount\": 40},\n                  {\"name\": \"Other Land\", \"iso_3166_1\": \"OL\", \"stationcount\": 12}]\nDEMO_REGIONS = [{\"name\": \"North\", \"stationcount\": 20}, {\"name\": \"South\", \"stationcount\": 9}]\nDEMO_LANGUAGES = [{\"name\": \"english\", \"stationcount\": 900}, {\"name\": \"demo\", \"stationcount\": 50}]\nDEMO_STATIONS = [{\"name\": \"Demo Radio %d\" % i, \"url_resolved\": \"http://example.com/%d.mp3\" % i,\n                  \"codec\": \"MP3\"} for i in range(1, 13)]\n"
     }
   ]
 }

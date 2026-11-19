@@ -26,7 +26,8 @@ background, so the screen never waits.
 
 ![Web radio](images/web-radio.png)
 
-Internet radio stations, built in or from a `stations.txt`. GStreamer's `gst-play-1.0` plays the
+Internet radio stations, built in or from a `stations.txt`, which the Find page fills from the
+[Radio Browser](https://www.radio-browser.info) catalogue by country, region, language and genre. GStreamer's `gst-play-1.0` plays the
 stream in the background through `linuxproc.Process`; the app connects to the Wi-Fi of the Settings
 app by itself. Needs a sound card: a USB audio adapter is enough.
 [Source](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/web-radio)
