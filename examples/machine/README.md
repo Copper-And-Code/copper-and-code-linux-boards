@@ -9,6 +9,7 @@ is the board's business:
 |---|---|---|
 | STM32MP157C-DK2 | Linux GPIO lines | the Cortex-M4 (`mpy_m4`) |
 | STM32MP135F-DK | Linux GPIO lines | Linux's drivers (`machine_kernel`: i2c-dev, spidev, ttys, PWM, IIO, a thread for `Timer`) |
+| STM32F769I-DISCO (a microcontroller, [mpy-lvgl-boards](https://github.com/Copper-And-Code/mpy-lvgl-boards)) | MicroPython's own `machine` | MicroPython's own `machine` |
 
 Any other Linux board without a microcontroller gets the second kind with a description file and
 no code: see [machine on Linux's drivers](../../docs/machine-linux.md). The apps take the board's
@@ -21,7 +22,7 @@ gives changing values so the screen can be tried without a board.
 
 | App | Boards | Wires | What it shows |
 |---|---|---|---|
-| [board-explorer](board-explorer) | both | none | The board's connector: each pin as an input, an output, an ADC or a PWM, live; on the DK2 the Cortex-M4 reads back what Linux drives and measures the PWM; the board's LEDs |
+| [board-explorer](board-explorer) | both, and the STM32F769I-DISCO | none | The board's connector: each pin as an input, an output, an ADC or a PWM, live; on the DK2 the Cortex-M4 reads back what Linux drives and measures the PWM; the board's LEDs |
 | [oscilloscope](oscilloscope) | DK2 | one, D6 to A0 | A0 to A5 sampled up to 100 kHz by the Cortex-M4's hardware, trigger, measurements; a test signal on D6 |
 | [timing-lab](timing-lab) | both | none | Every 10 ms three ways: a Python sleep, `machine.Timer` callbacks, the count of expiries; load Linux and see who keeps the time |
 | [logic-analyzer](logic-analyzer) | DK2 | none | Port E sampled up to 4 MHz by the M4 while the board's own UART, SPI and PWM send; decoded and drawn on Linux |
