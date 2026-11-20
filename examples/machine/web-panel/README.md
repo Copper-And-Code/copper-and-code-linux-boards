@@ -21,11 +21,18 @@ passer-by out, no more. Plain HTTP, no accounts: use it on your own network.
 
 ## Try it
 
-- On the board: the board needs its network (the Settings app); open `project.json` in LVGL MPY
+- On the board: the board needs its network (the Settings app); open `project-800x480.json` in LVGL MPY
   Studio and run it. Over the USB cable the PC reaches it at `http://192.168.7.1:8080/?k=PIN`.
 - In the simulator there is no server; the screen shows made-up values.
 - From a script: `curl "http://BOARD:8080/api/state?k=PIN"` (JSON),
   `curl "http://BOARD:8080/api/set?k=PIN&duty=40"` (also `red=1`, `orange=0`, `message=...`).
+
+## On the STM32MP135F-DK
+
+`project.json` (480×272): the inputs, LEDs and PWM are the board's own, from its description: A0
+to A3 (pins 8, 10, 13 and 15 of the 40-pin connector, 0 to 3.3 V), the green and orange LEDs, the PWM on
+pin 7, all through Linux's drivers ([machine on Linux's drivers](../../../docs/machine-linux.md)).
+The page the browser gets names them.
 
 ## Files
 

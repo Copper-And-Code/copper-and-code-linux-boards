@@ -1,0 +1,46 @@
+{
+  "board": "STM32MP135F-DK",
+  "about": "The STM32MP135F-DK for machine on Linux's drivers (machine_kernel.py): which bus, channel or line each name is. Devices are the kernel's platform device names (their bus address), found again in sysfs at each start. The connector peripherals are on through linux/stm32mp135f-dk-header.dtso.",
+  "connector": {
+    "name": "CN8",
+    "title": "GPIO expansion connector, 40 pins (Raspberry Pi numbering)",
+    "pins": {
+      "1": "3V3", "2": "5V", "3": "PH6", "4": "5V", "5": "PD1", "6": "GND", "7": "PB1", "8": "PC0",
+      "9": "GND", "10": "PB0", "11": "PC2", "12": "PA4", "13": "PC3", "14": "GND", "15": "PF13",
+      "16": "PG1", "17": "3V3", "18": "PG3", "19": "PH3", "20": "GND", "21": "PA8", "22": "PI0",
+      "23": "PH7", "24": "PH11", "25": "GND", "26": "PF10", "27": "PE8", "28": "PD12", "29": "PE6",
+      "30": "GND", "31": "PD13", "32": "PE5", "33": "PF9", "34": "GND", "35": "PF11", "36": "PA7",
+      "37": "PE1", "38": "PA5", "39": "GND", "40": "PA0"
+    }
+  },
+  "i2c": {
+    "5": {"device": "4c006000.i2c", "scl": "PD1", "sda": "PH6", "note": "shared with devices of the board"},
+    "1": {"device": "40012000.i2c", "scl": "PD12", "sda": "PE8", "note": "the board's own devices (touch, expander, ...)"}
+  },
+  "spi": {
+    "5": {"device": "4c003000.spi", "sck": "PH7", "mosi": "PH3", "miso": "PA8", "cs": "PH11", "cs_kernel": true}
+  },
+  "uart": {
+    "8": {"device": "40019000.serial", "tx": "PE1", "rx": "PF9"}
+  },
+  "pwm": {
+    "PB1": {"device": "40001000.timer", "channel": 3, "name": "TIM3 CH4"},
+    "PD13": {"device": "40002000.timer", "channel": 1, "name": "TIM4 CH2"},
+    "PE5": {"device": "44001000.timer", "channel": 2, "name": "TIM8 CH3"}
+  },
+  "adc": {
+    "device": "48003000.adc",
+    "bits": 12,
+    "range_uv": 3300000,
+    "pins": {"PC0": 0, "PB0": 9, "PC3": 13, "PF13": 11},
+    "vdda": 18,
+    "trigger": "tim6_trgo",
+    "max_freq": 100000
+  },
+  "aliases": {"A0": "PC0", "A1": "PB0", "A2": "PC3", "A3": "PF13"},
+  "leds": {
+    "green": {"pin": ["mcp23017", 14], "where": "LD7"},
+    "orange": {"pin": ["mcp23017", 15], "where": "LD6"}
+  },
+  "temperature": "cpu-thermal"
+}

@@ -83,7 +83,10 @@ to the card over the USB network. Plain FTP: for your own network.
 Apps that show MicroPython's `machine` API on a Linux board, in
 [`examples/machine`](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine).
 Their hardware code is the standard API, the same as on a microcontroller; on the STM32MP157C-DK2
-`Pin` is served by Linux and the rest by the Cortex-M4.
+`Pin` is served by Linux and the rest by the Cortex-M4, on the STM32MP135F-DK all of it by Linux's
+own drivers ([machine on Linux's drivers](machine-linux.md)). Board Explorer, Timing Lab, Web Panel,
+Data Logger and System Monitor run on both boards; the oscilloscope, the logic analyser and the tone
+player need the Cortex-M4.
 
 ### Board Explorer
 

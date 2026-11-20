@@ -9,7 +9,7 @@
 #   MICROPYTHON, HUB, DTB  files in dist/ (default: the newest of each; the DTB the board's)
 #   M4_ELF                 the Cortex-M4 firmware for the STM32MP157C-DK2 (scripts/build_m4.sh)
 #   dist/retro/            the games frontend and its cores, installed when present
-#   dist/kmods/            gamepad kernel modules (STM32MP157C-DK2), installed when present
+#   dist/kmods/            gamepad kernel modules, installed when the board's kernel matches
 #                          (scripts/build_retro.sh)
 #   MPY_SSH_ALIAS          name to check the board's SSH host key against, for boards that share
 #                          an address (both answer at 192.168.7.1), for example stm32mp157c-dk2
@@ -32,8 +32,10 @@ done
 
 COMPATIBLE=$(on_board "tr '\\0' ' ' < /proc/device-tree/compatible")
 case $COMPATIBLE in
-    *st,stm32mp135f-dk*) DTB_NAME=stm32mp135f-dk.dtb; DTB_BUILD=scripts/build_mp135_usb.sh ;;
+    *st,stm32mp135f-dk*) DTB_NAME=stm32mp135f-dk.dtb; DTB_BUILD=scripts/build_mp135_usb.sh
+        BOARD_JSON=linux/boards/stm32mp135f-dk.json ;;
     *st,stm32mp157c-dk2*) DTB_NAME=stm32mp157c-dk2.dtb; DTB_BUILD=scripts/build_mp157_usb.sh
+        BOARD_JSON=linux/boards/stm32mp157c-dk2.json
         M4_ELF=${M4_ELF:-$(newest 'mpy_m4-*.elf')}
         [[ -n $M4_ELF && -f $M4_ELF ]] || { echo "deploy: build the M4 firmware first (scripts/build_m4.sh)" >&2; exit 1; } ;;
     *) echo "deploy: unknown board: $COMPATIBLE" >&2; exit 1 ;;
@@ -59,10 +61,17 @@ for file in mpy_launcher.py mpy_tap.py mpy-usb-composite.sh mpy-usb-composite.se
     cp "$REPO/linux/$file" "$STAGE/$file"
 done
 cp "$REPO/examples/shell-linux/edit.py" "$REPO/examples/shell-linux/vi.py" "$STAGE/"
-# Kernel modules for gamepads, when built for this board's kernel (scripts/build_kmods.sh).
-if [[ -d $REPO/dist/kmods && $COMPATIBLE == *st,stm32mp157c-dk2* ]]; then
+cp "$REPO/$BOARD_JSON" "$STAGE/board.json"
+# Kernel modules for gamepads (scripts/build_kmods.sh), when the board's kernel has the
+# configuration they were built with: the symbols' versions follow from it. The STM32MP135F-DK's
+# and the STM32MP157C-DK2's are the same.
+kernel_config() { grep -v '^#' | grep -v '^$' | sort | sha256sum | cut -d' ' -f1; }
+if [[ -d $REPO/dist/kmods && -f $REPO/work/kernel/board.config ]] &&
+   [[ $(on_board 'zcat /proc/config.gz' | kernel_config) == $(kernel_config < "$REPO/work/kernel/board.config") ]]; then
     mkdir -p "$STAGE/kmods"
     cp "$REPO"/dist/kmods/*.ko "$STAGE/kmods/"
+elif [[ -d $REPO/dist/kmods ]]; then
+    echo "deploy: gamepad modules left out: this board's kernel is configured otherwise (scripts/build_kmods.sh)"
 fi
 # The games frontend and its cores, when built (scripts/build_retro.sh).
 if [[ -f $REPO/dist/retro/mpy-retro ]]; then

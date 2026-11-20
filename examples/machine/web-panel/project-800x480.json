@@ -1,0 +1,432 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Web Panel",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "07be5d9012da478caed15984d1c129aa",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "6e376ce6715442d1bce4ccfaa741e03c",
+          "name": "title",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 8,
+            "width": 300,
+            "height": 40,
+            "text": "Web Panel",
+            "textColor": "#FFFFFF",
+            "fontSize": 32,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "85dbfa12781c4901b4ec1d6a6c972357",
+          "name": "subtitle",
+          "type": "label",
+          "props": {
+            "x": 320,
+            "y": 18,
+            "width": 464,
+            "height": 24,
+            "text": "This board, from a browser on your network",
+            "textColor": "#8FA0B5",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_RIGHT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b31c36cbbc564c228783057f29777730",
+          "name": "qr_panel",
+          "type": "panel",
+          "props": {
+            "x": 10,
+            "y": 56,
+            "width": 250,
+            "height": 414,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "cac55db3b3124e899e38536e7b4d5f28",
+          "name": "url",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 250,
+            "width": 230,
+            "height": 70,
+            "text": "",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_CENTER",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "b31c36cbbc564c228783057f29777730",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "acf291fe95424a229740a59224373290",
+          "name": "pin",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 322,
+            "width": 230,
+            "height": 40,
+            "text": "PIN ----",
+            "textColor": "#E0742F",
+            "fontSize": 32,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_CENTER",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "b31c36cbbc564c228783057f29777730",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "d460c6305fc946cc90f79bf39eab0f0b",
+          "name": "serve_switch",
+          "type": "switch",
+          "props": {
+            "x": 150,
+            "y": 368,
+            "width": 80,
+            "height": 38,
+            "checked": true,
+            "onColor": "#4CC38A",
+            "offColor": "#2A3444",
+            "knobColor": "#FFFFFF",
+            "disabled": false
+          },
+          "events": {
+            "VALUE_CHANGED": "serve_switch_value_changed"
+          },
+          "parentId": "b31c36cbbc564c228783057f29777730",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "566e9c03550740fa8c4952a0cde4cc57",
+          "name": "serve_label",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 376,
+            "width": 130,
+            "height": 24,
+            "text": "Serving",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "b31c36cbbc564c228783057f29777730",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "f71f6b5f534748aba2368b2d8816adbe",
+          "name": "state_panel",
+          "type": "panel",
+          "props": {
+            "x": 270,
+            "y": 56,
+            "width": 520,
+            "height": 196,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b47bbab09d894c90a2eccdfa49a0ad7f",
+          "name": "inputs",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 10,
+            "width": 492,
+            "height": 60,
+            "text": "",
+            "textColor": "#4CC38A",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "f71f6b5f534748aba2368b2d8816adbe",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "052d4dd14a864d66964f7255e151912c",
+          "name": "outputs",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 74,
+            "width": 492,
+            "height": 50,
+            "text": "",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "f71f6b5f534748aba2368b2d8816adbe",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "1b6cee757fe040f49f23b366ee931c18",
+          "name": "message",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 128,
+            "width": 492,
+            "height": 60,
+            "text": "",
+            "textColor": "#E5C04C",
+            "fontSize": 24,
+            "longMode": "LV_LABEL_LONG_MODE_DOTS",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "f71f6b5f534748aba2368b2d8816adbe",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "0fc275bfdfb34705918758be354e9d4a",
+          "name": "log_panel",
+          "type": "panel",
+          "props": {
+            "x": 270,
+            "y": 262,
+            "width": 520,
+            "height": 208,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b812c1b9bf9d47cba3100db615fc534c",
+          "name": "log_title",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 8,
+            "width": 492,
+            "height": 20,
+            "text": "WHAT THE BROWSERS DID",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "0fc275bfdfb34705918758be354e9d4a",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "d47c99a5912a4415a7cdf1d06415ecc8",
+          "name": "log",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 30,
+            "width": 492,
+            "height": 170,
+            "text": "",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "0fc275bfdfb34705918758be354e9d4a",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "b4a82726cbb64501a7ce5d3f5d6efd2a",
+          "name": "tick",
+          "type": "timer",
+          "props": {
+            "period": 20,
+            "enabled": true
+          },
+          "events": {
+            "TICK": "tick_tick"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import panel_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "panel_app.start(ui)"
+      },
+      "serve_switch_value_changed": {
+        "widget": "serve_switch",
+        "event": "VALUE_CHANGED",
+        "body": "panel_app.serve_changed(e.get_target_obj())"
+      },
+      "tick_tick": {
+        "widget": "tick",
+        "event": "TICK",
+        "body": "panel_app.tick()"
+      }
+    }
+  },
+  "currentPageId": "07be5d9012da478caed15984d1c129aa",
+  "assets": {},
+  "variables": [],
+  "projectId": "cb7c46da26cc4580826514fb840e0982",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "29ffebdc4ab44de6be3365aa30239251",
+      "name": "board_io",
+      "source": "# SPDX-License-Identifier: MIT\n# What the web panel reads and sets on the board, from its description (mpy_board): its analog\n# inputs (A0 to A5 on the STM32MP157C-DK2, A0 and A1 on the STM32MP135F-DK), two of its LEDs and a\n# PWM output, whatever serves them (the Cortex-M4, Linux's drivers, a GPIO line); and the addresses\n# a browser reaches the board at. In the LVGL MPY Studio simulator, made-up values.\n\nimport time\n\ntry:\n    import machine\n    import mpy_board\n\n    HARDWARE = hasattr(machine, \"ADC\")\nexcept ImportError:\n    HARDWARE = False\n\nPWM_HZ = 1000\nLED_ORDER = (\"red\", \"green\", \"orange\", \"blue\")\n\n\ndef _label(pin):\n    # The name a user knows a pin by: the board's alias (\"A0\", \"D6\"), else its connector pin.\n    described = mpy_board.describe()\n    for alias, name in sorted(described.get(\"aliases\", {}).items()):\n        if name == pin:\n            return alias\n    connector = described.get(\"connector\", {})\n    for number, name in connector.get(\"pins\", {}).items():\n        if name == pin:\n            return \"pin %s\" % number\n    return pin\n\n\nclass _Led:\n    # One LED of the description: a GPIO line (by name, or [\"chip\", line]), the Cortex-M4's, or\n    # Linux's LED class.\n    def __init__(self, name, spec):\n        self.name = name\n        self._spec = spec\n        self._pin = None\n        if \"pin\" in spec:\n            line = spec[\"pin\"]\n            line = tuple(line) if isinstance(line, list) else line\n            self._pin = machine.Pin(line, machine.Pin.OUT, value=1 if spec.get(\"active_low\") else 0)\n\n    def set(self, on):\n        if self._pin is not None:\n            self._pin.value((0 if on else 1) if self._spec.get(\"active_low\") else (1 if on else 0))\n        elif self._spec.get(\"mcu\"):\n            import mpy_m4\n\n            mpy_m4.led(on)\n        elif \"sysfs\" in self._spec:\n            root = \"/sys/class/leds/%s/\" % self._spec[\"sysfs\"]\n            with open(root + \"trigger\", \"w\") as f:\n                f.write(\"none\" if on else \"heartbeat\")\n            if on:\n                with open(root + \"brightness\", \"w\") as f:\n                    f.write(\"1\")\n\n\nclass Board:\n    def __init__(self):\n        described = mpy_board.describe()\n        adc = described.get(\"adc\", {})\n        pins = list(adc.get(\"pins\", []))\n        aliased = sorted((alias, name) for alias, name in described.get(\"aliases\", {}).items()\n                         if name in pins and alias.startswith(\"A\"))\n        inputs = aliased or [(name, name) for name in sorted(pins)]\n        self.names = [label for label, name in inputs]\n        self.range_v = adc.get(\"range_uv\", 2500000) / 1e6\n        self._adcs = [machine.ADC(name) for label, name in inputs]\n        leds = described.get(\"leds\", {})\n        chosen = [name for name in LED_ORDER if name in leds][:2]\n        self.leds = [_Led(name, leds[name]) for name in chosen]\n        outputs = sorted(described.get(\"pwm\", {})) if hasattr(machine, \"PWM\") else []\n        self._pwm_pin = outputs[0] if outputs else None\n        self.pwm_name = _label(self._pwm_pin) if self._pwm_pin else \"\"\n        self.board = described.get(\"board\", \"This board\")\n        self._pwm = None\n\n    def inputs(self):\n        return [adc.read_uv() / 1000000 for adc in self._adcs]\n\n    def led(self, index, on):\n        self.leds[index].set(on)\n\n    def duty(self, percent):\n        if self._pwm_pin is None:\n            raise OSError(95, \"no PWM on this board\")\n        if self._pwm is None:\n            self._pwm = machine.PWM(self._pwm_pin, freq=PWM_HZ, duty_u16=0)\n        self._pwm.duty_u16(percent * 65535 // 100)\n\n    def addresses(self):\n        found = []\n        try:\n            import mpy_wifi\n\n            ip = mpy_wifi.status().get(\"ip\")\n            if ip:\n                found.append((\"Wi-Fi\", ip))\n        except (ImportError, OSError):\n            pass\n        found.append((\"USB\", \"192.168.7.1\"))\n        return found\n\n\nclass _SimulatedLed:\n    def __init__(self, name):\n        self.name = name\n\n\nclass Simulated:\n    names = [\"A0\", \"A1\", \"A2\", \"A3\", \"A4\", \"A5\"]\n    range_v = 2.5\n    leds = [_SimulatedLed(\"red\"), _SimulatedLed(\"orange\")]\n    pwm_name = \"D6\"\n    board = \"STM32MP157C-DK2\"\n\n    def inputs(self):\n        t = time.ticks_ms() / 1000\n        return [round(1.25 + 1.0 * ((t * (i + 1) / 7) % 1 - 0.5), 3) for i in range(6)]\n\n    def led(self, index, on):\n        pass\n\n    def duty(self, percent):\n        pass\n\n    def addresses(self):\n        return [(\"Wi-Fi\", \"192.168.1.50\")]\n\n\nboard = Board() if HARDWARE else Simulated()\n"
+    },
+    {
+      "id": "f9ac5344053849d9924e07fe74fb1f9d",
+      "name": "server",
+      "source": "# SPDX-License-Identifier: MIT\n# A small HTTP server in MicroPython, polled from the GUI's timer: it never blocks the screen.\n# One page for the browser (PAGE, with the board's names put in by Server(names=...)), and two JSON\n# calls: /api/state and /api/set. Every request needs the\n# PIN shown on the board's screen: anyone on the network can reach the board, and this keeps a\n# passer-by out, no more (plain HTTP, no accounts).\n\nimport json\nimport socket\n\nPAGE = \"\"\"<!doctype html><html><head><meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Board</title>\n<style>\nbody{font-family:system-ui,sans-serif;background:#121820;color:#fff;margin:0;padding:16px;max-width:520px}\nh1{font-size:24px;margin:0 0 12px}.card{background:#1e2633;border-radius:12px;padding:14px;margin-bottom:12px}\n.row{display:flex;align-items:center;justify-content:space-between;margin:8px 0}\n.bar{height:10px;background:#2a3444;border-radius:5px;flex:1;margin:0 10px}\n.fill{height:10px;background:#4cc38a;border-radius:5px}\nbutton{font-size:16px;border:0;border-radius:8px;padding:10px 16px;background:#2a3444;color:#fff}\nbutton.on{background:#e0742f}input[type=range]{width:100%}\ninput[type=text]{width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:0}\nsmall{color:#8fa0b5}\n</style></head><body>\n<h1>{board}</h1>\n<div class=\"card\"><small>ANALOG INPUTS</small><div id=\"inputs\"></div></div>\n<div class=\"card\"><small>OUTPUTS</small>\n<div class=\"row\">{led1} LED<button id=\"led1\" onclick=\"toggle('led1')\">off</button></div>\n<div class=\"row\">{led2} LED<button id=\"led2\" onclick=\"toggle('led2')\">off</button></div>\n<div>PWM on {pwm}, 1 kHz: <b id=\"dutyv\">0</b>%<input id=\"duty\" type=\"range\" min=\"0\" max=\"100\" value=\"0\"\n onchange=\"set('duty',this.value)\"></div></div>\n<div class=\"card\"><small>A MESSAGE FOR THE BOARD'S SCREEN</small>\n<input id=\"msg\" type=\"text\" maxlength=\"60\" placeholder=\"Hello from my phone\">\n<p><button onclick=\"set('message',document.getElementById('msg').value)\">Send</button></p></div>\n<script>\nconst k=new URLSearchParams(location.search).get('k')||'';let state={};\nfunction set(what,value){fetch('/api/set?k='+k+'&'+what+'='+encodeURIComponent(value)).then(r=>r.json()).then(show)}\nfunction toggle(what){set(what,state[what]?0:1)}\nfunction show(s){state=s;let h='';s.inputs.forEach((v,i)=>{h+='<div class=\"row\">'+s.names[i]+'<div class=\"bar\"><div class=\"fill\" style=\"width:'+\nMath.min(100,v/s.range*100)+'%\"></div></div>'+v.toFixed(3)+' V</div>'});document.getElementById('inputs').innerHTML=h;\nfor(const w of ['led1','led2']){const b=document.getElementById(w);b.className=s[w]?'on':'';b.textContent=s[w]?'on':'off'}\ndocument.getElementById('dutyv').textContent=s.duty}\nfunction poll(){fetch('/api/state?k='+k).then(r=>r.json()).then(show).finally(()=>setTimeout(poll,500))}\npoll()\n</script></body></html>\"\"\"\n\nASK_PIN = \"\"\"<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>PIN</title></head><body style=\"font-family:system-ui;background:#121820;color:#fff;padding:24px\">\n<form>The PIN on the board's screen: <input name=\"k\" inputmode=\"numeric\" size=\"6\"> <button>Open</button>\n</form></body></html>\"\"\"\n\n\ndef _unquote(text):\n    text = text.replace(\"+\", \" \")\n    parts = text.split(\"%\")\n    out = bytearray(parts[0].encode())\n    for part in parts[1:]:\n        try:\n            out.append(int(part[:2], 16))\n            out.extend(part[2:].encode())\n        except ValueError:\n            out.extend((\"%\" + part).encode())\n    return out.decode()\n\n\ndef _parameters(query):\n    found = {}\n    for item in query.split(\"&\"):\n        if item:\n            key, _, value = item.partition(\"=\")\n            found[_unquote(key)] = _unquote(value)\n    return found\n\n\nclass Server:\n    # handle(path, parameters, client) -> (status, content type, body); called only with the PIN.\n\n    def __init__(self, port, pin, handle, names=None):\n        self._page = PAGE\n        for key, value in (names or {}).items():\n            self._page = self._page.replace(\"{%s}\" % key, value)\n        self.port = port\n        self.pin = pin\n        self._handle = handle\n        self._socket = None\n\n    def start(self):\n        if self._socket:\n            return\n        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        listener.setsockopt(socket.SOL_SOCKET, 2, 1)  # SO_REUSEADDR: restart without waiting\n        listener.bind(socket.getaddrinfo(\"0.0.0.0\", self.port)[0][-1])\n        listener.listen(4)\n        listener.setblocking(False)\n        self._socket = listener\n\n    def stop(self):\n        if self._socket:\n            self._socket.close()\n            self._socket = None\n\n    def running(self):\n        return self._socket is not None\n\n    def poll(self):\n        # The requests waiting, each answered at once (a few milliseconds).\n        for _ in range(4):\n            try:\n                client, address = self._socket.accept()\n            except (OSError, AttributeError):\n                return\n            try:\n                self._serve(client, address)\n            except OSError:\n                pass\n            finally:\n                client.close()\n\n    def _serve(self, client, address):\n        client.settimeout(0.5)\n        request = b\"\"\n        while b\"\\r\\n\\r\\n\" not in request and len(request) < 4096:\n            part = client.recv(1024)\n            if not part:\n                break\n            request += part\n        line = request.split(b\"\\r\\n\", 1)[0].decode()\n        method, _, rest = line.partition(\" \")\n        target = rest.split(\" \", 1)[0]\n        path, _, query = target.partition(\"?\")\n        parameters = _parameters(query)\n        who = \".\".join(str(b) for b in address[4:8]) if len(address) >= 8 else \"?\"\n        if parameters.get(\"k\") != self.pin:\n            status, kind, body = (200, \"text/html\", ASK_PIN) if path == \"/\" else (403, \"text/plain\", \"PIN\")\n        elif path == \"/\":\n            status, kind, body = 200, \"text/html\", self._page\n        else:\n            status, kind, body = self._handle(path, parameters, who)\n            if not isinstance(body, str):\n                body, kind = json.dumps(body), \"application/json\"\n        data = body.encode()\n        head = \"HTTP/1.0 %d OK\\r\\nContent-Type: %s; charset=utf-8\\r\\nContent-Length: %d\\r\\n\" \\\n               \"Cache-Control: no-store\\r\\nConnection: close\\r\\n\\r\\n\" % (status, kind, len(data))\n        client.write(head.encode() + data)\n"
+    },
+    {
+      "id": "adf23382d1c444008f675461a09f7f4e",
+      "name": "panel_app",
+      "source": "# SPDX-License-Identifier: MIT\n# Web Panel: the board serves a page to the browsers of its network (a QR code to open it, a PIN to\n# use it); what they read and set goes through machine on the board, and the screen shows it live.\n# The inputs, LEDs and PWM are the board's own, from its description (board_io).\n\nimport os\nimport time\n\nimport lvgl as lv\n\nfrom board_io import HARDWARE, board\nfrom server import Server\n\nPORT = 8080\n\n_ui = None\n_server = None\n_qr = None\n_state = {\"inputs\": [0.0] * len(board.names), \"names\": board.names, \"range\": board.range_v, \"led1\": 0,\n          \"led2\": 0, \"duty\": 0, \"message\": \"\"}\n_log = []\n_ticks = 0\n\n\ndef _clock():\n    t = time.localtime()\n    return \"%02d:%02d:%02d\" % (t[3], t[4], t[5])\n\n\ndef _note(who, what):\n    _log.insert(0, \"%s  %-15s %s\" % (_clock(), who, what))\n    del _log[8:]\n    _ui.log.set_text(\"\\n\".join(_log))\n\n\ndef _show_outputs():\n    leds = \"    \".join(\"%s LED %s\" % (_title(led.name), \"on\" if _state[\"led%d\" % (i + 1)] else \"off\")\n                       for i, led in enumerate(board.leds))\n    _ui.outputs.set_text(\"%s%sPWM on %s %d%%\" % (leds, \"\\n\" if _small() else \"    \", board.pwm_name, _state[\"duty\"]))\n\n\ndef _title(name):\n    return name[:1].upper() + name[1:]\n\n\ndef _small():\n    return lv.display_get_default().get_vertical_resolution() < 400\n\n\ndef handle(path, parameters, who):\n    # From the server, with the right PIN: /api/state reads, /api/set changes one thing.\n    if path == \"/api/set\":\n        try:\n            for i, led in enumerate(board.leds):\n                key = \"led%d\" % (i + 1)\n                if key in parameters:\n                    _state[key] = 1 if parameters[key] == \"1\" else 0\n                    board.led(i, _state[key])\n                    _note(who, \"%s LED %s\" % (led.name, \"on\" if _state[key] else \"off\"))\n            if \"duty\" in parameters:\n                _state[\"duty\"] = max(0, min(100, int(parameters[\"duty\"])))\n                board.duty(_state[\"duty\"])\n                _note(who, \"PWM %d%%\" % _state[\"duty\"])\n            elif \"message\" in parameters:\n                _state[\"message\"] = parameters[\"message\"][:60]\n                _ui.message.set_text(_state[\"message\"])\n                _note(who, \"message\")\n        except (OSError, ValueError) as error:\n            _note(who, \"error: %s\" % error)\n            return 500, \"text/plain\", str(error)\n        _show_outputs()\n        return 200, \"\", _state\n    if path == \"/api/state\":\n        return 200, \"\", _state\n    return 404, \"text/plain\", \"not found\"\n\n\ndef _read_inputs():\n    try:\n        _state[\"inputs\"] = [round(v, 3) for v in board.inputs()]\n    except OSError as error:\n        _ui.inputs.set_text(\"Inputs: %s\" % error)\n        return\n    shown = [\"%s %.2f V\" % (name, v) for name, v in zip(board.names, _state[\"inputs\"])]\n    _ui.inputs.set_text(\"   \".join(shown[:3]) + (\"\\n\" + \"   \".join(shown[3:]) if shown[3:] else \"\"))\n\n\ndef _show_address():\n    name, ip = board.addresses()[0]\n    url = \"http://%s:%d/?k=%s\" % (ip, PORT, _server.pin)\n    _qr.update(url, len(url))\n    _ui.url.set_text(\"%s\\n%s:%d\" % (name, ip, PORT))\n\n\ndef tick():\n    # Every 20 ms: the browsers' requests; every 250 ms the inputs; every 10 s the address.\n    global _ticks\n    _ticks += 1\n    if _server.running():\n        _server.poll()\n    if _ticks % 12 == 0:\n        _read_inputs()\n    if _ticks % 500 == 0:\n        _show_address()\n\n\ndef serve_changed(switch):\n    on = switch.has_state(lv.STATE.CHECKED)\n    if not HARDWARE:\n        _ui.serve_label.set_text(\"Simulator\")\n        return\n    try:\n        if on:\n            _server.start()\n        else:\n            _server.stop()\n        _ui.serve_label.set_text(\"Serving\" if on else \"Stopped\")\n    except OSError as error:\n        _ui.serve_label.set_text(\"Error %s\" % error)\n\n\ndef start(ui):\n    global _ui, _server, _qr\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    pin = \"%04d\" % (int.from_bytes(os.urandom(2), \"little\") % 10000)\n    names = {\"board\": board.board, \"pwm\": board.pwm_name}\n    for i, led in enumerate(board.leds):\n        names[\"led%d\" % (i + 1)] = _title(led.name)\n    _server = Server(PORT, pin, handle, names)\n    _qr = lv.qrcode(ui.qr_panel)\n    _qr.set_size(108 if _small() else 210)\n    _qr.set_dark_color(lv.color_hex(0x000000))\n    _qr.set_light_color(lv.color_hex(0xFFFFFF))\n    _qr.set_pos(14 if _small() else 20, 6 if _small() else 20)\n    _qr.set_style_border_color(lv.color_hex(0xFFFFFF), 0)\n    _qr.set_style_border_width(6, 0)\n    ui.pin.set_text(\"PIN \" + pin)\n    _show_address()\n    _show_outputs()\n    _ui.log.set_text(\"Scan the code with a phone on the same network,\\nor open the address.\")\n    if HARDWARE:\n        try:\n            _server.start()\n        except OSError as error:\n            ui.serve_label.set_text(\"Error %s\" % error)\n    else:\n        ui.serve_label.set_text(\"Simulator\")\n"
+    }
+  ]
+}

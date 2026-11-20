@@ -12,9 +12,13 @@ module("mpy_home.py", base_path="$(BOARDS_DIR)/python/linux")
 module("shell_linux.py", base_path="$(BOARDS_DIR)/examples/shell-linux")
 module("ansiterm.py", base_path="$(BOARDS_DIR)/examples/shell-linux")
 module("ansifont.py", base_path="$(BOARDS_DIR)/examples/shell-linux")
-# machine: MicroPython's own, and I2C and ADC served by a Cortex-M4 where there is one (mpy_m4).
+# machine: MicroPython's own, and I2C, SPI, UART, PWM, ADC and Timer served by a Cortex-M4 where
+# there is one (mpy_m4), by Linux's drivers elsewhere (machine_kernel), from the board's
+# description (mpy_board).
 module("machine.py", base_path="$(BOARDS_DIR)/python/linux")
 module("mpy_m4.py", base_path="$(BOARDS_DIR)/python/linux")
+module("machine_kernel.py", base_path="$(BOARDS_DIR)/python/linux")
+module("mpy_board.py", base_path="$(BOARDS_DIR)/python/linux")
 module("mpy_retro.py", base_path="$(BOARDS_DIR)/python/linux")
 module("mpy_keys.py", base_path="$(BOARDS_DIR)/python/linux")
 module("mpy_bluetooth.py", base_path="$(BOARDS_DIR)/python/linux")

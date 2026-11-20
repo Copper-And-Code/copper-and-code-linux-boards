@@ -1,0 +1,102 @@
+// SPDX-License-Identifier: MIT
+// STM32MP135F-DK: the peripherals of the 40-pin GPIO expansion connector (CN8, numbered as on a
+// Raspberry Pi) for MicroPython's machine module, on Linux's own drivers (machine_kernel.py):
+//
+//   PWM    TIM3 CH4 on pin 7 (PB1), TIM4 CH2 on pin 31 (PD13), TIM8 CH3 on pin 32 (PE5)
+//   SPI    SPI5 through spidev (/dev/spidev0.0): MOSI pin 19 (PH3), MISO pin 21 (PA8),
+//          SCK pin 23 (PH7), chip select pin 24 (PH11)
+//   UART   UART8: TX pin 37 (PE1), RX pin 33 (PF9)
+//   ADC    ADC1 on pins 8 (PC0, channel 0), 10 (PB0, channel 9), 13 (PC3, channel 13) and
+//          15 (PF13, channel 11), the channels from ST's pin data for the STM32MP135FAF
+//          (STM32_open_pin_data, mcu/STM32MP135FAFx.xml). The ADC reads a pin only in analog mode,
+//          so these four belong to the ADC (no GPIO there). Pins 38 and 40 (PA5 channel 2, PA0
+//          channel 7) stay GPIO lines; vrefint is channel 18
+//   TIM6   a basic timer as the ADC's sampling clock (IIO trigger), apart from the PWM timers
+//
+// TIM14 (pin 33) and USART1 (pins 8 and 10, with RTS and CTS on 11 and 36) stay off: their pins
+// are UART8's RX, the ADC and GPIO lines here. ADC2 (the internal channels) belongs to the secure
+// world: Linux is refused it. I2C5 (pins 3 and 5) is on already, shared with devices of the board.
+
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "st,stm32mp135f-dk";
+
+    fragment@0 { target = <&timers3>; __overlay__ { status = "okay"; }; };
+    fragment@1 { target = <&timers4>; __overlay__ { status = "okay"; }; };
+    fragment@2 { target = <&timers8>; __overlay__ { status = "okay"; }; };
+
+    fragment@3 {
+        target = <&timers6>;
+        __overlay__ {
+            status = "okay";
+            timer@5 {
+                reg = <5>;
+                status = "okay";
+            };
+        };
+    };
+
+    fragment@4 {
+        target = <&spi5>;
+        __overlay__ {
+            status = "okay";
+            cs-gpios = <&gpioh 11 1>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            spidev@0 {
+                compatible = "rohm,dh2228fv";
+                reg = <0>;
+                spi-max-frequency = <10000000>;
+            };
+        };
+    };
+
+    fragment@5 { target = <&uart8>; __overlay__ { status = "okay"; }; };
+
+    fragment@6 {
+        target = <&pinctrl>;
+        __overlay__ {
+            adc1_header_pins: adc1-header-0 {
+                pins {
+                    /* STM32_PINMUX(port, line, ANALOG): PC0, PB0, PC3, PF13 */
+                    pinmux = <0x2011>, <0x1011>, <0x2311>, <0x5d11>;
+                };
+            };
+        };
+    };
+
+    fragment@7 {
+        target = <&adc_1>;
+        __overlay__ {
+            pinctrl-0 = <&adc1_usb_cc_pins_a &adc1_header_pins>;
+        };
+    };
+
+    fragment@8 {
+        target = <&adc1>;
+        __overlay__ {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            channel@0 {
+                reg = <0>;
+                st,min-sample-time-ns = <5000>;
+            };
+            channel@9 {
+                reg = <9>;
+                st,min-sample-time-ns = <5000>;
+            };
+            channel@11 {
+                reg = <11>;
+                st,min-sample-time-ns = <5000>;
+            };
+            channel@13 {
+                reg = <13>;
+                st,min-sample-time-ns = <5000>;
+            };
+        };
+    };
+};

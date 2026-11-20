@@ -56,6 +56,7 @@ nav:
   - The STM32MP135F-DK: stm32mp135f-dk.md
   - The display_driver contract: display-driver.md
   - The STM32MP157C-DK2 and its Cortex-M4: stm32mp157c-dk2.md
+  - "machine on Linux's drivers": machine-linux.md
   - "Games: mpy-retro": retro.md
   - Phase 0 reconnaissance: ricognizione.md
   - Source on GitHub: https://github.com/Copper-And-Code/lvgl-mpy-linux

@@ -15,6 +15,13 @@ On the board (above): memory 93 of 386 MB, 28.5 C, the M4 over `rpmsg_char` at a
 Everything Linux knows is a file away from Python, so a monitor is a page of code; what the M4 adds
 is its own state and the cost of talking to it.
 
+## On the STM32MP135F-DK
+
+`project.json` (480×272). One core, one line in the chart. In place of the Cortex-M4 the right
+panel shows what serves `machine` there, Linux's drivers: each class with its kernel device, and how
+long an ADC reading takes through the kernel (about 0.36 ms; the M4's round trip on the
+STM32MP157C-DK2 is the number to compare). `project-800x480.json` is the STM32MP157C-DK2's.
+
 ## Files
 
 | Module | What it does |

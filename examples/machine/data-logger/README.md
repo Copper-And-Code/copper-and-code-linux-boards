@@ -27,6 +27,14 @@ time,cpu_c,a0_v,vref_v
 To log something of your own, wire a sensor's output to A0 (0 to 2.5 V), or change `sensors.py`:
 an I2C sensor through `machine.I2C(5)` is one more field.
 
+## On the STM32MP135F-DK
+
+`project.json` (480×272). The pace is `machine.Timer` on Linux's clock and A0 is pin 8 of the
+40-pin connector (PC0), 0 to 3.3 V, through Linux's ADC driver
+([machine on Linux's drivers](../../../docs/machine-linux.md)). Its ADC has no internal reference
+Linux may read, so the `vref_v` column stays empty. `project-800x480.json` is the
+STM32MP157C-DK2's.
+
 ## Files
 
 | Module | What it does |

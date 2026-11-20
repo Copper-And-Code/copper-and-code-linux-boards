@@ -1,0 +1,440 @@
+{
+  "schemaVersion": 3,
+  "projectName": "Data Logger",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "colorFormat": "RGB565"
+  },
+  "pages": [
+    {
+      "id": "906499bc14144f9ca5d0589c2ab6ac3c",
+      "name": "main",
+      "canvasSize": [
+        800,
+        480
+      ],
+      "widgets": [
+        {
+          "id": "f0e5aaa8ae15472988e187d7396f7166",
+          "name": "title",
+          "type": "label",
+          "props": {
+            "x": 16,
+            "y": 8,
+            "width": 300,
+            "height": 40,
+            "text": "Data Logger",
+            "textColor": "#FFFFFF",
+            "fontSize": 32,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ad88b34bd804419cb0ef6b780e3ebebf",
+          "name": "clock",
+          "type": "label",
+          "props": {
+            "x": 320,
+            "y": 18,
+            "width": 464,
+            "height": 24,
+            "text": "",
+            "textColor": "#8FA0B5",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_RIGHT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "796047980a1c46979f81e0cae6fe78bb",
+          "name": "history",
+          "type": "chart",
+          "props": {
+            "x": 10,
+            "y": 56,
+            "width": 560,
+            "height": 300,
+            "chartType": "line",
+            "data": "",
+            "data2": "",
+            "bgColor": "#0B1016",
+            "lineColor": "#E0742F",
+            "lineColor2": "#FF5722",
+            "pointCount": 120,
+            "showPoints": false,
+            "rangeYMin": 20,
+            "rangeYMax": 80,
+            "divLineCount": 5,
+            "divLineCountSec": 5,
+            "updateMode": "shift"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "afc186d103e04a40bedca7e07a595e6d",
+          "name": "legend",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 360,
+            "width": 556,
+            "height": 22,
+            "text": "",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "ab7a77af75e34ccba0adc107c1496ce3",
+          "name": "now",
+          "type": "label",
+          "props": {
+            "x": 14,
+            "y": 384,
+            "width": 556,
+            "height": 90,
+            "text": "",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "42df9a04e38d41799b6625787b3dc464",
+          "name": "controls",
+          "type": "panel",
+          "props": {
+            "x": 580,
+            "y": 56,
+            "width": 210,
+            "height": 414,
+            "bgColor": "#1E2633",
+            "borderColor": "#BDBDBD",
+            "borderWidth": 0,
+            "radius": 12,
+            "flexFlow": "none",
+            "flexMainPlace": "none",
+            "flexCrossPlace": "none",
+            "padTop": 0,
+            "padBottom": 0,
+            "padLeft": 0,
+            "padRight": 0,
+            "padRow": 0,
+            "padColumn": 0,
+            "scrollbarMode": "LV_SCROLLBAR_MODE_OFF"
+          },
+          "events": {},
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "4f78a8ac7f1e428991f927b646cc2c36",
+          "name": "every_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 6,
+            "width": 190,
+            "height": 20,
+            "text": "A SAMPLE EVERY",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "42df9a04e38d41799b6625787b3dc464",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "3166f65523a047979425ef0b6a773364",
+          "name": "every_buttons",
+          "type": "buttonmatrix",
+          "props": {
+            "x": 2,
+            "y": 26,
+            "width": 206,
+            "height": 50,
+            "map": "1 s,10 s,60 s",
+            "bgColor": "#1E2633",
+            "btnColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 16,
+            "oneCheck": true
+          },
+          "events": {
+            "VALUE_CHANGED": "every_buttons_value_changed"
+          },
+          "parentId": "42df9a04e38d41799b6625787b3dc464",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "208df4a46c1f433db0e1a3685d89efd0",
+          "name": "file_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 84,
+            "width": 190,
+            "height": 20,
+            "text": "FILE",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "42df9a04e38d41799b6625787b3dc464",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "74d1a851aa9340b0abccef02b2a3bdf0",
+          "name": "file_info",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 104,
+            "width": 190,
+            "height": 64,
+            "text": "",
+            "textColor": "#FFFFFF",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "42df9a04e38d41799b6625787b3dc464",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "346e20f9af804d08a7fbee471d34e8f4",
+          "name": "download_label",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 172,
+            "width": 190,
+            "height": 20,
+            "text": "DOWNLOAD",
+            "textColor": "#8FA0B5",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "42df9a04e38d41799b6625787b3dc464",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "0e0de6f66b8d4c20b1b54426d3bf6cd8",
+          "name": "download",
+          "type": "label",
+          "props": {
+            "x": 10,
+            "y": 192,
+            "width": 190,
+            "height": 92,
+            "text": "",
+            "textColor": "#E5C04C",
+            "fontSize": 14,
+            "longMode": "LV_LABEL_LONG_MODE_WRAP",
+            "textAlign": "LV_TEXT_ALIGN_LEFT",
+            "recolor": false
+          },
+          "events": {},
+          "parentId": "42df9a04e38d41799b6625787b3dc464",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "3a55eec8d2a54382a193727b38d84112",
+          "name": "run_button",
+          "type": "button",
+          "props": {
+            "x": 8,
+            "y": 290,
+            "width": 194,
+            "height": 54,
+            "text": "Stop",
+            "bgColor": "#E0742F",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 12
+          },
+          "events": {
+            "CLICKED": "run_button_clicked"
+          },
+          "parentId": "42df9a04e38d41799b6625787b3dc464",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "abd3baa66a7e4004ba27d68ca882e10e",
+          "name": "new_button",
+          "type": "button",
+          "props": {
+            "x": 8,
+            "y": 352,
+            "width": 194,
+            "height": 54,
+            "text": "New file",
+            "bgColor": "#2A3444",
+            "textColor": "#FFFFFF",
+            "fontSize": 24,
+            "radius": 12
+          },
+          "events": {
+            "CLICKED": "new_button_clicked"
+          },
+          "parentId": "42df9a04e38d41799b6625787b3dc464",
+          "customStyles": {},
+          "animations": []
+        },
+        {
+          "id": "d6e5b8cf8a9e4227afa97e789a097895",
+          "name": "tick",
+          "type": "timer",
+          "props": {
+            "period": 50,
+            "enabled": true
+          },
+          "events": {
+            "TICK": "tick_tick"
+          },
+          "customStyles": {},
+          "animations": []
+        }
+      ]
+    }
+  ],
+  "code": {
+    "module": "import logger_app\n",
+    "handlers": {
+      "main_screen_loaded": {
+        "widget": "main",
+        "event": "SCREEN_LOADED",
+        "body": "logger_app.start(ui)"
+      },
+      "every_buttons_value_changed": {
+        "widget": "every_buttons",
+        "event": "VALUE_CHANGED",
+        "body": "logger_app.every_changed(e.get_target_obj())"
+      },
+      "run_button_clicked": {
+        "widget": "run_button",
+        "event": "CLICKED",
+        "body": "logger_app.run_clicked()"
+      },
+      "new_button_clicked": {
+        "widget": "new_button",
+        "event": "CLICKED",
+        "body": "logger_app.new_clicked()"
+      },
+      "tick_tick": {
+        "widget": "tick",
+        "event": "TICK",
+        "body": "logger_app.tick()"
+      }
+    }
+  },
+  "currentPageId": "906499bc14144f9ca5d0589c2ab6ac3c",
+  "assets": {},
+  "variables": [],
+  "projectId": "70422521213b441fb173b20851fcb952",
+  "board": {
+    "schemaVersion": 1,
+    "id": "stm32mp157c_dk2_800x480",
+    "revision": 1,
+    "name": "STM32MP157C-DK2 (800×480)",
+    "adapter": "stm32mp157_linux",
+    "firmware": {
+      "microPython": "1.29.0",
+      "lvgl": "9.5.0",
+      "modules": [
+        "lvgl",
+        "display_driver"
+      ]
+    },
+    "physicalWidth": 800,
+    "physicalHeight": 480,
+    "logicalWidth": 800,
+    "logicalHeight": 480,
+    "scale": 1,
+    "colorFormat": "RGB565",
+    "fonts": [
+      14,
+      16,
+      24,
+      32,
+      40
+    ],
+    "orientations": [
+      0
+    ],
+    "config": {
+      "driver": "display_driver",
+      "buffers": "driver",
+      "eventLoop": "driver",
+      "appRoot": "/lms_apps",
+      "mainPath": "/main.py"
+    }
+  },
+  "runTarget": {
+    "kind": "board",
+    "language": "micropython"
+  },
+  "modules": [
+    {
+      "id": "d00d24b66c3a4a08901a82a8b50323d0",
+      "name": "sensors",
+      "source": "# SPDX-License-Identifier: MIT\n# What the logger measures, at a pace set by machine.Timer (a timer of the Cortex-M4 where there is\n# one, Linux's clock elsewhere): the CPU's temperature from Linux (/sys/class/thermal), the voltage\n# on A0 (or the board's first analog input) and, where the ADC has it, the chip's internal\n# reference. Each expiry takes a sample and queues it; the GUI writes and draws them.\n# In the LVGL MPY Studio simulator the samples are made up, at the same pace.\n\nimport time\n\ntry:\n    import machine\n    import mpy_board\n\n    HARDWARE = hasattr(machine, \"ADC\") and hasattr(machine, \"Timer\")\nexcept ImportError:\n    HARDWARE = False\n\nTHERMAL = \"/sys/class/thermal/thermal_zone0/temp\"\nFIELDS = [\"time\", \"cpu_c\", \"a0_v\", \"vref_v\"]\n\n\ndef _input():\n    # \"A0\" where the board names one, else its first analog input.\n    if not HARDWARE:\n        return \"A0\"\n    described = mpy_board.describe()\n    if \"A0\" in described.get(\"aliases\", {}):\n        return \"A0\"\n    return sorted(described.get(\"adc\", {}).get(\"pins\", [\"A0\"]))[0]\n\n\nINPUT = _input()\n# The ADC's full scale in volts: the chart's right axis.\nRANGE_V = (mpy_board.describe().get(\"adc\", {}).get(\"range_uv\", 2500000) if HARDWARE else 2500000) / 1e6\nREFERENCE = HARDWARE and hasattr(machine.ADC, \"CORE_VREF\") or not HARDWARE\n\n\ndef _cpu_celsius():\n    with open(THERMAL) as f:\n        return int(f.read()) / 1000\n\n\nclass Board:\n    def __init__(self):\n        self.queue = []\n        self._timer = None\n        self._a0 = machine.ADC(INPUT)\n        self._vref = machine.ADC(machine.ADC.CORE_VREF) if REFERENCE else None\n\n    def _sample(self, timer):\n        try:\n            vref = self._vref.read_uv() / 1e6 if self._vref else None\n            self.queue.append((time.localtime(), _cpu_celsius(), self._a0.read_uv() / 1e6, vref))\n        except OSError:\n            pass  # a sample lost; the next one comes on time\n\n    def start(self, seconds):\n        self.stop()\n        self._timer = machine.Timer(-1, period=seconds * 1000, callback=self._sample)\n\n    def stop(self):\n        if self._timer is not None:\n            self._timer.deinit()\n            self._timer = None\n\n    def poll(self):\n        pass\n\n\nclass Simulated:\n    def __init__(self):\n        self.queue = []\n        self._period = 0\n        self._next = 0\n        self._n = 0\n\n    def start(self, seconds):\n        self._period = seconds * 1000\n        self._next = time.ticks_add(time.ticks_ms(), self._period)\n\n    def stop(self):\n        self._period = 0\n\n    def poll(self):\n        if self._period and time.ticks_diff(time.ticks_ms(), self._next) >= 0:\n            self._next = time.ticks_add(self._next, self._period)\n            self._n += 1\n            wave = (self._n % 40) / 40\n            self.queue.append((time.localtime(), 41 + 6 * wave, 1.2 + 0.8 * (1 - wave), 1.208))\n\n\nsensors = Board() if HARDWARE else Simulated()\n"
+    },
+    {
+      "id": "f3685a71043a42db8d2e622ad268aee0",
+      "name": "storage",
+      "source": "# SPDX-License-Identifier: MIT\n# The log as a CSV file on the board (logs/ in MicroPython's folder, /usr/local/mpy/fs/logs), one\n# row a sample, with the date and time of the board's clock (set by NTP once online). In the\n# simulator the rows stay in memory.\n\nimport os\n\nfrom sensors import FIELDS, HARDWARE\n\nFOLDER = \"logs\"\n\n\ndef _stamp(t):\n    return \"%04d-%02d-%02d %02d:%02d:%02d\" % t[:6]\n\n\nclass Log:\n    def __init__(self):\n        self.path = None\n        self.rows = 0\n        self.size = 0\n        self._memory = []\n\n    def new(self, t):\n        name = \"log-%04d%02d%02d-%02d%02d%02d.csv\" % t[:6]\n        header = \",\".join(FIELDS) + \"\\n\"\n        self.rows = 0\n        self.size = len(header)\n        if HARDWARE:\n            try:\n                os.mkdir(FOLDER)\n            except OSError:\n                pass  # it is there\n            self.path = FOLDER + \"/\" + name\n            with open(self.path, \"w\") as f:\n                f.write(header)\n        else:\n            self.path = name\n            self._memory = [header]\n\n    def add(self, sample):\n        t, cpu, a0, vref = sample\n        # No reference on a board whose ADC has none: the field stays empty.\n        line = \"%s,%.1f,%.4f,%s\\n\" % (_stamp(t), cpu, a0, \"\" if vref is None else \"%.4f\" % vref)\n        if HARDWARE:\n            with open(self.path, \"a\") as f:\n                f.write(line)\n        else:\n            self._memory.append(line)\n        self.rows += 1\n        self.size += len(line)\n\n    def read(self):\n        if HARDWARE:\n            with open(self.path) as f:\n                return f.read()\n        return \"\".join(self._memory)\n\n\nlog = Log()\n"
+    },
+    {
+      "id": "e913056e1c04429a99a2a3c1b784fead",
+      "name": "fileserver",
+      "source": "# SPDX-License-Identifier: MIT\n# The log for a browser: http://BOARD:8081/log.csv?k=PIN, polled from the GUI's timer. The PIN on\n# the screen keeps a passer-by out, no more (plain HTTP).\n\nimport socket\n\n\nclass FileServer:\n    def __init__(self, port, pin, content, name):\n        self.port = port\n        self.pin = pin\n        self._content = content  # function: the file's text\n        self._name = name        # function: the file's name\n        self._socket = None\n        self.served = 0\n\n    def start(self):\n        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        listener.setsockopt(socket.SOL_SOCKET, 2, 1)  # SO_REUSEADDR\n        listener.bind(socket.getaddrinfo(\"0.0.0.0\", self.port)[0][-1])\n        listener.listen(2)\n        listener.setblocking(False)\n        self._socket = listener\n\n    def poll(self):\n        if self._socket is None:\n            return\n        try:\n            client, address = self._socket.accept()\n        except OSError:\n            return\n        try:\n            client.settimeout(0.5)\n            request = client.recv(1024).decode()\n            target = request.split(\" \", 2)[1] if request.count(\" \") >= 2 else \"/\"\n            if target == \"/log.csv?k=\" + self.pin:\n                body = self._content().encode()\n                head = \"HTTP/1.0 200 OK\\r\\nContent-Type: text/csv\\r\\nContent-Disposition: attachment; \" \\\n                       \"filename=\\\"%s\\\"\\r\\nContent-Length: %d\\r\\nConnection: close\\r\\n\\r\\n\" % (\n                           self._name(), len(body))\n                self.served += 1\n            else:\n                body = b\"The log is at /log.csv?k=PIN, the PIN on the board's screen.\\n\"\n                head = \"HTTP/1.0 403 Forbidden\\r\\nContent-Type: text/plain\\r\\nContent-Length: %d\\r\\n\" \\\n                       \"Connection: close\\r\\n\\r\\n\" % len(body)\n            client.write(head.encode() + body)\n        except OSError:\n            pass\n        finally:\n            client.close()\n"
+    },
+    {
+      "id": "4af070b54af14c9cbf800e3bfff7f175",
+      "name": "logger_app",
+      "source": "# SPDX-License-Identifier: MIT\n# Data Logger: samples at the pace of machine.Timer (the Cortex-M4's where there is one), a CSV\n# file with the date and time from the network, a chart of the last 120 samples, the file for a\n# browser.\n\nimport os\nimport time\n\nimport lvgl as lv\n\nfrom fileserver import FileServer\nfrom sensors import HARDWARE, INPUT, RANGE_V, sensors\nfrom storage import log\n\nEVERY = [1, 10, 60]\nPOINTS = 120\nPORT = 8081\n\n_ui = None\n_every = 1\n_running = True\n_series = []\n_server = None\n\n\ndef _font(size):\n    return getattr(lv, \"font_montserrat_%d\" % size)\n\n\ndef _style_matrix(matrix, accent):\n    matrix.set_style_bg_opa(lv.OPA.TRANSP, 0)\n    matrix.set_style_border_width(0, 0)\n    matrix.set_style_pad_all(4, 0)\n    matrix.set_style_pad_gap(6, 0)\n    items = lv.PART.ITEMS\n    matrix.set_style_bg_color(lv.color_hex(0x2A3444), items)\n    matrix.set_style_bg_opa(lv.OPA.COVER, items)\n    matrix.set_style_radius(8, items)\n    matrix.set_style_border_width(0, items)\n    matrix.set_style_shadow_width(0, items)\n    matrix.set_style_text_color(lv.color_hex(0xFFFFFF), items)\n    matrix.set_style_text_font(_font(16), items)\n    matrix.set_style_bg_color(lv.color_hex(accent), items | lv.STATE.CHECKED)\n    matrix.set_button_ctrl_all(lv.buttonmatrix.CTRL.CHECKABLE)\n    matrix.set_one_checked(True)\n\n\ndef _file_info():\n    path = log.path.split(\"/\")[-1] if _small() else log.path\n    _ui.file_info.set_text(\"%s\\n%d rows, %.1f kB\" % (path, log.rows, log.size / 1024))\n\n\ndef _address():\n    try:\n        import mpy_wifi\n\n        ip = mpy_wifi.status().get(\"ip\")\n    except (ImportError, OSError):\n        ip = None\n    return ip or \"192.168.7.1\"\n\n\ndef tick():\n    # Every 50 ms: the samples the timer queued, the browsers, the clock.\n    sensors.poll()\n    if _server:\n        _server.poll()\n    queue = sensors.queue\n    while queue:\n        sample = queue.pop(0)\n        t, cpu, a0, vref = sample\n        try:\n            log.add(sample)\n        except OSError as error:\n            _ui.now.set_text(\"Cannot write the file: %s\" % error)\n            continue\n        _ui.history.set_next_value(_series[0], int(cpu))\n        _ui.history.set_next_value(_series[1], int(a0 * 1000))\n        reference = \"\" if vref is None else \"    reference %.4f V\" % vref\n        if _small():\n            _ui.now.set_text(\"CPU %.1f C    %s %.3f V\\n%sat %02d:%02d:%02d\"\n                             % (cpu, INPUT, a0, reference.strip() + \"   \" if reference else \"\", t[3], t[4], t[5]))\n        else:\n            _ui.now.set_text(\"CPU %.1f C (Linux)    %s %.3f V%s\\nlast sample %02d:%02d:%02d\"\n                             % (cpu, INPUT, a0, reference, t[3], t[4], t[5]))\n        _file_info()\n    t = time.localtime()\n    if _small():\n        _ui.clock.set_text(\"%04d-%02d-%02d %02d:%02d:%02d\" % t[:6])\n    else:\n        _ui.clock.set_text(\"%04d-%02d-%02d  %02d:%02d:%02d  board clock (NTP)\" % t[:6])\n\n\ndef _small():\n    return lv.display_get_default().get_vertical_resolution() < 400\n\n\ndef every_changed(matrix):\n    global _every\n    index = matrix.get_selected_button()\n    if 0 <= index < len(EVERY):\n        _every = EVERY[index]\n        if _running:\n            sensors.start(_every)\n        _ui.legend.set_text(_legend())\n\n\ndef _legend():\n    if _small():\n        return \"orange CPU 20-80 C, green %s 0-%.1f V\" % (INPUT, RANGE_V)\n    return \"orange: CPU 20-80 C (left)   green: %s 0-%.1f V (right)   one every %d s\" % (INPUT, RANGE_V, _every)\n\n\ndef run_clicked():\n    global _running\n    _running = not _running\n    if _running:\n        sensors.start(_every)\n    else:\n        sensors.stop()\n    _ui.run_button.get_child(0).set_text(\"Stop\" if _running else \"Start\")\n    _ui.run_button.set_style_bg_color(lv.color_hex(0xE0742F if _running else 0x2E9E6A), 0)\n\n\ndef new_clicked():\n    log.new(time.localtime())\n    _file_info()\n\n\ndef start(ui):\n    global _ui, _server\n    _ui = ui\n    lv.screen_active().set_style_bg_color(lv.color_hex(0x121820), 0)\n    chart = ui.history\n    series = chart.get_series_next(None)\n    while series:\n        chart.remove_series(series)\n        series = chart.get_series_next(None)\n    chart.set_point_count(POINTS)\n    chart.set_axis_range(lv.chart.AXIS.PRIMARY_Y, 20, 80)\n    chart.set_axis_range(lv.chart.AXIS.SECONDARY_Y, 0, int(RANGE_V * 1000))\n    chart.set_style_size(0, 0, lv.PART.INDICATOR)\n    chart.set_style_line_width(2, lv.PART.ITEMS)\n    chart.set_style_border_width(0, 0)\n    chart.set_style_line_color(lv.color_hex(0x2A3444), lv.PART.MAIN)\n    _series.append(chart.add_series(lv.color_hex(0xE0742F), lv.chart.AXIS.PRIMARY_Y))\n    _series.append(chart.add_series(lv.color_hex(0x4CC38A), lv.chart.AXIS.SECONDARY_Y))\n    _style_matrix(ui.every_buttons, 0x2F6FDE)\n    ui.every_buttons.set_button_ctrl(0, lv.buttonmatrix.CTRL.CHECKED)\n    ui.legend.set_text(_legend())\n    log.new(time.localtime())\n    _file_info()\n    pin = \"%04d\" % (int.from_bytes(os.urandom(2), \"little\") % 10000)\n    if HARDWARE:\n        _server = FileServer(PORT, pin, log.read, lambda: log.path.split(\"/\")[-1])\n        try:\n            _server.start()\n            if _small():\n                ui.download.set_text(\"%s:%d\\nlog.csv?k=%s\" % (_address(), PORT, pin))\n            else:\n                ui.download.set_text(\"http://%s:%d/\\nlog.csv?k=%s\\n\\nPIN %s\" % (_address(), PORT, pin, pin))\n        except OSError as error:\n            ui.download.set_text(\"No server: %s\" % error)\n    else:\n        ui.download.set_text(\"Simulator: the rows\\nstay in memory.\")\n    sensors.start(_every)\n"
+    }
+  ]
+}

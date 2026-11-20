@@ -399,8 +399,10 @@ line; `tests/hil/t19_mp135_led.py` drives the green LD7 and orange LD6 LEDs on t
 open drain with a jumper across CN8 pins 38 (PA5) and 40 (PA0). A released line keeps its last
 configuration, as a pin does on the MCU ports when its `Pin` object is deleted: an output stays an
 output. Results:
-`docs/log/stm32mp135f-dk-machine-pin.txt`. This section records an architectural decision; it does not imply that all of
-these classes are already implemented.
+`docs/log/stm32mp135f-dk-machine-pin.txt`. The other classes (`I2C`, `SPI`, `UART`, `PWM`, `ADC`, `Timer`) are implemented on the kernel's
+drivers by `machine_kernel.py`, from the board's description (`linux/boards/stm32mp135f-dk.json`),
+with the expansion connector's peripherals turned on by `linux/stm32mp135f-dk-header.dtso`:
+[machine on Linux's drivers](machine-linux.md), checked by `tests/hil/t22_mp135_machine_kernel.py`.
 
 ## Flash references
 

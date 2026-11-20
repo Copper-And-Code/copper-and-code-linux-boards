@@ -35,6 +35,15 @@ Measured on the board:
 
 In the Studio simulator the intervals are made up, of the same kind.
 
+## On the STM32MP135F-DK
+
+`project.json` (480×272). Without a microcontroller, `machine.Timer` is a thread of MicroPython on
+Linux's clock ([machine on Linux's drivers](../../../docs/machine-linux.md)): the green count is the
+timer thread's, and the load is one busy process, the board having one core. There nobody keeps the
+time apart from Linux, and it shows: with the screen being drawn, the sleep and the timer spread
+alike (about 10.5 ms on average, 92% within 0.5 ms, the longest about 47 ms), while the count stays
+whole, the late expiries made up. `project-800x480.json` is the STM32MP157C-DK2's.
+
 ## Files
 
 | Module | What it does |

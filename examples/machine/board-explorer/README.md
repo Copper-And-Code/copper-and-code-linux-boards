@@ -21,8 +21,20 @@ it.
 
 ## On the board
 
-Open `project.json` in LVGL MPY Studio, connect to the STM32MP157C-DK2 and run it. The first use of
+Open `project-800x480.json` in LVGL MPY Studio, connect to the STM32MP157C-DK2 and run it. The first use of
 the M4 starts its firmware (about half a second).
+
+## On the STM32MP135F-DK
+
+![Board Explorer on the 40-pin connector, in the Studio simulator](../../../docs/images/board-explorer-mp135.png)
+
+`project.json` (480×272): the same app on the 40-pin connector CN8, numbered as on a Raspberry Pi,
+in a grid of its 28 signal pins. The board's description says what each pin is: GPIO, the ADC on
+pins 8, 10, 13 and 15 (0 to 3.3 V), PWM on 7, 31 and 32, I2C5 on 3 and 5, SPI5, UART8 and I2C1, all on
+Linux's drivers ([machine on Linux's drivers](../../../docs/machine-linux.md)); the green and orange
+LEDs (LD7, LD6) on the I/O expander. With no microcontroller there, nobody reads back an output or
+measures the PWM on its pin: the screen says so. In the Studio simulator `project.json` shows this
+board with made-up values, `project-800x480.json` the STM32MP157C-DK2.
 
 ## Files
 

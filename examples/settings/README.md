@@ -3,8 +3,9 @@
 The board's settings screen, made with LVGL MPY Studio and its MCP tools. It sets up Wi-Fi: scan,
 choose a network, type the password on the touch keyboard, save and connect. And it chooses the
 layout of a keyboard plugged into the board (US or Italian): the REPL hub, which turns its keys into
-text for the shell and the REPL, follows the choice within a second. On the STM32MP157C-DK2 the Controllers
-page searches for Bluetooth gamepads and pairs them (`mpy_bluetooth`, BlueZ in the background).
+text for the shell and the REPL, follows the choice within a second. The Controllers page searches
+for Bluetooth gamepads and pairs them (`mpy_bluetooth`, BlueZ in the background), on both boards:
+`project.json` is the STM32MP135F-DK's (480×272), `project-800x480.json` the STM32MP157C-DK2's.
 
 The choice is saved in `settings.json` in the board's folder (`/usr/local/mpy/fs` on the
 STM32MP135F-DK), which every app reads through the frozen modules of the firmware:

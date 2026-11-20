@@ -126,6 +126,8 @@ fi
 put "$SOURCE/mpy-usb-composite.sh" "$PREFIX/bin/mpy-usb-composite" 0755
 put "$SOURCE/mpy_launcher.py" "$PREFIX/lib/mpy_launcher.py" 0644
 put "$SOURCE/mpy_tap.py" "$PREFIX/lib/mpy_tap.py" 0644
+# The board's description (linux/boards/): its connector, buses and pins for machine and the apps.
+[ -f "$SOURCE/board.json" ] && put "$SOURCE/board.json" "$PREFIX/board.json" 0644
 put "$SOURCE/edit.py" "$PREFIX/fs/bin/edit.py" 0644
 put "$SOURCE/vi.py" "$PREFIX/fs/bin/vi.py" 0644
 if [ -n "$M4_FIRMWARE" ]; then

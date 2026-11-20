@@ -1,0 +1,35 @@
+{
+  "board": "STM32MP157C-DK2",
+  "about": "The STM32MP157C-DK2: machine's I2C, SPI, UART, PWM, ADC and Timer are the Cortex-M4's (mpy_m4), Pin is Linux's GPIO lines. This description names the Arduino connector's pins and the LEDs for the apps.",
+  "machine": "mpy_m4",
+  "connector": {
+    "name": "CN13 CN14 CN16 CN17",
+    "title": "Arduino Uno connector",
+    "pins": {
+      "D0": "PE7", "D1": "PE8", "D2": "PE1", "D3": "PD14", "D4": "PE10", "D5": "PD15", "D6": "PE9",
+      "D7": "PD1", "D8": "PG3", "D9": "PH6", "D10": "PE11", "D11": "PE14", "D12": "PE13", "D13": "PE12",
+      "D14": "PA12", "D15": "PA11", "A0": "ANA0", "A1": "ANA1", "A2": "PF14", "A3": "PF13", "A4": "PC3",
+      "A5": "PF12"
+    }
+  },
+  "i2c": {"5": {"scl": "PA11", "sda": "PA12", "name": "I2C5"}},
+  "spi": {"4": {"sck": "PE12", "mosi": "PE14", "miso": "PE13", "cs": "PE11", "name": "SPI4"}},
+  "uart": {"7": {"tx": "PE8", "rx": "PE7", "name": "UART7"}},
+  "pwm": {"PE9": {"name": "TIM1 CH1"}},
+  "adc": {
+    "bits": 16,
+    "range_uv": 2500000,
+    "pins": ["ANA0", "ANA1", "PF14", "PF13", "PC3", "PF12"],
+    "max_freq": 100000
+  },
+  "aliases": {
+    "D0": "PE7", "D1": "PE8", "D2": "PE1", "D3": "PD14", "D4": "PE10", "D5": "PD15", "D6": "PE9", "D7": "PD1",
+    "D8": "PG3", "D9": "PH6", "D10": "PE11", "D11": "PE14", "D12": "PE13", "D13": "PE12", "D14": "PA12",
+    "D15": "PA11", "A0": "ANA0", "A1": "ANA1", "A2": "PF14", "A3": "PF13", "A4": "PC3", "A5": "PF12"
+  },
+  "leds": {
+    "red": {"pin": "PA13", "active_low": true, "where": "PA13"},
+    "orange": {"mcu": true, "where": "PH7"},
+    "blue": {"sysfs": "heartbeat", "where": "PD11"}
+  }
+}
