@@ -1029,8 +1029,8 @@ def read_line():
         elif k == "right":
             pos = min(len(line), pos + 1)
         elif k == "\x01" and not line:
-            # Ctrl-A on an empty line is a tool (mpremote, LVGL MPY Studio) asking for the raw
-            # REPL: leave, and let the REPL start in raw mode.
+            # Ctrl-A on an empty line is a tool (mpremote, Copper and Code Studio) asking for the
+            # raw REPL: leave, and let the REPL start in raw mode.
             raw_requested = True
             try:
                 import mpyrepl

@@ -200,8 +200,8 @@ class Terminal(io.IOBase):
         n = len(buf)
         mine = False  # this call set busy, so it clears it
         if RAW_BANNER in buf:
-            # A tool (mpremote, LVGL MPY Studio) entered the raw REPL: its bytes are not for the
-            # display, and drawing them would slow it down. The next start() shows us again.
+            # A tool (mpremote, Copper and Code Studio) entered the raw REPL: its bytes are not for
+            # the display, and drawing them would slow it down. The next start() shows us again.
             os.dupterm(None)
             return n
         try:

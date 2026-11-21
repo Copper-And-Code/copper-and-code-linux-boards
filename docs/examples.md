@@ -1,6 +1,6 @@
 # Examples
 
-Each example is an Copper and Code Studio project (`project.json`, with its Python modules inside), made
+Each example is a Copper and Code Studio project (`project.json`, with its Python modules inside), made
 with the Studio's MCP tools. Open it in the Studio, try it in the simulator (demo data stands in for
 the network and the sound), connect to the board and run it. To have it in the home screen's menu,
 add it to `settings.json`, section `home`.

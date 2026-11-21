@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # The screen shown at start when there is no main.py (or in safe mode): the board is ready and says
-# where LVGL MPY Studio can reach it. Frozen; called by the launcher before the REPL starts.
+# where Copper and Code Studio can reach it. Frozen; called by the launcher before the REPL starts.
 
 import os
 import time
@@ -24,7 +24,7 @@ def show(safe_mode=False):
     title.set_style_text_font(lv.font_montserrat_24, 0)
     title.align(lv.ALIGN.TOP_MID, 0, 40)
     lines = [
-        "Safe mode: main.py skipped" if safe_mode else "Waiting for LVGL MPY Studio",
+        "Safe mode: main.py skipped" if safe_mode else "Waiting for Copper and Code Studio",
         "USB serial: the CDC-ACM port",
         "TCP: socket://" + tcp,
     ]

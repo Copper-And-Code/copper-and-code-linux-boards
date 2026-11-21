@@ -3,8 +3,8 @@
 # the serial or TCP terminal. A tap on the terminal opens a menu of apps; an app runs in a fresh
 # process (a soft reset), and the home button at the top brings the shell back the same way.
 #
-# The apps of the menu are in settings.json, section "home", each an LVGL MPY Studio app on the
-# board (the entry point the Studio uploaded) and a name:
+# The apps of the menu are in settings.json, section "home", each a Copper and Code Studio app on
+# the board (the entry point the Studio uploaded) and a name:
 #
 #   {"home": {"apps": [{"name": "Weather", "path": "/lms_apps/app_09a333ec182f/app_main.py"}]}}
 #
@@ -14,7 +14,7 @@
 # arrows, Tab, Home and End move between the buttons, Enter or Space presses one, Esc goes back
 # (mpy_keys).
 #
-# LVGL MPY Studio and mpremote take the board as usual: the shell leaves on their Ctrl-A, and
+# Copper and Code Studio and mpremote take the board as usual: the shell leaves on their Ctrl-A, and
 # after a soft reset from the raw REPL main.py does not run.
 
 import os
@@ -261,7 +261,8 @@ def _home_button():
 
 
 def _app_size(folder):
-    # The screen an LVGL MPY Studio app was made for, from the profile the Studio uploaded with it.
+    # The screen a Copper and Code Studio app was made for, from the profile the Studio uploaded
+    # with it.
     import json
 
     try:
@@ -315,7 +316,7 @@ def main():
     startup = None
     if path == LINUX_SHELL:
         # The system's own shell, full screen; its `exit` leaves the MicroPython shell. While it
-        # runs, Ctrl-C and Ctrl-A are its own: LVGL MPY Studio and mpremote wait for `exit`.
+        # runs, Ctrl-C and Ctrl-A are its own: Copper and Code Studio and mpremote wait for `exit`.
         bash = any(_exists(d + "/bash") for d in ("/bin", "/usr/bin"))
         startup = "linux bash -l" if bash else "linux sh -l"
     shell_linux.main(startup)
