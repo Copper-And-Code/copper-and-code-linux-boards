@@ -1,0 +1,1064 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Turn a Linux board into a MicroPython board with a touch screen">
+      
+      
+      
+        <link rel="canonical" href="https://copper-and-code.github.io/copper-and-code-linux-boards/machine-linux/">
+      
+      
+        <link rel="prev" href="../stm32mp157c-dk2/">
+      
+      
+        <link rel="next" href="../retro/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../images/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>machine on Linux's drivers - copper-and-code-linux-boards</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/site.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#machine-on-linuxs-drivers" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="copper-and-code-linux-boards" class="md-header__button md-logo" aria-label="copper-and-code-linux-boards" data-md-component="logo">
+      
+  <img src="../images/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            copper-and-code-linux-boards
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              machine on Linux's drivers
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="copper-and-code-linux-boards" class="md-nav__button md-logo" aria-label="copper-and-code-linux-boards" data-md-component="logo">
+      
+  <img src="../images/logo.svg" alt="logo">
+
+    </a>
+    copper-and-code-linux-boards
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stm32mp135f-dk-install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stm32mp135f-dk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The STM32MP135F-DK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../display-driver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The display_driver contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stm32mp157c-dk2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The STM32MP157C-DK2 and its Cortex-M4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    machine on Linux's drivers
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    machine on Linux's drivers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-pieces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pieces
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-boards-description" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The board's description
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The board&#39;s description">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-new-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A new board
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stm32mp135f-dk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STM32MP135F-DK
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#timing-on-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timing on Linux
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../retro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Games: mpy-retro
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ricognizione/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 0 reconnaissance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Source on GitHub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://copper-and-code.github.io/copper-and-code-studio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copper and Code Studio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-pieces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pieces
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-boards-description" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The board's description
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The board&#39;s description">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-new-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A new board
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stm32mp135f-dk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STM32MP135F-DK
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#timing-on-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timing on Linux
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="machine-on-linuxs-drivers">machine on Linux's drivers<a class="headerlink" href="#machine-on-linuxs-drivers" title="Permanent link">&para;</a></h1>
+<p><img alt="Board Explorer on the STM32MP135F-DK's connector, in the Studio simulator" src="../images/board-explorer-mp135.png" /></p>
+<p>MicroPython's <code>machine</code> module, with the same API as on a microcontroller, on a board that has no
+microcontroller beside its processor: <code>I2C</code>, <code>SPI</code>, <code>UART</code>, <code>PWM</code>, <code>ADC</code> and <code>Timer</code> go through
+the Linux kernel's own drivers, <code>Pin</code> through the GPIO character device. The STM32MP135F-DK is the
+first such board; any board running Linux with the usual drivers can follow with a description
+file and no code.</p>
+<p>On a board with a Cortex-M4 (the STM32MP157C-DK2) the M4 serves these classes instead
+(<a href="../stm32mp157c-dk2/">mpy_m4</a>); <code>machine.py</code> picks the backend at import. The apps don't change:
+<code>hasattr(machine, "PWM")</code> says whether the board has a class at all.</p>
+<h2 id="the-pieces">The pieces<a class="headerlink" href="#the-pieces" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>Where</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>machine.py</code></td>
+<td><code>python/linux/</code>, frozen</td>
+<td>MicroPython's <code>umachine</code> (with <code>Pin</code>), then the M4's classes where there is an M4, else those of <code>machine_kernel</code> the board describes</td>
+</tr>
+<tr>
+<td><code>machine_kernel.py</code></td>
+<td><code>python/linux/</code>, frozen</td>
+<td>the classes, on i2c-dev, spidev, the tty layer, the PWM and IIO frameworks, and a thread for <code>Timer</code></td>
+</tr>
+<tr>
+<td><code>mpy_board.py</code></td>
+<td><code>python/linux/</code>, frozen</td>
+<td>reads the board's description; apps take the connector, the pins' names and the LEDs from it</td>
+</tr>
+<tr>
+<td>the description</td>
+<td><code>linux/boards/BOARD.json</code>, installed as <code>/usr/local/mpy/board.json</code></td>
+<td>which bus, channel or line each name is</td>
+</tr>
+<tr>
+<td>the device tree</td>
+<td><code>linux/stm32mp135f-dk-header.dtso</code> on the STM32MP135F-DK</td>
+<td>turns on the peripherals of the expansion connector, for the kernel's drivers</td>
+</tr>
+<tr>
+<td><code>linux_delay.c</code></td>
+<td><code>modules/linuxmachine/</code></td>
+<td><code>time.sleep_ms()</code> that releases the GIL once per 10 ms (see below)</td>
+</tr>
+</tbody>
+</table>
+<p>Nothing writes the SoC's registers from user space: each class is the kernel's driver.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Kernel interface</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>I2C(id)</code></td>
+<td><code>/dev/i2c-N</code>, <code>I2C_RDWR</code></td>
+<td>combined transfers (<code>stop=False</code>, <code>readfrom_mem</code>); a device that doesn't answer is <code>OSError(ENODEV)</code>, as on a microcontroller; the speed is the device tree's <code>clock-frequency</code></td>
+</tr>
+<tr>
+<td><code>SPI(id)</code></td>
+<td><code>/dev/spidevB.C</code>, <code>SPI_IOC_MESSAGE</code></td>
+<td>modes 0 to 3, MSB or LSB first, 8 bits; the kernel drives the bus's chip select, a device on another line uses <code>Pin</code></td>
+</tr>
+<tr>
+<td><code>UART(id)</code></td>
+<td>the port's tty, raw</td>
+<td>Linux's standard rates (300 to 4,000,000 baud), 7 or 8 bits, parity, 1 or 2 stop bits; the kernel buffers what arrives meanwhile</td>
+</tr>
+<tr>
+<td><code>PWM(pin)</code></td>
+<td><code>/sys/class/pwm</code></td>
+<td><code>freq</code>, <code>duty_u16</code>, <code>duty_ns</code>, <code>invert</code>; the duty is the nearest the timer makes</td>
+</tr>
+<tr>
+<td><code>ADC(pin)</code></td>
+<td>IIO (<code>/sys/bus/iio</code>)</td>
+<td><code>read_u16</code> scaled to 16 bits, <code>read_uv</code> from the kernel's scale; <code>read_timed()</code> and <code>capture()</code> sample at a fixed rate kept by a hardware timer (an IIO trigger) and moved by DMA</td>
+</tr>
+<tr>
+<td><code>Timer(id)</code></td>
+<td>a thread on the monotonic clock</td>
+<td>absolute deadlines, so the period doesn't drift; late expiries are counted in <code>missed</code> and made up in one call; periods from 1 ms</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-boards-description">The board's description<a class="headerlink" href="#the-boards-description" title="Permanent link">&para;</a></h2>
+<p>One JSON file per board. The names are the kernel's platform devices (their bus address), found
+in sysfs at each start, so the numbering the kernel happens to choose (<code>i2c-1</code>, <code>pwmchip4</code>) never
+matters.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"board"</span><span class="p">:</span><span class="w"> </span><span class="s2">"STM32MP135F-DK"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"connector"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"CN8"</span><span class="p">,</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span><span class="w"> </span><span class="nt">"pins"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3V3"</span><span class="p">,</span><span class="w"> </span><span class="nt">"3"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PH6"</span><span class="p">,</span><span class="w"> </span><span class="nt">"8"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PC0"</span><span class="p">}},</span>
+<span class="w">  </span><span class="nt">"i2c"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"5"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"device"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4c006000.i2c"</span><span class="p">,</span><span class="w"> </span><span class="nt">"scl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PD1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"sda"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PH6"</span><span class="p">}},</span>
+<span class="w">  </span><span class="nt">"spi"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"5"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"device"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4c003000.spi"</span><span class="p">,</span><span class="w"> </span><span class="nt">"sck"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PH7"</span><span class="p">,</span><span class="w"> </span><span class="nt">"mosi"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PH3"</span><span class="p">,</span><span class="w"> </span><span class="nt">"miso"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PA8"</span><span class="p">,</span><span class="w"> </span><span class="nt">"cs"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PH11"</span><span class="p">,</span><span class="w"> </span><span class="nt">"cs_kernel"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}},</span>
+<span class="w">  </span><span class="nt">"uart"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"8"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"device"</span><span class="p">:</span><span class="w"> </span><span class="s2">"40019000.serial"</span><span class="p">,</span><span class="w"> </span><span class="nt">"tx"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PE1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"rx"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PF9"</span><span class="p">}},</span>
+<span class="w">  </span><span class="nt">"pwm"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"PB1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"device"</span><span class="p">:</span><span class="w"> </span><span class="s2">"40001000.timer"</span><span class="p">,</span><span class="w"> </span><span class="nt">"channel"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"TIM3 CH4"</span><span class="p">}},</span>
+<span class="w">  </span><span class="nt">"adc"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"device"</span><span class="p">:</span><span class="w"> </span><span class="s2">"48003000.adc"</span><span class="p">,</span><span class="w"> </span><span class="nt">"bits"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="nt">"range_uv"</span><span class="p">:</span><span class="w"> </span><span class="mi">3300000</span><span class="p">,</span><span class="w"> </span><span class="nt">"pins"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"PC0"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span>
+<span class="w">          </span><span class="nt">"trigger"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tim6_trgo"</span><span class="p">,</span><span class="w"> </span><span class="nt">"max_freq"</span><span class="p">:</span><span class="w"> </span><span class="mi">100000</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"aliases"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"A0"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PC0"</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"leds"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"green"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"pin"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mcp23017"</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">],</span><span class="w"> </span><span class="nt">"where"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LD7"</span><span class="p">}},</span>
+<span class="w">  </span><span class="nt">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cpu-thermal"</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>connector</code>: the pins as the board's connector numbers or names them; power pins by name
+  (<code>3V3</code>, <code>5V</code>, <code>GND</code>). The apps draw it.</li>
+<li><code>i2c</code>, <code>spi</code>, <code>uart</code>: by the number <code>machine</code> takes (<code>I2C(5)</code>), the device and its pins.
+  <code>cs_kernel</code>: the chip select belongs to the kernel, it is no free GPIO line.</li>
+<li><code>pwm</code>: by pin, the timer's device and the channel of its PWM chip.</li>
+<li><code>adc</code>: the converter's device, its bits and full scale, the input pins and their channels; the
+  trigger and the top rate for <code>read_timed()</code>.</li>
+<li><code>aliases</code>: names a user knows the pins by (<code>A0</code>, <code>D6</code>); <code>machine</code> takes them too.</li>
+<li><code>leds</code>: by colour, a GPIO line (a name, or <code>[chip, line]</code> of an expander), <code>"mcu": true</code> for one
+  a microcontroller drives, or <code>"sysfs": NAME</code> for Linux's LED class; <code>active_low</code> when 0 lights it.</li>
+</ul>
+<h3 id="a-new-board">A new board<a class="headerlink" href="#a-new-board" title="Permanent link">&para;</a></h3>
+<ol>
+<li>The kernel's drivers on: the device tree enables the peripherals of the connector (an overlay
+   like <code>linux/stm32mp135f-dk-header.dtso</code>) and, for SPI, a <code>spidev</code> child.</li>
+<li><code>linux/boards/BOARD.json</code>, from the device tree: the devices' addresses, and the pins of
+   each function from the pin controller's groups.</li>
+<li><code>scripts/deploy.sh</code>: the board's compatible string names its DTB and description.</li>
+<li>Check with a test like <code>tests/hil/t22_mp135_machine_kernel.py</code>.</li>
+</ol>
+<p>Which pin is which ADC channel is in the chip's pin data: ST publishes it for every chip in
+<a href="https://github.com/STMicroelectronics/STM32_open_pin_data">STM32_open_pin_data</a> (<code>mcu/STM32MP135FAFx.xml</code>
+for the STM32MP135F-DK's: the <code>ADC1_INPn</code> signals of each pin). Guessing it on the board is not
+reliable: the ADC reads a pin only in analog mode, and a pull-up on a floating input leaves charge
+that the next channel's conversion picks up. So the device tree puts the ADC's pins in analog mode
+(a pin control group of the ADC), which takes them from the GPIO lines, as on a microcontroller.</p>
+<h2 id="stm32mp135f-dk">STM32MP135F-DK<a class="headerlink" href="#stm32mp135f-dk" title="Permanent link">&para;</a></h2>
+<p>The 40-pin GPIO expansion connector CN8 (numbered as on a Raspberry Pi):</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Pins</th>
+<th><code>machine</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I2C5</td>
+<td>3 SDA (PH6), 5 SCL (PD1)</td>
+<td><code>I2C(5)</code>, 400 kHz, shared with the board's MIPI bridge (0x14) and touch controller (0x5d)</td>
+</tr>
+<tr>
+<td>I2C1</td>
+<td>27 SDA (PE8), 28 SCL (PD12)</td>
+<td><code>I2C(1)</code>, the board's own devices (expander, USB-C controller)</td>
+</tr>
+<tr>
+<td>SPI5</td>
+<td>19 MOSI (PH3), 21 MISO (PA8), 23 SCK (PH7), 24 CS (PH11)</td>
+<td><code>SPI(5)</code></td>
+</tr>
+<tr>
+<td>UART8</td>
+<td>37 TX (PE1), 33 RX (PF9)</td>
+<td><code>UART(8)</code></td>
+</tr>
+<tr>
+<td>PWM</td>
+<td>7 (PB1, TIM3 CH4), 31 (PD13, TIM4 CH2), 32 (PE5, TIM8 CH3)</td>
+<td><code>PWM("PB1")</code></td>
+</tr>
+<tr>
+<td>ADC1</td>
+<td>8 (PC0, channel 0, <code>A0</code>), 10 (PB0, 9, <code>A1</code>), 13 (PC3, 13, <code>A2</code>), 15 (PF13, 11, <code>A3</code>)</td>
+<td><code>ADC("A0")</code>, 0 to 3.3 V, 12 bits</td>
+</tr>
+<tr>
+<td>GPIO</td>
+<td>the others</td>
+<td><code>Pin("PA0")</code></td>
+</tr>
+<tr>
+<td>LEDs</td>
+<td>LD7 green, LD6 orange (MCP23017 IO14, IO15)</td>
+<td><code>Pin(("mcp23017", 14))</code></td>
+</tr>
+</tbody>
+</table>
+<p>What is left off, and why:</p>
+<ul>
+<li>TIM1's PWM is the panel's backlight; TIM14 (pin 33) would take UART8's RX.</li>
+<li>USART1 (pins 8 and 10) would also take pins 11 and 36 for RTS and CTS, and pin 8 is an ADC input.</li>
+<li>ADC2, with the chip's internal channels (<code>vrefint</code>, the supplies), belongs to the secure world:
+  the kernel is refused it (<code>EACCES</code> from the ETZPC firewall). So there is no <code>ADC.CORE_VREF</code> here;
+  <code>ADC.CORE_TEMP</code> neither, the CPU's temperature is Linux's (<code>/sys/class/thermal</code>).</li>
+<li>TIM6, a basic timer, is the ADC's sampling clock (<code>tim6_trgo</code>), apart from the PWM timers.</li>
+</ul>
+<p>Measured on the board (<code>tests/hil/t22_mp135_machine_kernel.py</code>; the last rows with wires on CN8,
+<code>MACHINE_LOOPBACK</code>):</p>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>I2C(5).scan()</code></td>
+<td>0x14, 0x5d; an empty address raises <code>ENODEV</code></td>
+</tr>
+<tr>
+<td><code>ADC("A0").read_timed()</code></td>
+<td>1,000 samples at 10 kHz in 124 to 136 ms</td>
+</tr>
+<tr>
+<td>an ADC reading through the kernel</td>
+<td>about 0.36 ms (System Monitor)</td>
+</tr>
+<tr>
+<td><code>Timer(period=10)</code></td>
+<td>9.75 to 10.2 ms apart idle; with the GUI drawing, 92% within 0.5 ms, the longest interval about 47 ms (Timing Lab)</td>
+</tr>
+<tr>
+<td>SPI5, pins 19 to 21</td>
+<td>the bytes sent come back</td>
+</tr>
+<tr>
+<td>UART8, pins 37 to 33</td>
+<td>the line sent comes back</td>
+</tr>
+<tr>
+<td>PWM pin 7 to A0 (pin 8), steady</td>
+<td>3.299 V high, 0.000 V low</td>
+</tr>
+<tr>
+<td>PWM 20 kHz to A0, <code>read_timed()</code> at 97 kHz</td>
+<td>0.250, 0.498, 0.748 of the samples high for 25, 50 and 75%</td>
+</tr>
+</tbody>
+</table>
+<h2 id="timing-on-linux">Timing on Linux<a class="headerlink" href="#timing-on-linux" title="Permanent link">&para;</a></h2>
+<p>Linux decides when a thread runs, the <code>Timer</code>'s as any other; a microcontroller does not share that
+limit. On the STM32MP157C-DK2 the M4 keeps the time and Linux only runs the callbacks; on a board
+without one, nobody keeps it apart from Linux. Timing Lab shows the difference: with the GUI drawing
+on a single core, the <code>Timer</code> thread and a thread calling <code>time.sleep_ms(10)</code> spread alike, the
+count of expiries stays whole.</p>
+<p>Two things in MicroPython's Unix port made it worse, and are handled here:</p>
+<ul>
+<li><code>time.sleep_ms()</code> slept in steps of 0.5 ms and took the GIL back after each one: 20 times for
+  10 ms. On a single core each of those waited for the thread holding the GIL, and a thread's
+  <code>sleep_ms(10)</code> took 33 ms on average and up to 640 ms. <code>modules/linuxmachine/linux_delay.c</code>
+  sleeps in steps of up to 10 ms, the GIL released for each, Ctrl-C and scheduled callbacks still
+  handled between steps: 10.7 ms on average, 13 ms at most, measured the same way.</li>
+<li><code>time.sleep_us()</code> keeps the GIL while it sleeps: other threads wait. The <code>Timer</code> thread sleeps
+  with <code>sleep_ms()</code> and uses <code>sleep_us()</code> only for the last fraction of a millisecond. A program's
+  own threads should do the same for any sleep longer than a millisecond.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

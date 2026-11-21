@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://copper-and-code.github.io/lvgl-mpy-linux/stm32mp157c-dk2/">
+        <link rel="canonical" href="https://copper-and-code.github.io/copper-and-code-linux-boards/stm32mp157c-dk2/">
       
       
         <link rel="prev" href="../display-driver/">
       
       
-        <link rel="next" href="../retro/">
+        <link rel="next" href="../machine-linux/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>The STM32MP157C-DK2 and its Cortex-M4 - lvgl-mpy-linux</title>
+        <title>The STM32MP157C-DK2 and its Cortex-M4 - copper-and-code-linux-boards</title>
       
     
     
@@ -90,7 +90,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="lvgl-mpy-linux" class="md-header__button md-logo" aria-label="lvgl-mpy-linux" data-md-component="logo">
+    <a href=".." title="copper-and-code-linux-boards" class="md-header__button md-logo" aria-label="copper-and-code-linux-boards" data-md-component="logo">
       
   <img src="../images/logo.svg" alt="logo">
 
@@ -103,7 +103,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            lvgl-mpy-linux
+            copper-and-code-linux-boards
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -218,12 +218,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="lvgl-mpy-linux" class="md-nav__button md-logo" aria-label="lvgl-mpy-linux" data-md-component="logo">
+    <a href=".." title="copper-and-code-linux-boards" class="md-nav__button md-logo" aria-label="copper-and-code-linux-boards" data-md-component="logo">
       
   <img src="../images/logo.svg" alt="logo">
 
     </a>
-    lvgl-mpy-linux
+    copper-and-code-linux-boards
   </label>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -582,6 +582,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../machine-linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    machine on Linux's drivers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../retro/" class="md-nav__link">
         
   
@@ -636,7 +663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="https://github.com/Copper-And-Code/lvgl-mpy-linux" class="md-nav__link">
+      <a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards" class="md-nav__link">
         
   
   
@@ -663,14 +690,14 @@
   
   
     <li class="md-nav__item">
-      <a href="https://copper-and-code.github.io/lvgl-mpy-studio/" class="md-nav__link">
+      <a href="https://copper-and-code.github.io/copper-and-code-studio/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    LVGL MPY Studio
+    Copper and Code Studio
   
 
     
@@ -906,7 +933,7 @@ on the ST wiki.</p>
 </tr>
 <tr>
 <td>Gamepads</td>
-<td>USB, and Bluetooth with limits. OpenSTLinux's kernel lacks the drivers: <code>scripts/build_kmods.sh</code> builds <code>xpad</code> (X-input), <code>hid-nintendo</code> (Switch mode), <code>uhid</code> and <code>hidp</code> (Bluetooth input) from ST's kernel at the image's tag with the board's own configuration, and <code>deploy.sh</code> installs them. A gamepad's Home button opens the app menu; in the menu and the Games list the d-pad, hat or stick move, A, B or Start press, Select goes back. Settings → Controllers pairs Bluetooth controllers. Tried with an 8BitDo SN30 Pro+: over USB it works; over Bluetooth in Switch mode it works after pairing but not when it connects again by itself (hid-nintendo gets no answer to its first commands), and in D-input mode it pairs without bonding, which BlueZ refuses for input devices (<code>ClassicBondedOnly</code>, kept on against keystroke injection)</td>
+<td>USB and Bluetooth. OpenSTLinux's kernel lacks the drivers: <code>scripts/build_kmods.sh</code> builds <code>xpad</code> (X-input), <code>hid-nintendo</code> (Switch mode), <code>uhid</code> and <code>hidp</code> (Bluetooth input) from ST's kernel at the image's tag with the board's own configuration, and <code>deploy.sh</code> installs them. A gamepad's Home button opens the app menu; in the menu and the Games list the d-pad, hat or stick move, A, B or Start press, Select goes back. Settings → Controllers pairs Bluetooth controllers. Tried with an 8BitDo SN30 Pro+ (firmware 6.01) over USB and over Bluetooth in Switch mode (Start to switch it on). When it connects again by itself it answers none of hid-nintendo's commands and goes silent once told to send full reports; our hid-nintendo carries a change (<code>scripts/kmods/hid-nintendo-simple-reports.patch</code>): one read first, and without an answer it reads the controller's simple reports (buttons, d-pad, sticks; no motion sensors, battery or rumble). It is ready about 2 seconds after it connects</td>
 </tr>
 <tr>
 <td>USB mouse</td>

@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://copper-and-code.github.io/lvgl-mpy-linux/examples/">
+        <link rel="canonical" href="https://copper-and-code.github.io/copper-and-code-linux-boards/examples/">
       
       
         <link rel="prev" href="../stm32mp135f-dk-install/">
@@ -27,7 +27,7 @@
     
     
       
-        <title>Examples - lvgl-mpy-linux</title>
+        <title>Examples - copper-and-code-linux-boards</title>
       
     
     
@@ -90,7 +90,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="lvgl-mpy-linux" class="md-header__button md-logo" aria-label="lvgl-mpy-linux" data-md-component="logo">
+    <a href=".." title="copper-and-code-linux-boards" class="md-header__button md-logo" aria-label="copper-and-code-linux-boards" data-md-component="logo">
       
   <img src="../images/logo.svg" alt="logo">
 
@@ -103,7 +103,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            lvgl-mpy-linux
+            copper-and-code-linux-boards
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -218,12 +218,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="lvgl-mpy-linux" class="md-nav__button md-logo" aria-label="lvgl-mpy-linux" data-md-component="logo">
+    <a href=".." title="copper-and-code-linux-boards" class="md-nav__button md-logo" aria-label="copper-and-code-linux-boards" data-md-component="logo">
       
   <img src="../images/logo.svg" alt="logo">
 
     </a>
-    lvgl-mpy-linux
+    copper-and-code-linux-boards
   </label>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -408,6 +408,17 @@
     <span class="md-ellipsis">
       
         Games
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ftp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FTP Server
       
     </span>
   </a>
@@ -615,6 +626,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../machine-linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    machine on Linux's drivers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../retro/" class="md-nav__link">
         
   
@@ -669,7 +707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="https://github.com/Copper-And-Code/lvgl-mpy-linux" class="md-nav__link">
+      <a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards" class="md-nav__link">
         
   
   
@@ -696,14 +734,14 @@
   
   
     <li class="md-nav__item">
-      <a href="https://copper-and-code.github.io/lvgl-mpy-studio/" class="md-nav__link">
+      <a href="https://copper-and-code.github.io/copper-and-code-studio/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    LVGL MPY Studio
+    Copper and Code Studio
   
 
     
@@ -802,6 +840,17 @@
     <span class="md-ellipsis">
       
         Games
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ftp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FTP Server
       
     </span>
   </a>
@@ -931,14 +980,14 @@
 
 
 <h1 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h1>
-<p>Each example is an LVGL MPY Studio project (<code>project.json</code>, with its Python modules inside), made
+<p>Each example is a Copper and Code Studio project (<code>project.json</code>, with its Python modules inside), made
 with the Studio's MCP tools. Open it in the Studio, try it in the simulator (demo data stands in for
 the network and the sound), connect to the board and run it. To have it in the home screen's menu,
 add it to <code>settings.json</code>, section <code>home</code>.</p>
 <p>Each example has two projects with the same Python modules: <code>project.json</code> for 480×272 (STM32MP135F-DK)
 and <code>project-800x480.json</code> for 800×480 (STM32MP157C-DK2). Sizes drawn by the code follow the widgets,
 so the modules fit both.</p>
-<p>Source: <a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples">examples on GitHub</a>.</p>
+<p>Source: <a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples">examples on GitHub</a>.</p>
 <h2 id="weather">Weather<a class="headerlink" href="#weather" title="Permanent link">&para;</a></h2>
 <p><img alt="Weather" src="../images/weather.png" /> <img alt="Weather settings" src="../images/weather-settings.png" /></p>
 <p>Weather now and for the next five days from <a href="https://open-meteo.com">Open-Meteo</a> (no account, no
@@ -946,49 +995,61 @@ key), with icons drawn by LVGL objects from the WMO weather code: no image files
 finds the place by name and sets the units, the update interval and the night: by default the
 backlight goes down to 20% from 23:00 to 05:30, in the place's own time. <code>curl</code> downloads in the
 background, so the screen never waits.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/weather">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/weather">Source</a></p>
 <h2 id="web-radio">Web radio<a class="headerlink" href="#web-radio" title="Permanent link">&para;</a></h2>
 <p><img alt="Web radio" src="../images/web-radio.png" /></p>
-<p>Internet radio stations, built in or from a <code>stations.txt</code>. GStreamer's <code>gst-play-1.0</code> plays the
+<p>Internet radio stations, built in or from a <code>stations.txt</code>, which the Find page fills from the
+<a href="https://www.radio-browser.info">Radio Browser</a> catalogue by country, region, language and genre. GStreamer's <code>gst-play-1.0</code> plays the
 stream in the background through <code>linuxproc.Process</code>; the app connects to the Wi-Fi of the Settings
 app by itself. Needs a sound card: a USB audio adapter is enough.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/web-radio">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/web-radio">Source</a></p>
 <h2 id="mp3-player">MP3 player<a class="headerlink" href="#mp3-player" title="Permanent link">&para;</a></h2>
 <p><img alt="MP3 player" src="../images/mp3-player.png" /></p>
 <p>The songs of the <code>music</code> folder, with titles and artists from their ID3 tags: play, pause, previous,
 next, volume, progress. The same player module as the radio.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/mp3-player">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/mp3-player">Source</a></p>
 <h2 id="settings">Settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h2>
 <p><img alt="Settings" src="../images/settings.png" /></p>
 <p>Wi-Fi: scan, choose, type the password on the touch keyboard, connect; and the layout of a
 keyboard plugged into the board. The choices go to <code>settings.json</code>, where every app finds it through <code>mpy_settings</code> and <code>mpy_wifi.ensure()</code>.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/settings">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/settings">Source</a></p>
 <h2 id="shell">Shell<a class="headerlink" href="#shell" title="Permanent link">&para;</a></h2>
 <p>A terminal on the display, the home screen at power-on: built-in commands, the <code>vi</code> and <code>edit</code>
 editors, Python programs and Linux programs on a pseudo-terminal, with a USB keyboard plugged into the
 board or the keyboard of the serial or TCP terminal. A tap opens the app menu.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/shell-linux">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/shell-linux">Source</a></p>
 <h2 id="games">Games<a class="headerlink" href="#games" title="Permanent link">&para;</a></h2>
 <p><img alt="Games" src="../images/games.png" /></p>
 <p>Your games, full screen, through libretro cores: the list is LVGL, the game is <code>mpy-retro</code>, a
 frontend in C that has the screen, the sound and the keyboard while it runs, then gives them back.
 SNES (Snes9x2005), C64 (the core of the STM32H743 port) and Neo Geo and arcade (FBNeo) on the
-STM32MP157C-DK2, on its panel or a monitor. Arrows and Enter,
+STM32MP157C-DK2, on its panel or a monitor; SNES on the STM32MP135F-DK too. Arrows and Enter,
 the mouse or a tap choose; Esc, the Windows key or Select + Start come back. See
 <a href="../retro/">Games: mpy-retro</a>.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/games">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/games">Source</a></p>
+<h2 id="ftp-server">FTP Server<a class="headerlink" href="#ftp-server" title="Permanent link">&para;</a></h2>
+<p><img alt="FTP Server" src="../images/ftp-server.png" /></p>
+<p>The board's files for a PC on the network: the whole SD card, the MicroPython folder or the Studio
+apps, with FileZilla, WinSCP, Windows Explorer or a file manager. The screen shows the address, the
+user and the password (kept in <code>settings.json</code>), who is connected and what moves. A MicroPython
+server polled from the GUI's timer: files move in pieces, so the screen never waits; about 4 MB/s
+to the card over the USB network. Plain FTP: for your own network.
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/ftp-server">Source</a></p>
 <h2 id="machine-the-hardware">machine: the hardware<a class="headerlink" href="#machine-the-hardware" title="Permanent link">&para;</a></h2>
 <p>Apps that show MicroPython's <code>machine</code> API on a Linux board, in
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine"><code>examples/machine</code></a>.
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine"><code>examples/machine</code></a>.
 Their hardware code is the standard API, the same as on a microcontroller; on the STM32MP157C-DK2
-<code>Pin</code> is served by Linux and the rest by the Cortex-M4.</p>
+<code>Pin</code> is served by Linux and the rest by the Cortex-M4, on the STM32MP135F-DK all of it by Linux's
+own drivers (<a href="../machine-linux/">machine on Linux's drivers</a>). Board Explorer, Timing Lab, Web Panel,
+Data Logger and System Monitor run on both boards; the oscilloscope, the logic analyser and the tone
+player need the Cortex-M4.</p>
 <h3 id="board-explorer">Board Explorer<a class="headerlink" href="#board-explorer" title="Permanent link">&para;</a></h3>
 <p><img alt="Board Explorer" src="../images/board-explorer.png" /></p>
 <p>The Arduino connector on the screen: tap a pin, make it an input, an output, an analog input or
 the PWM, see its value live. The Cortex-M4 reads back the level of an output Linux drives and
 measures its own PWM on the pin; the LEDs come from Linux's LED class, <code>machine.Pin</code> and the M4.
 Nothing to wire.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/board-explorer">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine/board-explorer">Source</a></p>
 <h3 id="oscilloscope">Oscilloscope<a class="headerlink" href="#oscilloscope" title="Permanent link">&para;</a></h3>
 <p><img alt="Oscilloscope" src="../images/oscilloscope-simulator.png" /></p>
 <p>One of A0 to A5 on a chart, 0.25 to 20 ms a division, triggered on an edge, with minimum, maximum,
@@ -996,7 +1057,7 @@ peak to peak, frequency and duty, and a 1 kHz test signal on D6: one wire from D
 square wave is on the screen. The Cortex-M4's TIM2 paces the conversions in hardware, up to
 100,000 samples a second; Python starts a capture, collects it when it is done and draws it, so
 the screen never waits. (Above: the Studio simulator.)
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/oscilloscope">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine/oscilloscope">Source</a></p>
 <h3 id="timing-lab">Timing Lab<a class="headerlink" href="#timing-lab" title="Permanent link">&para;</a></h3>
 <p><img alt="Timing Lab" src="../images/timing-lab.png" /></p>
 <p>Something every 10 ms, three ways: a Python thread that sleeps, <code>machine.Timer</code> callbacks, and the
@@ -1004,37 +1065,37 @@ expiries the Cortex-M4 counts. A histogram shows the intervals; a switch loads L
 processes. Measured: even idle, Linux stretches some intervals to tens of milliseconds (the GIL
 while the screen is drawn), loaded to over 100 ms; the M4's count stays whole, with no drift.
 What must happen at an exact time belongs on the M4. Nothing to wire.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/timing-lab">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine/timing-lab">Source</a></p>
 <h3 id="logic-analyzer">Logic Analyzer<a class="headerlink" href="#logic-analyzer" title="Permanent link">&para;</a></h3>
 <p><img alt="Logic Analyzer" src="../images/logic-analyzer.png" /></p>
 <p>The board watches its own buses, no wires: the Cortex-M4 samples GPIO port E at up to 4 MHz while
 it sends a UART message, an SPI transfer or the PWM, started with the capture; Python decodes them
 (UART 8N1, SPI mode 0, PWM) and draws one row a pin, the bytes over their frames.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/logic-analyzer">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine/logic-analyzer">Source</a></p>
 <h3 id="web-panel">Web Panel<a class="headerlink" href="#web-panel" title="Permanent link">&para;</a></h3>
 <p><img alt="Web Panel" src="../images/web-panel.png" /></p>
 <p>The board serves a page to the phones of its network: scan the QR code, type the PIN on the screen,
 see A0 to A5 live, switch the LEDs, set the PWM, send a message to the board's screen, which shows
 what each browser did. A few lines of MicroPython, polled from the GUI's timer: about 16 ms a
 request. (Above: the Studio simulator.)
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/web-panel">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine/web-panel">Source</a></p>
 <h3 id="data-logger">Data Logger<a class="headerlink" href="#data-logger" title="Permanent link">&para;</a></h3>
 <p><img alt="Data Logger" src="../images/data-logger.png" /></p>
 <p>The CPU's temperature (Linux), A0 and the chip's reference (the Cortex-M4), at the pace of an M4
 timer, into a CSV file dated by the network's clock, on a chart, and for a browser to download.
 Each part where it is best: the M4 keeps the pace, Linux keeps the files and the time.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/data-logger">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine/data-logger">Source</a></p>
 <h3 id="tone-player">Tone Player<a class="headerlink" href="#tone-player" title="Permanent link">&para;</a></h3>
 <p><img alt="Tone Player" src="../images/tone-player.png" /></p>
 <p>A keyboard on the screen and tunes the Cortex-M4 plays by itself, on time, on D6 (a passive
 buzzer): Python hands over the whole score and lights each key as the M4 plays it. Without a
 buzzer the M4 measures each note on the pin.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/tone-player">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine/tone-player">Source</a></p>
 <h3 id="system-monitor">System Monitor<a class="headerlink" href="#system-monitor" title="Permanent link">&para;</a></h3>
 <p><img alt="System Monitor" src="../images/system-monitor.png" /></p>
 <p>The board's two halves live: Linux's cores, memory, temperature and network from its own files,
 and the Cortex-M4's state, firmware, channel and the time of a request there and back.
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/examples/machine/system-monitor">Source</a></p>
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/examples/machine/system-monitor">Source</a></p>
 
 
 

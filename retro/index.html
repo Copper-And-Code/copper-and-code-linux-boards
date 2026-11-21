@@ -10,10 +10,10 @@
       
       
       
-        <link rel="canonical" href="https://copper-and-code.github.io/lvgl-mpy-linux/retro/">
+        <link rel="canonical" href="https://copper-and-code.github.io/copper-and-code-linux-boards/retro/">
       
       
-        <link rel="prev" href="../stm32mp157c-dk2/">
+        <link rel="prev" href="../machine-linux/">
       
       
         <link rel="next" href="../ricognizione/">
@@ -27,7 +27,7 @@
     
     
       
-        <title>Games: mpy-retro - lvgl-mpy-linux</title>
+        <title>Games: mpy-retro - copper-and-code-linux-boards</title>
       
     
     
@@ -90,7 +90,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="lvgl-mpy-linux" class="md-header__button md-logo" aria-label="lvgl-mpy-linux" data-md-component="logo">
+    <a href=".." title="copper-and-code-linux-boards" class="md-header__button md-logo" aria-label="copper-and-code-linux-boards" data-md-component="logo">
       
   <img src="../images/logo.svg" alt="logo">
 
@@ -103,7 +103,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            lvgl-mpy-linux
+            copper-and-code-linux-boards
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -218,12 +218,12 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="lvgl-mpy-linux" class="md-nav__button md-logo" aria-label="lvgl-mpy-linux" data-md-component="logo">
+    <a href=".." title="copper-and-code-linux-boards" class="md-nav__button md-logo" aria-label="copper-and-code-linux-boards" data-md-component="logo">
       
   <img src="../images/logo.svg" alt="logo">
 
     </a>
-    lvgl-mpy-linux
+    copper-and-code-linux-boards
   </label>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -378,6 +378,33 @@
     
   
     The STM32MP157C-DK2 and its Cortex-M4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../machine-linux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    machine on Linux's drivers
   
 
     
@@ -564,7 +591,7 @@
   
   
     <li class="md-nav__item">
-      <a href="https://github.com/Copper-And-Code/lvgl-mpy-linux" class="md-nav__link">
+      <a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards" class="md-nav__link">
         
   
   
@@ -591,14 +618,14 @@
   
   
     <li class="md-nav__item">
-      <a href="https://copper-and-code.github.io/lvgl-mpy-studio/" class="md-nav__link">
+      <a href="https://copper-and-code.github.io/copper-and-code-studio/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    LVGL MPY Studio
+    Copper and Code Studio
   
 
     
@@ -765,7 +792,7 @@ frame takes 3.6 ms to draw, and three buffers keep a frame that comes while anot
 blank (the few missing come from 60.04 Hz of the SNES against 60.00 of the panel).</p>
 <h2 id="the-c64">The C64<a class="headerlink" href="#the-c64" title="Permanent link">&para;</a></h2>
 <p>The C64 core of the same STM32H743 and RP2350 projects, in this repository as a libretro core
-(<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64">cores/c64</a>): 6510, CIAs,
+(<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/cores/c64">cores/c64</a>): 6510, CIAs,
 VIC-II, SID, the emulated 1541 and cartridges. <code>.prg</code>, <code>.d64</code> (loaded and run by itself) and <code>.crt</code>
 files start from the Games list. On the STM32MP157C-DK2 it runs at 50.1 emulated and 49.9 shown
 frames a second (the panel switched to 50 Hz), 5.4 ms to draw a frame; while a disk loads, three
@@ -775,12 +802,13 @@ left Ctrl C=, Home CLR/HOME, Insert £, Page Up ↑, the backquote ←, F2 F4 F6
 function keys. The joystick is in port 2: a gamepad, or the keypad's 8 4 6 2 and 0; the gamepad's
 Select moves it to port 1. The Windows key, or Select and Start together, come back to the list.</p>
 <p>The Commodore ROMs are the user's, in <code>/usr/local/mpy/retro/system/c64/</code> (see
-<a href="https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64">the core's notes</a>). The
+<a href="https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/cores/c64">the core's notes</a>). The
 demo used to check it, <a href="https://www.linusakesson.net/scene/nine/">Nine</a> by Linus Åkesson, comes
 from its author's page.</p>
 <h2 id="neo-geo-and-the-arcade-fbneo">Neo Geo and the arcade: FBNeo<a class="headerlink" href="#neo-geo-and-the-arcade-fbneo" title="Permanent link">&para;</a></h2>
 <p>FBNeo, the libretro core of reference for the Neo Geo, built for our CPU (<code>platform=rpi2</code>: Cortex-A7
-with NEON) with Cyclone, its 68000 in ARM assembly. The full build, which also brings CPS1, CPS2,
+with NEON) with Cyclone, its 68000 in ARM assembly, which <code>options.cfg</code> turns on (FBNeo leaves it
+off by default, for savestates that match other platforms'; mpy-retro makes none). The full build, which also brings CPS1, CPS2,
 Sega System 16 and the other arcade systems FBNeo knows; romsets are FBNeo's (<code>.zip</code>), the BIOS
 <code>neogeo.zip</code> goes next to the Neo Geo games and is not listed. The Neo Geo runs at 59.19 frames a
 second; measured on the STM32MP157C-DK2:</p>
@@ -825,7 +853,7 @@ second; measured on the STM32MP157C-DK2:</p>
 </tr>
 </tbody>
 </table>
-<p>(As fast as it goes: the first four over their first 15 seconds, mostly the BIOS screen and
+<p>(Measured before Cyclone was on; see below for what it changes.) (As fast as it goes: the first four over their first 15 seconds, mostly the BIOS screen and
 the demo; the two fighting games over a minute, with the sound interpolation off. With the sound: a
 minute each; the emulated frames count the second a game takes to start.)</p>
 <p>Most games keep their speed as they are. The heaviest ones (the fighting games of the late 1990s) have scenes beyond a
@@ -834,6 +862,38 @@ a row), and a game's own options can lower the emulated 68000's clock, as FBNeo 
 <code>GAME.opt</code> next to <code>GAME.zip</code> with <code>fbneo-cpu-speed-adjust = "85%"</code>. Then the 1999 fighting game keeps 59.0 frames
 a second, about four in five of them drawn. <code>options.cfg</code> turns FBNeo's sound interpolation off for
 all games (it costs what those games need).</p>
+<p>Two changes take a third off the time of a frame. Cyclone instead of FBNeo's 68000 in C; and FBNeo's
+Z80, which at every memory access and opcode called two functions that only the ZX Spectrum's memory
+contention needs, now has them inline (<code>scripts/retro/fbneo-z80-inline.patch</code>, applied by
+<code>build_retro.sh</code>). A fighting game of 1992, the core's time a frame (<code>perf</code> showed where it went):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align: right;">Its demo, as fast as it goes</th>
+<th style="text-align: right;">A minute of fights, with the sound: emulated, shown a second</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Before</td>
+<td style="text-align: right;">14.4 ms</td>
+<td style="text-align: right;">54.7, 40.9 (77 times the sound ran dry)</td>
+</tr>
+<tr>
+<td>Cyclone</td>
+<td style="text-align: right;">10.1 ms</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Cyclone and the Z80 inline</td>
+<td style="text-align: right;">9.3 ms</td>
+<td style="text-align: right;">59.1, 58.9 (the sound never ran dry)</td>
+</tr>
+</tbody>
+</table>
+<p>mpy-retro prints these figures when a game ends; the Games app keeps the last game's in
+<code>/run/mpy-retro.log</code>.</p>
 <p>FBNeo is fetched at a fixed commit and built in <code>work/</code>; it has non-commercial terms. The BIOS and
 the games are the user's.</p>
 <h2 id="the-frontend">The frontend<a class="headerlink" href="#the-frontend" title="Permanent link">&para;</a></h2>
