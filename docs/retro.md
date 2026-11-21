@@ -25,7 +25,7 @@ blank (the few missing come from 60.04 Hz of the SNES against 60.00 of the panel
 ## The C64
 
 The C64 core of the same STM32H743 and RP2350 projects, in this repository as a libretro core
-([cores/c64](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64)): 6510, CIAs,
+([cores/c64](https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/cores/c64)): 6510, CIAs,
 VIC-II, SID, the emulated 1541 and cartridges. `.prg`, `.d64` (loaded and run by itself) and `.crt`
 files start from the Games list. On the STM32MP157C-DK2 it runs at 50.1 emulated and 49.9 shown
 frames a second (the panel switched to 50 Hz), 5.4 ms to draw a frame; while a disk loads, three
@@ -37,7 +37,7 @@ function keys. The joystick is in port 2: a gamepad, or the keypad's 8 4 6 2 and
 Select moves it to port 1. The Windows key, or Select and Start together, come back to the list.
 
 The Commodore ROMs are the user's, in `/usr/local/mpy/retro/system/c64/` (see
-[the core's notes](https://github.com/Copper-And-Code/lvgl-mpy-linux/tree/main/cores/c64)). The
+[the core's notes](https://github.com/Copper-And-Code/copper-and-code-linux-boards/tree/main/cores/c64)). The
 demo used to check it, [Nine](https://www.linusakesson.net/scene/nine/) by Linus Åkesson, comes
 from its author's page.
 

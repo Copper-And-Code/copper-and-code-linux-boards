@@ -26,7 +26,8 @@ if [ -e /lib/firmware/mpy_m4.elf ]; then
     say "removed the Cortex-M4 firmware"
 fi
 
-if grep -q "lvgl-mpy-linux" /etc/bluetooth/main.conf 2>/dev/null; then
+# Our file names the project: the repository's name now, or its old one on boards installed before.
+if grep -q -e "copper-and-code-linux-boards" -e "lvgl-mpy-linux" /etc/bluetooth/main.conf 2>/dev/null; then
     rm -f /etc/bluetooth/main.conf
     say "removed the Bluetooth configuration"
 fi

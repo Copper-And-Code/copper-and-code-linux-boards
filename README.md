@@ -1,11 +1,11 @@
-# lvgl-mpy-linux
+# copper-and-code-linux-boards
 
 **Turn a Linux board into a MicroPython board with a touch screen, where the GUI and the operating
 system work as one.** Write the GUI in Python with LVGL, use `mpremote` as on any MicroPython board,
 and let every button reach what Linux can do: files, network, audio, GPIO, and every program the
 board can run.
 
-Website: **https://copper-and-code.github.io/lvgl-mpy-linux/**
+Website: **https://copper-and-code.github.io/copper-and-code-linux-boards/**
 
 | | |
 |---|---|
@@ -27,7 +27,7 @@ On a Linux board the graphical app and the system usually live apart. On one sid
 (Qt, GTK, a web page), on the other the programs and services of the system; between them, glue in
 C++, D-Bus or shell scripts. That glue is where most makers stop.
 
-lvgl-mpy-linux puts the GUI **inside** the system. The screen is LVGL, written in Python, and the
+copper-and-code-linux-boards puts the GUI **inside** the system. The screen is LVGL, written in Python, and the
 same Python code reaches everything Linux can do:
 
 | A touch on the screen... | ...uses the operating system |

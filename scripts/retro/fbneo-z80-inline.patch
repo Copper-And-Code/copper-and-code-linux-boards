@@ -27,7 +27,7 @@ index 3e5e45e..64fc1ff 100644
 +
 +// Without the ZX Spectrum's memory contention (ULA_VARIANT_NONE: every other machine) store_rwinfo
 +// does nothing and eat_cycles only counts the cycles; they are called at every memory access and
-+// every opcode, so these fast paths are inline: the same work, without a call (lvgl-mpy-linux).
++// every opcode, so these fast paths are inline: the same work, without a call (copper-and-code-linux-boards).
 +static inline void eat_cycles(int type, int cycles)
 +{
 +	if (m_ula_variant != ULA_VARIANT_NONE || type == CYCLES_UNCONTENDED) {

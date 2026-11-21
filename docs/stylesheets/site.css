@@ -75,7 +75,7 @@
   }
 }
 
-/* lvgl-mpy-linux: screenshots of the panel, 480x272 */
+/* copper-and-code-linux-boards: screenshots of the panel, 480x272 */
 .shot-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

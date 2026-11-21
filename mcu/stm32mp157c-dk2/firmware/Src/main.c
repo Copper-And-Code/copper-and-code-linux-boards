@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Cortex-M4 firmware of lvgl-mpy-linux for the STM32MP157C-DK2: it serves machine.I2C, ADC,
+// Cortex-M4 firmware of copper-and-code-linux-boards for the STM32MP157C-DK2: it serves machine.I2C, ADC,
 // PWM, SPI, UART and Timer to MicroPython on Linux, through the protocol of mpy_m4_protocol.h over
 // RPMsg (a raw channel, /dev/rpmsgN on Linux, and a virtual serial port, /dev/ttyRPMSGN).
 //
