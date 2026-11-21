@@ -24,7 +24,7 @@ board can run.
 </figure>
 </div>
 
-All these apps were built with [LVGL MPY Studio](https://copper-and-code.github.io/lvgl-mpy-studio/)
+All these apps were built with [Copper and Code Studio](https://copper-and-code.github.io/copper-and-code-studio/)
 through its MCP tools: an AI assistant designed the screens, wrote the code, tried it in the
 Studio's simulator and ran it on the board.
 
@@ -66,7 +66,7 @@ It is made for makers, so it keeps what makes microcontrollers easy:
   ESP32 runs unchanged on a Linux board with a bigger screen, and can then grow into Linux.
 - **An appliance, not a desktop.** At power-on a shell on the display; a tap opens a menu of apps
   (weather, radio) and power off. The board becomes a device you build.
-- **Apps written with an assistant, and checked.** LVGL MPY Studio's MCP tools let an AI assistant
+- **Apps written with an assistant, and checked.** Copper and Code Studio's MCP tools let an AI assistant
   write the glue between the GUI and the system; the simulator and the tests on the board check it.
 
 <div class="home-grid" markdown>
@@ -99,9 +99,9 @@ Measurements, test results and known issues, with the logs of every check on the
 </div>
 </div>
 
-## LVGL MPY Studio and its MCP tools
+## Copper and Code Studio and its MCP tools
 
-[LVGL MPY Studio](https://copper-and-code.github.io/lvgl-mpy-studio/) designs LVGL screens by drag
+[Copper and Code Studio](https://copper-and-code.github.io/copper-and-code-studio/) designs LVGL screens by drag
 and drop, runs them in a simulator and uploads them to the board. Import the board definition
 (`studio-board/boards/stm32mp135f_dk_480x272.json`) in its board manager and the Linux board is one
 more target.
@@ -114,7 +114,7 @@ here were made.
 ## How it works
 
 ```text
- PC: LVGL MPY Studio / mpremote
+ PC: Copper and Code Studio / mpremote
         │ USB serial (CDC-ACM)        │ TCP over USB network
         └──────────────┬──────────────┘
                  mpy-repl-hub            one REPL for both, Ctrl-C as a signal, systemd watchdog

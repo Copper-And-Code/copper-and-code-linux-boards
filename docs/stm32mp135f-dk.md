@@ -4,7 +4,7 @@ This is a personal project by Nunzio Raciti and is not affiliated with or endors
 STMicroelectronics.
 
 Target: STM32MP135F-DK, MB1635, running MicroPython with LVGL and controlled by
-LVGL MPY Studio. The ST-LINK virtual COM port remains the Linux console and is never reused as
+Copper and Code Studio. The ST-LINK virtual COM port remains the Linux console and is never reused as
 the MicroPython REPL.
 
 ## Current status
@@ -14,10 +14,10 @@ the MicroPython REPL.
 - Phase 2 system preparation: complete.
 - Phase 3 Cortex-A7 MicroPython/LVGL cross-build: complete.
 - Phase 4 MCU-style REPL: Linux HIL tests, performance, stress and reboot validation complete.
-- Phase 5 DRM display, Goodix touch and LVGL MPY Studio demo: complete, including rendering
+- Phase 5 DRM display, Goodix touch and Copper and Code Studio demo: complete, including rendering
   performance and repeated soft-reset resource checks.
 - The physical B1 safe-mode check passes; the Windows HIL checkpoint remains open.
-- Phase 6 LVGL MPY Studio: the Studio imports the board definition in `studio-board/` from a file.
+- Phase 6 Copper and Code Studio: the Studio imports the board definition in `studio-board/` from a file.
 - Phase 7 start-up and robustness: ready screen, REPL independent of the display, systemd watchdog
   on the REPL hub, journal in RAM; the 10 power cycles by hand remain.
 - Phase 8 packaging: `scripts/deploy.sh`, `linux/install.sh` and `linux/uninstall.sh`, checked
@@ -331,7 +331,7 @@ Validation results on the physical panel:
 | Test | Result |
 |---|---|
 | Red, green, blue and white bars, orientation and title | Visually confirmed |
-| LVGL MPY Studio project upload and execution | `LVGL_MPY_STUDIO_APP_READY buffers=1 touch=True` |
+| Copper and Code Studio project upload and execution | `LVGL_MPY_STUDIO_APP_READY buffers=1 touch=True` |
 | Studio button press changes the label and runs its handler | 24 `STM32MP135_TOUCH_OK` events after the final evdev correction; no errors |
 | Quick-tap press/release delivery | 11 matched `DOWN`/`UP`/`CLICK` sequences; callback approximately 0.4–2.0 ms |
 | Full-screen color animation | 582 frames in 10.011 s: **58.14 FPS**, 100% full-frame coverage |
@@ -437,7 +437,7 @@ means changing the image (phase 9). Results: `docs/log/stm32mp135f-dk-phase7.txt
 
 ## Differences from the MCU boards
 
-What LVGL MPY Studio, `mpremote` and an application see, compared with the MicroPython MCU boards
+What Copper and Code Studio, `mpremote` and an application see, compared with the MicroPython MCU boards
 of `mpy-lvgl-boards`:
 
 | Topic | MCU boards | STM32MP135F-DK |
@@ -477,13 +477,13 @@ of `mpy-lvgl-boards`:
 (frozen too), with the keyboard of the serial or TCP terminal: built-in commands, the `edit` and `vi`
 editors in `fs/bin`, Python programs (`name.py` in `fs/bin`, or `python file.py`) and Linux programs.
 
-A tap on the terminal opens the app menu: the LVGL MPY Studio apps listed in `settings.json`,
+A tap on the terminal opens the app menu: the Copper and Code Studio apps listed in `settings.json`,
 section `home` (`{"apps": [{"name": ..., "path": ".../app_main.py"}]}`), Shell, and Power off,
 which asks first and then runs `systemctl poweroff`. An app starts in
 a fresh process (`mpyrepl.restart()`, a soft reset), so apps never share modules; a small home tab
 at the top centre brings the shell back the same way. Every soft reset stops the Linux programs the
 application started with `linuxproc.Process` (a radio stream does not go on playing).
 
-LVGL MPY Studio and mpremote take the board as on the MCU ports: Ctrl-A on an empty shell line
+Copper and Code Studio and mpremote take the board as on the MCU ports: Ctrl-A on an empty shell line
 hands over to the raw REPL, and after a soft reset asked from the raw REPL `main.py` does not run.
 Results: `docs/log/stm32mp135f-dk-home.txt`.

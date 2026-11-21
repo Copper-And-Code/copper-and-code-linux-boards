@@ -2,7 +2,7 @@
 
 ![The oscilloscope in the Studio simulator, with its test signal](../../../docs/images/oscilloscope-simulator.png)
 
-An oscilloscope on the STM32MP157C-DK2's screen, made with LVGL MPY Studio and its MCP tools: one
+An oscilloscope on the STM32MP157C-DK2's screen, made with Copper and Code Studio and its MCP tools: one
 of the analog inputs A0 to A5, 0.25 to 20 ms a division, trigger on a rising or falling edge,
 minimum, maximum, peak to peak, frequency and duty. A switch turns on a test signal, a 1 kHz PWM
 at 25% on D6.
@@ -15,7 +15,7 @@ steps of `ADC.read_timed()`).
 
 ## Try it
 
-1. Open `project.json` in LVGL MPY Studio. In the simulator, A0 shows the test signal when it is on
+1. Open `project.json` in Copper and Code Studio. In the simulator, A0 shows the test signal when it is on
    and A1 a 50 Hz sine.
 2. On the board: one wire from **D6 to A0** on the Arduino connector, turn the test signal on: a
    1 kHz square wave, measured at 1000 Hz and 25%. Without the wire the inputs float near 0 V.

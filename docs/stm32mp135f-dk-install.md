@@ -145,7 +145,7 @@ To upload and run the interactive Studio example, use the matching Studio execut
 profile `stm32mp135f_dk_480x272`:
 
 ```sh
-/opt/devel/lvgl/lvgl-mpy-studio/.venv/bin/lvgl-mpy-studio --language en device run \
+copper-and-code-studio --language en device run \
     examples/stm32mp135f-dk/project.json --port $P
 ```
 

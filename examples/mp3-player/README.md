@@ -1,6 +1,6 @@
 # MP3 player
 
-A touch MP3 player made with LVGL MPY Studio and its MCP tools: a track list read from the
+A touch MP3 player made with Copper and Code Studio and its MCP tools: a track list read from the
 `music/` folder (titles and artists from the ID3 tags), play, pause, previous, next, a progress bar
 and the volume. It shows how a GUI drives a Linux program: `player.py` runs GStreamer's
 `gst-play-1.0` in the background with `linuxproc.Process` and controls it with its keyboard keys.
@@ -19,7 +19,7 @@ screen can be designed and tried without a board.
    mpremote connect /dev/ttyACM2 fs cp song.mp3 :music/
    ```
 
-3. Open `project.json` in LVGL MPY Studio, connect to the board and run it.
+3. Open `project.json` in Copper and Code Studio, connect to the board and run it.
 
 Without a sound card, set `MPY_AUDIO_SINK=fakesink sync=true` in the environment of
 `mpy-repl.service` (a systemd drop-in) to try everything but the sound.

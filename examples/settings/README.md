@@ -1,6 +1,6 @@
 # Settings
 
-The board's settings screen, made with LVGL MPY Studio and its MCP tools. It sets up Wi-Fi: scan,
+The board's settings screen, made with Copper and Code Studio and its MCP tools. It sets up Wi-Fi: scan,
 choose a network, type the password on the touch keyboard, save and connect. And it chooses the
 layout of a keyboard plugged into the board (US or Italian): the REPL hub, which turns its keys into
 text for the shell and the REPL, follows the choice within a second. The Controllers page searches

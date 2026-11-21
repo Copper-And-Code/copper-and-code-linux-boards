@@ -114,7 +114,7 @@ static mp_obj_t mpyrepl_run(mp_obj_t safe_mode) {
 
     int ret = pyexec_file_if_exists("boot.py");
     // As on the MCU ports, main.py runs only for the friendly REPL: after a soft reset asked from
-    // the raw REPL (mpremote, LVGL MPY Studio) the tool gets the REPL, not the application.
+    // the raw REPL (mpremote, Copper and Code Studio) the tool gets the REPL, not the application.
     if (!(ret & PYEXEC_FORCED_EXIT) && !mp_obj_is_true(safe_mode) && pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
         ret = pyexec_file_if_exists("main.py");
     }

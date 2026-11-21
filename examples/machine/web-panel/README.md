@@ -2,7 +2,7 @@
 
 ![Web Panel, in the Studio simulator](../../../docs/images/web-panel.png)
 
-The STM32MP157C-DK2 serves a page to the browsers of its network, made with LVGL MPY Studio and its
+The STM32MP157C-DK2 serves a page to the browsers of its network, made with Copper and Code Studio and its
 MCP tools. Scan the QR code with a phone on the same Wi-Fi (or open the address), type the PIN
 shown on the screen, and:
 

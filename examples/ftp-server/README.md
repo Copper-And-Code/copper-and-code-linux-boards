@@ -5,7 +5,7 @@
 The board's files for a PC on the same network: the whole SD card, the MicroPython folder or the
 Studio apps, with FileZilla, WinSCP, Windows Explorer, the file manager of Linux or macOS, `curl`,
 `lftp` or `ftp`. Copy, download, rename, delete, make and remove folders, resume a broken transfer.
-Made with LVGL MPY Studio and its MCP tools.
+Made with Copper and Code Studio and its MCP tools.
 
 The screen shows the addresses (`ftp://192.168.7.1` over the USB cable, and the Wi-Fi's), the user
 `mpy` and the password, who is connected, the file moving and its speed, the free space on the card
@@ -27,7 +27,7 @@ close the connection; active connections go only to the client's own address.
 ## Try it
 
 - On the board: open `project-800x480.json` (STM32MP157C-DK2) or `project.json` (STM32MP135F-DK)
-  in LVGL MPY Studio and run it. To have it in the home screen's menu, add it to `settings.json`:
+  in Copper and Code Studio and run it. To have it in the home screen's menu, add it to `settings.json`:
   `{"name": "FTP", "path": "/lms_apps/app_.../app_main.py"}` in `home.apps`.
 - From the PC over the USB cable: `ftp://mpy@192.168.7.1/`, or
   `curl --user mpy:PASSWORD ftp://192.168.7.1/usr/local/mpy/fs/`.

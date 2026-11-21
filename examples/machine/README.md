@@ -1,6 +1,6 @@
 # machine examples
 
-Apps that show what MicroPython's `machine` API does on a Linux board, made with LVGL MPY Studio
+Apps that show what MicroPython's `machine` API does on a Linux board, made with Copper and Code Studio
 and its MCP tools. They use the standard API (`Pin`, `ADC`, `PWM`, `I2C`, `SPI`, `UART`,
 `Timer`), so their hardware code is the same as on a microcontroller board; what serves each class
 is the board's business:

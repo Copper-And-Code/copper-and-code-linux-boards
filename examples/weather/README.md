@@ -1,6 +1,6 @@
 # Weather
 
-Weather now and for the next five days, with drawn icons, made with LVGL MPY Studio and its MCP
+Weather now and for the next five days, with drawn icons, made with Copper and Code Studio and its MCP
 tools. Data from [Open-Meteo](https://open-meteo.com): no account and no key, free for
 non-commercial use.
 

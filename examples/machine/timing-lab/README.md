@@ -2,7 +2,7 @@
 
 ![Timing Lab, Linux loaded](../../../docs/images/timing-lab.png)
 
-Something every 10 ms, three ways, on the STM32MP157C-DK2, made with LVGL MPY Studio and its MCP
+Something every 10 ms, three ways, on the STM32MP157C-DK2, made with Copper and Code Studio and its MCP
 tools. Nothing to wire.
 
 | Colour | What | Who keeps the time |

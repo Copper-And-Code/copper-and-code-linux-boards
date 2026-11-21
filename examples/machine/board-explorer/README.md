@@ -2,7 +2,7 @@
 
 ![Board Explorer](../../../docs/images/board-explorer.png)
 
-The STM32MP157C-DK2's Arduino connector on the screen, made with LVGL MPY Studio and its MCP tools.
+The STM32MP157C-DK2's Arduino connector on the screen, made with Copper and Code Studio and its MCP tools.
 Tap a pin and choose what it does; its value is live. Nothing needs to be wired.
 
 | Pins | What you can do | Served by |
@@ -21,7 +21,7 @@ it.
 
 ## On the board
 
-Open `project-800x480.json` in LVGL MPY Studio, connect to the STM32MP157C-DK2 and run it. The first use of
+Open `project-800x480.json` in Copper and Code Studio, connect to the STM32MP157C-DK2 and run it. The first use of
 the M4 starts its firmware (about half a second).
 
 ## On the STM32MP135F-DK
@@ -41,7 +41,7 @@ board with made-up values, `project-800x480.json` the STM32MP157C-DK2.
 The same app runs on the STM32F769I-DISCO with its 800×480 MB1166 display, a microcontroller board
 from [mpy-lvgl-boards](https://github.com/Copper-And-Code/mpy-lvgl-boards): there `machine` is
 MicroPython's own, and the board's description (`mpy_board`, frozen in its firmware) gives the
-Arduino connector. Import the board into LVGL MPY Studio from `studio-board.json` in that board's
+Arduino connector. Import the board into Copper and Code Studio from `studio-board.json` in that board's
 folder, open `project-800x480.json`, pick the board and run.
 
 | Pins | What you can do | Served by |

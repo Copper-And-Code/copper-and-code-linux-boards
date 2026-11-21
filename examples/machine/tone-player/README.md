@@ -2,7 +2,7 @@
 
 ![Tone Player, the Cortex-M4 playing a tune](../../../docs/images/tone-player.png)
 
-A keyboard and a music box on the STM32MP157C-DK2, made with LVGL MPY Studio and its MCP tools. The
+A keyboard and a music box on the STM32MP157C-DK2, made with Copper and Code Studio and its MCP tools. The
 sound comes out of D6 as a square wave: a passive buzzer between D6 and GND, or a small speaker
 through a 100 ohm resistor.
 

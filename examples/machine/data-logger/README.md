@@ -2,7 +2,7 @@
 
 ![Data Logger, in the Studio simulator](../../../docs/images/data-logger.png)
 
-A data logger on the STM32MP157C-DK2, made with LVGL MPY Studio and its MCP tools. Nothing to wire
+A data logger on the STM32MP157C-DK2, made with Copper and Code Studio and its MCP tools. Nothing to wire
 to start with: it logs the CPU's temperature, the voltage on A0 and the chip's internal reference.
 
 Each part does what it does best:

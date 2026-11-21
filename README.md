@@ -14,7 +14,7 @@ Website: **https://copper-and-code.github.io/lvgl-mpy-linux/**
 | ![MP3 player](docs/images/mp3-player.png) | ![Settings](docs/images/settings.png) |
 | [MP3 player](examples/mp3-player): songs from the SD card | [Settings](examples/settings): Wi-Fi for every app |
 
-All these examples were built with [LVGL MPY Studio](https://github.com/Copper-And-Code/lvgl-mpy-studio)
+All these examples were built with [Copper and Code Studio](https://github.com/Copper-And-Code/copper-and-code-studio)
 through its MCP tools: an AI assistant designed the screens, wrote the code, tried it in the
 Studio's simulator and ran it on the board.
 
@@ -53,12 +53,12 @@ It is made for makers, so it keeps what makes microcontrollers easy:
   ESP32 runs unchanged on a Linux board with a bigger screen, and can then grow into Linux.
 - **An appliance, not a desktop.** At power-on a shell on the display; a tap opens a menu of apps
   (weather, radio) and power off. The board becomes a device you build.
-- **Apps written with an assistant, and checked.** LVGL MPY Studio's MCP tools let an AI assistant
+- **Apps written with an assistant, and checked.** Copper and Code Studio's MCP tools let an AI assistant
   write the glue between the GUI and the system; the simulator and the tests on the board check it.
 
-## LVGL MPY Studio and its MCP tools
+## Copper and Code Studio and its MCP tools
 
-[LVGL MPY Studio](https://github.com/Copper-And-Code/lvgl-mpy-studio) designs LVGL screens by drag
+[Copper and Code Studio](https://github.com/Copper-And-Code/copper-and-code-studio) designs LVGL screens by drag
 and drop, runs them in a simulator and uploads them to the board. Import
 `studio-board/boards/stm32mp135f_dk_480x272.json` in its board manager and the Linux board is one
 more target.
@@ -126,14 +126,14 @@ board then needs a unix variant in `boards/unix/` built with its toolchain, and 
    sudo cp linux/host/70-mpy-lvgl-board.rules /etc/udev/rules.d/ && sudo udevadm control --reload
    ```
 
-4. Open an example in LVGL MPY Studio and run it on the board.
+4. Open an example in Copper and Code Studio and run it on the board.
 
 `/usr/local/mpy/bin/mpy-uninstall` brings the original system back.
 
 ## How it works
 
 ```text
- PC: LVGL MPY Studio / mpremote
+ PC: Copper and Code Studio / mpremote
         │ USB serial (CDC-ACM)        │ TCP over USB network
         └──────────────┬──────────────┘
                  mpy-repl-hub            one REPL for both, Ctrl-C as a signal, systemd watchdog
@@ -198,7 +198,7 @@ audio of the examples.
 
 ## Website
 
-The site is built from `docs/` with MkDocs Material, like the LVGL MPY Studio site:
+The site is built from `docs/` with MkDocs Material, like the Copper and Code Studio site:
 
 ```sh
 pip install -r requirements-site.txt

@@ -51,7 +51,7 @@ plugged into the board goes on typing there); Ctrl-D in the REPL starts the shel
 tool enters the raw REPL the terminal leaves the display. `linux/install.sh` starts the shell at power-on through
 `mpy_home` (a `main.py` it writes when there is none), with an app menu on a tap; the shell,
 `ansiterm` and `ansifont` are frozen in the firmware and the editors installed in `fs/bin`. Ctrl-A on
-an empty line hands the board over to the raw REPL, which is what LVGL MPY Studio and mpremote ask
+an empty line hands the board over to the raw REPL, which is what Copper and Code Studio and mpremote ask
 for when they connect.
 
 ## Use

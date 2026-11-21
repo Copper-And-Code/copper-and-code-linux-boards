@@ -2,7 +2,7 @@
 
 ![System Monitor](../../../docs/images/system-monitor.png)
 
-The STM32MP157C-DK2's two halves, live, made with LVGL MPY Studio and its MCP tools. Nothing to wire.
+The STM32MP157C-DK2's two halves, live, made with Copper and Code Studio and its MCP tools. Nothing to wire.
 
 | Linux on the Cortex-A7 | The Cortex-M4 |
 |---|---|

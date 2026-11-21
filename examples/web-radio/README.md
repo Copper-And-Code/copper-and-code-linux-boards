@@ -1,6 +1,6 @@
 # Web radio
 
-Internet radio on a touch screen, made with LVGL MPY Studio and its MCP tools: a list of stations,
+Internet radio on a touch screen, made with Copper and Code Studio and its MCP tools: a list of stations,
 play and stop, previous and next station, the time on air and the volume, and a page that fills
 the list from a catalogue of tens of thousands of stations by country, region, language and genre. It uses the same
 `player.py` as the MP3 player: GStreamer's `gst-play-1.0` plays the `http://` or `https://` MP3
@@ -31,7 +31,7 @@ designed and tried without a board.
 
    and copy it with `mpremote fs cp stations.txt :` (or with the FTP Server example). The Find page
    writes the same file, at most 500 stations.
-4. Open `project.json` in LVGL MPY Studio, connect to the board and run it.
+4. Open `project.json` in Copper and Code Studio, connect to the board and run it.
 
 When a stream cannot be played (no network, no sound card, a wrong address) the status line shows
 GStreamer's message.

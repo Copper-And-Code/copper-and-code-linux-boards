@@ -2,7 +2,7 @@
 
 ![Logic Analyzer, the board's own UART](../../../docs/images/logic-analyzer.png)
 
-A logic analyser on the STM32MP157C-DK2's screen, made with LVGL MPY Studio and its MCP tools, that
+A logic analyser on the STM32MP157C-DK2's screen, made with Copper and Code Studio and its MCP tools, that
 needs no wires: it watches the board's own buses.
 
 The Cortex-M4 samples all 16 pins of GPIO port E at a fixed rate, up to 4 MHz, timed by its cycle
